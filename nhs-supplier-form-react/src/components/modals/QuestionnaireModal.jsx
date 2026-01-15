@@ -61,9 +61,10 @@ const QuestionnaireModal = ({ isOpen, onClose, type = 'clinical' }) => {
     control,
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isValid },
     reset,
   } = useForm({
+    mode: 'onChange',
     resolver: zodResolver(schema),
     defaultValues: isClinical
       ? {

@@ -11,7 +11,10 @@
       "Bash(tree:*)",
       "Bash(dir \"%USERPROFILE%\\\\.config\\\\claude\\\\config.json\")",
       "Bash(bash:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(git pull:*)"
     ],
     "additionalDirectories": [
       "C:\\BH2VMHOM01\\Home$\\HaqueFah\\Desktop\\Projects",
