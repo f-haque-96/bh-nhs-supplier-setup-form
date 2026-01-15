@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(\\\\BH2VMHOM01\\Home$\\HaqueFah\\Desktop\\Projects/**)",
+      "Bash(ls:*)",
+      "Bash(node --version:*)",
+      "Bash(npm:*)",
+      "Bash(npx create-vite@latest:*)",
+      "Bash(cp:*)",
+      "Bash(find:*)",
+      "Bash(tree:*)",
+      "Bash(dir \"%USERPROFILE%\\\\.config\\\\claude\\\\config.json\")",
+      "Bash(bash:*)"
+    ],
+    "additionalDirectories": [
+      "C:\\BH2VMHOM01\\Home$\\HaqueFah\\Desktop\\Projects",
+      "\\\\BH2VMHOM01\\Home$\\HaqueFah\\Desktop\\Projects\\supplier_setup_form_main"
+    ]
+  }
+}
