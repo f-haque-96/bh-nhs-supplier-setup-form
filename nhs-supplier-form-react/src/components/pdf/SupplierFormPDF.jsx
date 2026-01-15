@@ -412,6 +412,9 @@ const SupplierFormPDF = ({ formData, uploadedFiles, submissionId, submissionDate
     ...formData,
   } : formData || {};
 
+  // Ensure uploadedFiles is always an object
+  const safeUploadedFiles = uploadedFiles || submission?.uploadedFiles || submission?.uploads || {};
+
   // Extract common fields with fallbacks
   const companyName = normalizedData.section4?.companyName
     || normalizedData.companyName
@@ -640,14 +643,14 @@ const SupplierFormPDF = ({ formData, uploadedFiles, submissionId, submissionDate
       </Page>
 
       {/* UPLOADED DOCUMENTS SUMMARY */}
-      {Object.keys(uploadedFiles).length > 0 && (
+      {Object.keys(safeUploadedFiles).length > 0 && (
         <Page size="A4" style={styles.page}>
           <Text style={styles.sectionHeader}>Uploaded Documents</Text>
           <Text style={{ fontSize: 10, color: '#425563', marginBottom: 16 }}>
             The following documents have been uploaded with this submission:
           </Text>
 
-          {Object.entries(uploadedFiles).map(([fieldName, file]) => {
+          {Object.entries(safeUploadedFiles).map(([fieldName, file]) => {
             const labels = {
               procurementApproval: 'Procurement Approval Document',
               letterhead: 'Letterhead with Bank Details',
@@ -680,7 +683,8 @@ const SupplierFormPDF = ({ formData, uploadedFiles, submissionId, submissionDate
       )}
 
       {/* AUTHORISATION USE ONLY - Only show if there are any authorisation decisions */}
-      {submission && (submission.pbpReview || submission.procurementReview || submission.opwReview || submission.contractDrafter || submission.apReview) && (
+      {/* Note: AP Review is NOT included here since AP Control is the one downloading this PDF */}
+      {submission && (submission.pbpReview || submission.procurementReview || submission.opwReview || submission.contractDrafter) && (
         <Page size="A4" style={styles.page}>
           <View style={styles.authorisationSection} wrap={false}>
             {/* Header with red underline */}
@@ -836,44 +840,9 @@ const SupplierFormPDF = ({ formData, uploadedFiles, submissionId, submissionDate
               </View>
             )}
 
-            {/* 5. AP Control Review - Always last */}
-            {submission.apReview && (
-              <View style={styles.authBlock}>
-                <View style={styles.authBlockHeader}>
-                  <Text style={styles.authBlockTitle}>AP Control</Text>
-                  <View
-                    style={[
-                      styles.authBadge,
-                      submission.apReview.decision === 'approved'
-                        ? styles.badgeGreen
-                        : submission.apReview.decision === 'rejected'
-                        ? styles.badgeRed
-                        : styles.badgeAmber,
-                    ]}
-                  >
-                    <Text style={styles.badgeText}>
-                      {submission.apReview.decision?.toUpperCase() || 'PENDING'}
-                    </Text>
-                  </View>
-                </View>
-                {submission.apReview.supplierName && (
-                  <Text style={styles.authField}>Supplier Name: {submission.apReview.supplierName}</Text>
-                )}
-                {submission.apReview.supplierNumber && (
-                  <Text style={styles.authField}>Supplier Number: {submission.apReview.supplierNumber}</Text>
-                )}
-                {submission.apReview.additionalInfo && (
-                  <Text style={styles.authComments}>Additional Info: {submission.apReview.additionalInfo}</Text>
-                )}
-                <View style={styles.signatureRow}>
-                  <Text>Signature: {submission.apReview.signature || '_______________'}</Text>
-                  <Text>
-                    Date:{' '}
-                    {submission.apReview.date ? formatDate(submission.apReview.date) : '_______________'}
-                  </Text>
-                </View>
-              </View>
-            )}
+            {/* AP Control Review - REMOVED */}
+            {/* AP Control is the one downloading this PDF, so they don't need to see their own signature */}
+            {/* Only previous authorizations (PBP, Procurement, OPW, Contract Drafter) are shown */}
           </View>
 
           <Text style={styles.footer}>Page 5 - NHS Barts Health Trust</Text>
