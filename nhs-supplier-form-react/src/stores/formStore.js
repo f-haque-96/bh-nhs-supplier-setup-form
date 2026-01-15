@@ -22,8 +22,20 @@ const useFormStore = create(
       touchedFields: {},
 
       // ===== Uploaded Files =====
-      // Note: Files themselves are not persisted, only metadata
-      uploadedFiles: {},
+      // Note: Files are now persisted to localStorage including base64 data
+      uploadedFiles: (() => {
+        try {
+          const saved = localStorage.getItem('formUploads');
+          if (saved) {
+            const parsed = JSON.parse(saved);
+            console.log('Loaded uploads from localStorage:', Object.keys(parsed));
+            return parsed;
+          }
+        } catch (e) {
+          console.error('Failed to load uploads from localStorage:', e);
+        }
+        return {};
+      })(),
 
       // ===== Reviewer Mode =====
       reviewerRole: null, // 'procurement' | 'ir35' | 'ap'
@@ -224,8 +236,8 @@ const useFormStore = create(
 
       // ----- File Upload Actions -----
       setUploadedFile: (fieldName, fileData) => {
-        set((state) => ({
-          uploadedFiles: {
+        set((state) => {
+          const newUploads = {
             ...state.uploadedFiles,
             [fieldName]: {
               name: fileData.name,
@@ -236,8 +248,18 @@ const useFormStore = create(
               file: fileData.file,
               base64: fileData.base64, // Store base64 for persistence
             },
-          },
-        }));
+          };
+
+          // Persist to localStorage
+          try {
+            localStorage.setItem('formUploads', JSON.stringify(newUploads));
+            console.log('Uploads saved to localStorage:', Object.keys(newUploads));
+          } catch (e) {
+            console.error('Failed to save uploads to localStorage:', e);
+          }
+
+          return { uploadedFiles: newUploads };
+        });
       },
 
       removeUploadedFile: (fieldName) => {
@@ -469,9 +491,11 @@ const useFormStore = create(
       },
 
       // Get list of missing mandatory fields for a section
-      getMissingFields: (section) => {
-        const { formData, uploadedFiles } = get();
+      getMissingFields: (sectionNumber = 'all') => {
+        const state = get();
+        const { formData, uploadedFiles } = state;
         const missing = [];
+        const section = sectionNumber; // Preserve compatibility
 
         switch(section) {
           case 1:
@@ -619,6 +643,47 @@ const useFormStore = create(
 
           default:
             break;
+        }
+
+        // UPLOAD VALIDATION - Check when validating Section 7 or all sections
+        if (sectionNumber === 7 || sectionNumber === 'all') {
+          const section2 = formData?.section2 || formData || {};
+          const section3 = formData?.section3 || formData || {};
+          const currentUploads = uploadedFiles || state.uploads || {};
+
+          // Letterhead with Bank Details - ALWAYS REQUIRED
+          if (!currentUploads?.letterhead?.base64 && !currentUploads?.letterhead?.data) {
+            missing.push('Letterhead with Bank Details (Upload Required)');
+          }
+
+          // Procurement Approval - Required if engaged with procurement
+          if (section2?.procurementEngaged === 'yes' || formData?.procurementEngaged === 'yes' || formData?.hasProcurementApproval === 'yes') {
+            if (!currentUploads?.procurementApproval?.base64 && !currentUploads?.procurementApproval?.data) {
+              missing.push('Procurement Approval Document (Upload Required)');
+            }
+          }
+
+          // CEST Form - Required for Sole Traders
+          if (section3?.supplierType === 'sole_trader' || section3?.supplierType === 'individual' || formData?.supplierType === 'sole_trader' || formData?.soleTraderStatus === 'yes') {
+            if (!currentUploads?.cestForm?.base64 && !currentUploads?.cestForm?.data) {
+              missing.push('CEST Form (Upload Required for Sole Traders)');
+            }
+          }
+
+          // Passport/ID - Required for Sole Traders
+          if (section3?.supplierType === 'sole_trader' || section3?.supplierType === 'individual' || formData?.supplierType === 'sole_trader' || formData?.soleTraderStatus === 'yes') {
+            const hasPassport = currentUploads?.passportPhoto?.base64 || currentUploads?.passportPhoto?.data;
+            const hasLicenceFront = currentUploads?.licenceFront?.base64 || currentUploads?.licenceFront?.data;
+            const hasLicenceBack = currentUploads?.licenceBack?.base64 || currentUploads?.licenceBack?.data;
+
+            // At least passport OR both licence sides required
+            if (!hasPassport && !(hasLicenceFront && hasLicenceBack)) {
+              missing.push('Passport or Driving Licence (Upload Required for Sole Traders)');
+            }
+          }
+
+          console.log('Upload validation - Current uploads:', currentUploads);
+          console.log('Upload validation - Missing:', missing.filter(m => m.includes('Upload')));
         }
 
         return missing;

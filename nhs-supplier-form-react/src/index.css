@@ -2600,3 +2600,42 @@ span.required::after,
   margin-left: 2px;
 }
 
+/* ===== Upload Status Indicators (Section 7 Review) ===== */
+.upload-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-radius: 6px;
+  margin-bottom: 8px;
+}
+
+.upload-item.uploaded {
+  background: #f0fdf4;
+  border: 1px solid #22c55e;
+}
+
+.upload-item.missing {
+  background: #fef2f2;
+  border: 1px solid #dc2626;
+}
+
+.upload-status {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.status-uploaded {
+  color: #22c55e;
+}
+
+.status-missing {
+  color: #dc2626;
+}
+
+.file-name {
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin-left: 12px;
+}
+

@@ -62,28 +62,78 @@ const formatUploadDate = (isoString) => {
 };
 
 const UploadedDocuments = () => {
-  const { uploadedFiles, removeUploadedFile } = useFormStore();
+  const { uploadedFiles, removeUploadedFile, formData } = useFormStore();
   const [confirmDelete, setConfirmDelete] = useState(null);
 
-  const uploadedFilesList = Object.entries(uploadedFiles);
+  // Determine which uploads are required based on formData
+  const requiredUploads = [];
 
-  if (uploadedFilesList.length === 0) {
-    return (
-      <div
-        style={{
-          padding: 'var(--space-24)',
-          borderRadius: 'var(--radius-base)',
-          border: '2px dashed var(--color-border)',
-          marginBottom: 'var(--space-24)',
-          backgroundColor: 'var(--color-background)',
-          textAlign: 'center',
-        }}
-      >
-        <p style={{ color: 'var(--color-text-secondary)', margin: 0 }}>
-          No documents uploaded yet.
-        </p>
-      </div>
-    );
+  // Letterhead - ALWAYS REQUIRED
+  requiredUploads.push({
+    fieldName: 'letterhead',
+    label: 'Letterhead with Bank Details',
+    section: 'Section 2: Pre-screening',
+    required: true,
+  });
+
+  // Procurement Approval - Required if engaged with procurement
+  if (formData?.procurementEngaged === 'yes') {
+    requiredUploads.push({
+      fieldName: 'procurementApproval',
+      label: 'Procurement Approval Document',
+      section: 'Section 2: Pre-screening',
+      required: true,
+    });
+  }
+
+  // CEST Form - Required for Sole Traders
+  if (formData?.supplierType === 'sole_trader' || formData?.soleTraderStatus === 'yes') {
+    requiredUploads.push({
+      fieldName: 'cestForm',
+      label: 'CEST Form',
+      section: 'Section 2: Pre-screening',
+      required: true,
+    });
+  }
+
+  // Passport/ID - Required for Sole Traders
+  if (formData?.supplierType === 'sole_trader' || formData?.soleTraderStatus === 'yes') {
+    const hasPassport = uploadedFiles?.passportPhoto?.base64;
+    const hasLicenceFront = uploadedFiles?.licenceFront?.base64;
+    const hasLicenceBack = uploadedFiles?.licenceBack?.base64;
+
+    if (hasPassport || (hasLicenceFront && hasLicenceBack)) {
+      // Show whichever they uploaded
+      if (hasPassport) {
+        requiredUploads.push({
+          fieldName: 'passportPhoto',
+          label: 'Passport Photo',
+          section: 'Section 3: Supplier Classification',
+          required: true,
+        });
+      } else {
+        requiredUploads.push({
+          fieldName: 'licenceFront',
+          label: 'Driving Licence (Front)',
+          section: 'Section 3: Supplier Classification',
+          required: true,
+        });
+        requiredUploads.push({
+          fieldName: 'licenceBack',
+          label: 'Driving Licence (Back)',
+          section: 'Section 3: Supplier Classification',
+          required: true,
+        });
+      }
+    } else {
+      // Neither uploaded, show passport as required
+      requiredUploads.push({
+        fieldName: 'passportPhoto',
+        label: 'Passport or Driving Licence',
+        section: 'Section 3: Supplier Classification',
+        required: true,
+      });
+    }
   }
 
   const handleDelete = (fieldName) => {
@@ -119,99 +169,92 @@ const UploadedDocuments = () => {
       }}
     >
       <h4 style={{ marginBottom: 'var(--space-16)', color: 'var(--nhs-blue)' }}>
-        Uploaded Documents ({uploadedFilesList.length})
+        Required Documents
       </h4>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-12)' }}>
-        {uploadedFilesList.map(([fieldName, file]) => {
-          const metadata = FILE_METADATA[fieldName] || {
-            label: fieldName,
-            section: 'Unknown',
-          };
+        {requiredUploads.map((upload) => {
+          const file = uploadedFiles?.[upload.fieldName];
+          const isUploaded = !!(file?.base64 || file?.data);
 
           return (
             <div
-              key={fieldName}
+              key={upload.fieldName}
               style={{
-                padding: 'var(--space-16)',
-                borderRadius: 'var(--radius-base)',
-                border: '1px solid var(--color-border)',
-                backgroundColor: 'var(--color-background)',
+                padding: '12px 16px',
+                borderRadius: '6px',
+                marginBottom: '8px',
+                background: isUploaded ? '#f0fdf4' : '#fef2f2',
+                border: `1px solid ${isUploaded ? '#22c55e' : '#dc2626'}`,
                 display: 'flex',
                 alignItems: 'center',
-                gap: 'var(--space-16)',
-                transition: 'all var(--transition-base)',
-                boxShadow: 'var(--shadow-sm)',
+                justifyContent: 'space-between',
+                gap: '12px',
               }}
             >
-              {/* File Icon */}
-              <div
-                style={{
-                  fontSize: '32px',
-                  minWidth: '40px',
-                  textAlign: 'center',
-                }}
-              >
-                📄
-              </div>
-
-              {/* File Info */}
               <div style={{ flex: 1 }}>
-                <div style={{ fontWeight: 'var(--font-weight-semibold)', color: 'var(--color-text)' }}>
-                  {metadata.label}
+                <div style={{ fontWeight: '600', color: 'var(--color-text)' }}>
+                  {upload.label}
                 </div>
-                <div
-                  style={{
-                    fontSize: 'var(--font-size-sm)',
-                    color: 'var(--color-text-secondary)',
-                    marginTop: 'var(--space-4)',
-                  }}
-                >
-                  {file.name} • {formatFileSize(file.size)}
-                </div>
-                <div
-                  style={{
-                    fontSize: 'var(--font-size-xs)',
-                    color: 'var(--color-text-muted)',
-                    marginTop: 'var(--space-4)',
-                  }}
-                >
-                  {metadata.section} • Uploaded: {formatUploadDate(file.uploadDate)}
-                </div>
+                {file?.name && (
+                  <div
+                    style={{
+                      fontSize: '0.85rem',
+                      color: '#6b7280',
+                      marginTop: '4px',
+                    }}
+                  >
+                    {file.name}
+                  </div>
+                )}
               </div>
 
-              {/* Action Buttons */}
-              <div style={{ display: 'flex', gap: 'var(--space-8)', flexWrap: 'wrap' }}>
-                {file.file && (
-                  <Button variant="outline" size="sm" onClick={() => handlePreview(file)}>
-                    Preview
-                  </Button>
-                )}
-                <Button
-                  variant={confirmDelete === fieldName ? 'danger' : 'outline'}
-                  size="sm"
-                  onClick={() => handleDelete(fieldName)}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <span
+                  style={{
+                    fontWeight: '600',
+                    fontSize: '0.9rem',
+                    color: isUploaded ? '#22c55e' : '#dc2626',
+                  }}
                 >
-                  {confirmDelete === fieldName ? 'Confirm Delete?' : 'Remove'}
-                </Button>
+                  {isUploaded ? '✓ Uploaded' : '✗ Required'}
+                </span>
+
+                {isUploaded && (
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    {file.file && (
+                      <Button variant="outline" size="sm" onClick={() => handlePreview(file)}>
+                        Preview
+                      </Button>
+                    )}
+                    <Button
+                      variant={confirmDelete === upload.fieldName ? 'danger' : 'outline'}
+                      size="sm"
+                      onClick={() => handleDelete(upload.fieldName)}
+                    >
+                      {confirmDelete === upload.fieldName ? 'Confirm?' : 'Remove'}
+                    </Button>
+                  </div>
+                )}
               </div>
             </div>
           );
         })}
       </div>
 
-      <div
-        style={{
-          marginTop: 'var(--space-16)',
-          paddingTop: 'var(--space-16)',
-          borderTop: '1px solid var(--color-border)',
-          fontSize: 'var(--font-size-sm)',
-          color: 'var(--color-text-secondary)',
-        }}
-      >
-        <strong>Note:</strong> Files uploaded in previous sessions may not be available for preview
-        but are still recorded in your submission.
-      </div>
+      {requiredUploads.some(u => !uploadedFiles?.[u.fieldName]?.base64) && (
+        <div
+          style={{
+            marginTop: 'var(--space-16)',
+            paddingTop: 'var(--space-16)',
+            borderTop: '1px solid var(--color-border)',
+            fontSize: 'var(--font-size-sm)',
+            color: '#dc2626',
+          }}
+        >
+          <strong>⚠ Warning:</strong> You cannot submit the form until all required documents are uploaded.
+        </div>
+      )}
     </div>
   );
 };

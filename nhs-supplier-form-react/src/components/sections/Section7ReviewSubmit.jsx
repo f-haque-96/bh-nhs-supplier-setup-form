@@ -3,7 +3,7 @@
  * Summary of all form data and final submission
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { pdf } from '@react-pdf/renderer';
@@ -95,11 +95,13 @@ const ReviewCard = ({ title, children, sectionNumber }) => {
 };
 
 const Section7ReviewSubmit = () => {
-  const { formData, uploadedFiles, getAllFormData, setSubmissionId, resetForm, setCurrentSection, canSubmitForm } = useFormStore();
+  const { formData, uploadedFiles, getAllFormData, setSubmissionId, resetForm, setCurrentSection, canSubmitForm, getMissingFields } = useFormStore();
   const { handlePrev } = useFormNavigation();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(null);
   const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [missingFields, setMissingFields] = useState([]);
+  const [canSubmitWithUploads, setCanSubmitWithUploads] = useState(false);
   const [testSubmissionId, setTestSubmissionId] = useState(() => {
     // Check if there's an existing test submission
     return localStorage.getItem('current-test-submission-id') || null;
@@ -120,9 +122,38 @@ const Section7ReviewSubmit = () => {
   });
 
   const finalAcknowledgement = watch('finalAcknowledgement');
-  const canSubmit = canSubmitForm() && finalAcknowledgement;
+
+  // Check validation whenever uploads or formData changes
+  useEffect(() => {
+    const missing = getMissingFields('all');
+    setMissingFields(missing);
+    setCanSubmitWithUploads(missing.length === 0);
+
+    console.log('Section 7 Validation:', {
+      missingFields: missing,
+      canSubmit: missing.length === 0,
+      uploads: uploadedFiles
+    });
+  }, [formData, uploadedFiles, getMissingFields]);
+
+  // Also check on component mount
+  useEffect(() => {
+    const missing = getMissingFields('all');
+    setMissingFields(missing);
+    setCanSubmitWithUploads(missing.length === 0);
+  }, [getMissingFields]);
+
+  const canSubmit = canSubmitForm() && finalAcknowledgement && canSubmitWithUploads;
 
   const onSubmit = async (data) => {
+    // Double-check validation before submitting
+    const missing = getMissingFields('all');
+
+    if (missing.length > 0) {
+      alert('Please complete all required fields and uploads before submitting:\n\n' + missing.join('\n'));
+      return;
+    }
+
     setIsSubmitting(true);
     setSubmitError(null);
 
@@ -538,6 +569,59 @@ const Section7ReviewSubmit = () => {
       {/* Final Acknowledgement */}
       <form onSubmit={handleSubmit(onSubmit)}>
         <div style={{ marginTop: 'var(--space-32)', paddingTop: 'var(--space-24)', borderTop: '2px solid var(--color-border)' }}>
+          {/* Show missing uploads warning */}
+          {missingFields.filter(f => f.includes('Upload')).length > 0 && (
+            <div style={{
+              background: '#fef2f2',
+              border: '1px solid #dc2626',
+              borderRadius: '8px',
+              padding: '16px',
+              marginBottom: '24px'
+            }}>
+              <h4 style={{ color: '#dc2626', margin: '0 0 12px 0' }}>
+                ⚠️ Missing Required Uploads
+              </h4>
+              <p style={{ margin: '0 0 12px 0' }}>
+                The following documents must be uploaded before you can submit:
+              </p>
+              <ul style={{ margin: 0, paddingLeft: '20px' }}>
+                {missingFields
+                  .filter(f => f.includes('Upload'))
+                  .map((field, index) => (
+                    <li key={index} style={{ color: '#dc2626', marginBottom: '4px' }}>
+                      {field.replace(' (Upload Required)', '').replace(' (Upload Required for Sole Traders)', '')}
+                    </li>
+                  ))
+                }
+              </ul>
+              <p style={{ margin: '12px 0 0 0', fontSize: '0.9rem' }}>
+                Please go back to the relevant section and upload the required documents.
+              </p>
+            </div>
+          )}
+
+          {/* Show all missing fields */}
+          {missingFields.length > 0 && (
+            <div style={{
+              background: '#fef3c7',
+              border: '1px solid #f59e0b',
+              borderRadius: '8px',
+              padding: '16px',
+              marginBottom: '24px'
+            }}>
+              <h4 style={{ color: '#92400e', margin: '0 0 12px 0' }}>
+                ⚠️ Please Complete All Required Fields
+              </h4>
+              <ul style={{ margin: 0, paddingLeft: '20px' }}>
+                {missingFields.map((field, index) => (
+                  <li key={index} style={{ color: '#92400e', marginBottom: '4px' }}>
+                    {field}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
           <NoticeBox type="info">
             <strong>Before submitting:</strong> Please ensure all information is accurate and complete.
             Once submitted, this form will be reviewed by the Procurement team.
@@ -578,7 +662,19 @@ const Section7ReviewSubmit = () => {
           onPrev={handlePrev}
           showNext={true}
           nextDisabled={!canSubmit || isSubmitting}
+          nextLabel={canSubmit ? 'Submit Form' : 'Complete Required Fields to Submit'}
         />
+
+        {!canSubmit && missingFields.length > 0 && (
+          <p style={{
+            textAlign: 'center',
+            color: '#dc2626',
+            marginTop: '12px',
+            fontSize: '0.9rem'
+          }}>
+            {missingFields.length} required field(s) must be completed before submission
+          </p>
+        )}
       </form>
     </section>
   );
