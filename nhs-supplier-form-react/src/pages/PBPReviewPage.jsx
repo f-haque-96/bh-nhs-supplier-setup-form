@@ -184,6 +184,7 @@ const PBPReviewPage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [reviewerName, setReviewerName] = useState('');
   const [signatureDate, setSignatureDate] = useState(new Date().toISOString().split('T')[0]);
+  const [questionnaireUploads, setQuestionnaireUploads] = useState({});
 
   useEffect(() => {
     // Load submission from localStorage
@@ -193,6 +194,24 @@ const PBPReviewPage = () => {
       try {
         const parsed = JSON.parse(submissionData);
         setSubmission(parsed);
+
+        // Load questionnaire uploads with multiple fallback paths
+        if (parsed.questionnaireUploads) {
+          setQuestionnaireUploads(parsed.questionnaireUploads);
+        } else if (parsed.questionnaireData?.uploads) {
+          setQuestionnaireUploads(parsed.questionnaireData.uploads);
+        } else if (parsed.questionnaireData?.uploadedFiles) {
+          setQuestionnaireUploads(parsed.questionnaireData.uploadedFiles);
+        } else if (parsed.formData?.section2?.questionnaireUploads) {
+          setQuestionnaireUploads(parsed.formData.section2.questionnaireUploads);
+        } else {
+          // Try localStorage directly as last resort
+          const storedQuestionnaire = localStorage.getItem('questionnaireSubmission');
+          if (storedQuestionnaire) {
+            const parsedQ = JSON.parse(storedQuestionnaire);
+            setQuestionnaireUploads(parsedQ.uploads || parsedQ.uploadedFiles || {});
+          }
+        }
       } catch (error) {
         console.error('Error parsing submission:', error);
       }
@@ -556,10 +575,10 @@ const PBPReviewPage = () => {
       </ReviewSection>
 
       {/* Questionnaire Uploads */}
-      {submission.questionnaireUploads && Object.keys(submission.questionnaireUploads).length > 0 && (
+      {Object.keys(questionnaireUploads).length > 0 && (
         <ReviewSection title="Supporting Documents">
           <div style={{ gridColumn: '1 / -1' }}>
-            {Object.entries(submission.questionnaireUploads).map(([key, file]) => (
+            {Object.entries(questionnaireUploads).map(([key, file]) => (
               <div key={key} style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -588,6 +607,17 @@ const PBPReviewPage = () => {
                 </Button>
               </div>
             ))}
+          </div>
+        </ReviewSection>
+      )}
+
+      {/* Show message if no uploads */}
+      {Object.keys(questionnaireUploads).length === 0 && (
+        <ReviewSection title="Supporting Documents">
+          <div style={{ gridColumn: '1 / -1' }}>
+            <p style={{ color: '#6b7280', fontStyle: 'italic', margin: 0 }}>
+              No documents were uploaded with this questionnaire.
+            </p>
           </div>
         </ReviewSection>
       )}

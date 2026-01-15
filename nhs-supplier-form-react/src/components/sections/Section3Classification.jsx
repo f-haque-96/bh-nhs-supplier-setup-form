@@ -92,6 +92,11 @@ const Section3Classification = () => {
     if (watchCH) {
       setCompaniesHouseValue(watchCH);
       updateFormData('companiesHouseRegistered', watchCH);
+
+      // If changing to "Yes", clear sole trader ID consent
+      if (watchCH === 'yes') {
+        setIdConsentGiven(false);
+      }
     }
   }, [watchCH, updateFormData]);
 
@@ -390,8 +395,8 @@ const Section3Classification = () => {
           </>
         )}
 
-        {/* Sole Trader: ID Upload with Consent */}
-        {selectedSupplierType === 'sole_trader' && (
+        {/* Sole Trader: ID Upload with Consent - Only show when NOT registered with Companies House */}
+        {companiesHouseValue === 'no' && (selectedSupplierType === 'sole_trader' || selectedSupplierType === 'individual') && (
           <div className="id-upload-section">
             <div className="consent-notice">
               <div className="notice-icon">🔒</div>

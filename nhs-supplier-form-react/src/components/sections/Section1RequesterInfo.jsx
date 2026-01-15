@@ -130,20 +130,25 @@ const Section1RequesterInfo = () => {
 
         {/* Contact Details */}
         <div className="form-row">
-          <Input
-            label={<QuestionLabel section="1" question="5">NHS Email Address</QuestionLabel>}
-            name="nhsEmail"
-            type="email"
-            {...register('nhsEmail')}
-            onChange={(e) => {
-              register('nhsEmail').onChange(e);
-              handleFieldChange('nhsEmail', e.target.value);
-            }}
-            error={errors.nhsEmail?.message}
-            required
-            placeholder="firstname.lastname@nhs.net"
-            tooltip="Must be an @nhs.net email address"
-          />
+          <div style={{ flex: 1 }}>
+            <Input
+              label={<QuestionLabel section="1" question="5">NHS Email Address</QuestionLabel>}
+              name="nhsEmail"
+              type="email"
+              {...register('nhsEmail')}
+              onChange={(e) => {
+                register('nhsEmail').onChange(e);
+                handleFieldChange('nhsEmail', e.target.value);
+              }}
+              error={errors.nhsEmail?.message}
+              required
+              placeholder="firstname.lastname@nhs.net"
+            />
+            <div className="info-box">
+              <span className="info-icon">ℹ</span>
+              <span>This must be your official NHS email address (ending in @nhs.net)</span>
+            </div>
+          </div>
 
           <Input
             label={<QuestionLabel section="1" question="6">Phone Number</QuestionLabel>}

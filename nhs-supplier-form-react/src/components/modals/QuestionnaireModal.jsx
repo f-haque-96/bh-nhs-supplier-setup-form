@@ -68,6 +68,7 @@ const QuestionnaireModal = ({ isOpen, onClose, type = 'clinical' }) => {
     resolver: zodResolver(schema),
     defaultValues: isClinical
       ? {
+          supplierName: '',
           clinicalServices: '',
           patientContact: '',
           patientDataAccess: '',
@@ -77,6 +78,7 @@ const QuestionnaireModal = ({ isOpen, onClose, type = 'clinical' }) => {
           additionalNotes: '',
         }
       : {
+          supplierName: '',
           goodsServices: '',
           procurementCategory: '',
           annualValue: '',
@@ -238,7 +240,7 @@ const QuestionnaireModal = ({ isOpen, onClose, type = 'clinical' }) => {
             <button
               type="submit"
               className="btn-primary"
-              disabled={isSubmitting || !isValid}
+              disabled={isSubmitting}
               style={{
                 backgroundColor: '#005EB8',
                 color: 'white',
@@ -247,13 +249,13 @@ const QuestionnaireModal = ({ isOpen, onClose, type = 'clinical' }) => {
                 borderRadius: '8px',
                 fontSize: '1rem',
                 fontWeight: '600',
-                cursor: (isSubmitting || !isValid) ? 'not-allowed' : 'pointer',
+                cursor: isSubmitting ? 'not-allowed' : 'pointer',
                 minWidth: '180px',
                 display: 'inline-flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '8px',
-                opacity: (isSubmitting || !isValid) ? 0.7 : 1,
+                opacity: isSubmitting ? 0.7 : 1,
               }}
             >
               {isSubmitting ? (
@@ -290,7 +292,26 @@ const QuestionnaireModal = ({ isOpen, onClose, type = 'clinical' }) => {
         </NoticeBox>
       ) : (
         <form onSubmit={handleSubmit(onSubmit)}>
-          {/* Supplier Name - Add at the TOP */}
+          {/* INFO BOX - MOVED TO TOP, BEFORE FIRST QUESTION */}
+          <div className="info-box" style={{
+            background: '#eff6ff',
+            border: '1px solid #bfdbfe',
+            borderRadius: '8px',
+            padding: '16px',
+            marginBottom: '24px',
+            display: 'flex',
+            alignItems: 'flex-start',
+            gap: '12px'
+          }}>
+            <span style={{ color: '#3b82f6', fontSize: '1.2rem', flexShrink: 0 }}>ℹ</span>
+            <span style={{ color: '#1e40af' }}>
+              {isClinical
+                ? 'This questionnaire assesses clinical suppliers who will have direct patient contact or access to patient data.'
+                : 'This questionnaire assesses non-clinical suppliers providing goods or services to the Trust.'}
+            </span>
+          </div>
+
+          {/* Supplier Name - First Question */}
           <div className="form-group" style={{ marginBottom: '24px' }}>
             <label className="form-label" style={{ fontWeight: 600, marginBottom: '8px', display: 'block' }}>
               Supplier/Company Name
@@ -299,11 +320,13 @@ const QuestionnaireModal = ({ isOpen, onClose, type = 'clinical' }) => {
             <Controller
               name="supplierName"
               control={control}
+              defaultValue=""
               render={({ field }) => (
                 <>
                   <input
                     type="text"
                     {...field}
+                    value={field.value ?? ''}
                     placeholder="Enter the name of the supplier you wish to set up"
                     required
                     style={{
