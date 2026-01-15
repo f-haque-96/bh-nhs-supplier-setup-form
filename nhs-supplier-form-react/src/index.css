@@ -447,46 +447,113 @@ textarea.form-control {
   font-family: var(--font-family-base);
 }
 
-/* ===== Error Messages ===== */
+/* ===== CRITICAL FIX: Input fields should NOT shrink when errors appear ===== */
+
+/* Ensure input fields maintain consistent size */
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+input[type="number"],
+input[type="password"],
+input[type="date"],
+select,
+textarea,
+.form-control {
+  width: 100% !important;
+  box-sizing: border-box !important;
+  min-height: 44px;
+  padding: 12px 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+  margin-bottom: 0 !important;
+}
+
+/* Input with error state - only change border color, NOT size */
+input.error,
+input.has-error,
+input:invalid:not(:placeholder-shown),
+select.error,
+textarea.error,
+.form-control.error {
+  border-color: #dc2626 !important;
+  /* DO NOT change width, padding, or any sizing properties */
+}
+
+/* ===== ERROR MESSAGE SPACING FIX ===== */
 .error-message,
 .field-error,
-.validation-error {
+.validation-error,
+.error-text {
+  display: block;
   color: #dc2626;
   font-size: 0.85rem;
-  margin-top: 4px; /* Reduced spacing */
-  margin-bottom: 0;
-  padding: 0;
-  display: flex;
-  align-items: center;
-  gap: 4px;
+  margin-top: 4px !important;
+  margin-bottom: 0 !important;
+  padding: 0 !important;
+  line-height: 1.4;
+  /* These should not affect the input above */
+  position: relative;
+  width: auto;
 }
 
 .error-message::before {
   content: '⚠';
   font-size: 0.9rem;
+  margin-right: 4px;
 }
 
-.textarea-wrapper .error-message {
-  margin-top: 4px;
+/* Form group container - maintain consistent layout */
+.form-group,
+.form-field {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 20px;
+  width: 100%;
 }
 
-/* Ensure input fields don't have excessive bottom margin */
+/* Ensure the input wrapper doesn't change size */
+.input-wrapper,
+.field-wrapper {
+  width: 100%;
+}
+
+/* REMOVE any CSS that might be causing the input to shrink */
+.form-group input,
 .form-field input,
+.form-group select,
 .form-field select,
-.form-field textarea,
-.input-wrapper input,
-.input-wrapper select,
-.input-wrapper textarea {
-  margin-bottom: 2px; /* Minimal margin before error message */
+.form-group textarea,
+.form-field textarea {
+  flex-shrink: 0 !important;
+  flex-grow: 0 !important;
 }
 
-/* Form group spacing - space between groups, not between input and error */
-.form-group {
-  margin-bottom: 20px; /* Space between form groups */
+/* Target the specific pattern: input followed by error */
+input + .error-message,
+input + .field-error,
+select + .error-message,
+select + .field-error,
+textarea + .error-message,
+textarea + .field-error,
+.form-control + .error-message {
+  margin-top: 4px !important;
+  display: block;
 }
 
-.form-group .error-message {
-  margin-top: 4px;
+/* For radio/checkbox groups with errors */
+.radio-group + .error-message,
+.checkbox-group + .error-message,
+.radio-options + .error-message {
+  margin-top: 8px !important;
+}
+
+/* Remove any padding from error containers */
+.error-container,
+.validation-message {
+  padding: 0 !important;
+  margin: 4px 0 0 0 !important;
 }
 
 /* ===== Missing Fields Indicator (Section 7) ===== */
@@ -2255,23 +2322,60 @@ textarea.form-control {
   }
 }
 
-/* ===== Questionnaire Submit Button ===== */
-.btn-submit-questionnaire {
-  width: 100%;
-  padding: 16px 32px !important;
-  font-size: 1.1rem !important;
-  font-weight: 600 !important;
-  margin-top: 24px;
+/* ===== Small Spinner for Buttons ===== */
+.spinner-small {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
 }
 
-.btn-submit-questionnaire:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 94, 184, 0.3);
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
-.btn-submit-questionnaire:disabled {
-  opacity: 0.5;
+/* ===== Primary Button Styling ===== */
+.btn-primary,
+button[type="submit"].btn-primary {
+  background-color: #005EB8 !important;
+  color: white !important;
+  padding: 12px 24px;
+  border: none !important;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  min-width: 150px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background-color 0.2s, opacity 0.2s;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: #003d7a !important;
+}
+
+.btn-primary:disabled {
+  background-color: #005EB8 !important;
+  opacity: 0.7;
   cursor: not-allowed;
+}
+
+/* Remove any grey button styling that might be overriding */
+.btn-primary:not(:hover):not(:active):not(:focus) {
+  background-color: #005EB8 !important;
+}
+
+/* Modal specific button fix */
+.modal-footer .btn-primary,
+.questionnaire-modal .btn-primary,
+.modal-actions .btn-primary {
+  background-color: #005EB8 !important;
+  color: white !important;
 }
 
 /* ===== Declaration Notice (Q 2.7) ===== */
@@ -2369,5 +2473,130 @@ textarea.form-control {
 .consent-checkbox li {
   margin-bottom: 4px;
   font-size: 0.9rem;
+}
+
+/* ===== AP Control Documents Grid ===== */
+.documents-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.document-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.document-card.document-sensitive {
+  background: #fef3c7;
+  border-color: #f59e0b;
+}
+
+.document-icon {
+  font-size: 2rem;
+}
+
+.document-info h4 {
+  margin: 0 0 4px 0;
+  font-size: 1rem;
+  color: #1f2937;
+}
+
+.document-info .file-name {
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin: 0;
+  word-break: break-all;
+}
+
+.document-info .upload-date {
+  font-size: 0.8rem;
+  color: #9ca3af;
+  margin: 4px 0 0 0;
+}
+
+.document-info .sensitive-note {
+  color: #d97706;
+  font-weight: 500;
+}
+
+.document-actions {
+  margin-top: auto;
+  display: flex;
+  gap: 8px;
+}
+
+.btn-preview {
+  padding: 8px 16px;
+  background: #005EB8;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.btn-preview:hover {
+  background: #003d7a;
+}
+
+.verified-badge {
+  background: #22c55e;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.no-documents {
+  color: #6b7280;
+  font-style: italic;
+  grid-column: 1 / -1;
+}
+
+/* ===== Question Label with Asterisk - Proper Alignment ===== */
+.question-label,
+.form-label,
+label {
+  display: inline-flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #1f2937;
+}
+
+/* Question number */
+.question-number {
+  color: #005EB8;
+  font-weight: 600;
+}
+
+/* Required asterisk - align with text baseline */
+.required-asterisk,
+.required,
+label .required {
+  color: #dc2626;
+  font-size: 1rem;
+  font-weight: normal;
+  line-height: 1;
+  vertical-align: baseline;
+  margin-left: 2px;
+}
+
+/* If using a separate span for asterisk */
+span.required::after,
+.required-indicator::after {
+  content: '*';
+  color: #dc2626;
+  margin-left: 2px;
 }
 

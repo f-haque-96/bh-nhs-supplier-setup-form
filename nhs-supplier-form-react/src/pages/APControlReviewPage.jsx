@@ -903,6 +903,146 @@ const APControlReviewPage = () => {
         </div>
       )}
 
+      {/* Uploaded Documents Section */}
+      <div className="section-card" style={{ marginTop: 'var(--space-32)' }}>
+        <h3 style={{ margin: '0 0 var(--space-8) 0', color: 'var(--nhs-blue)' }}>
+          📎 Uploaded Documents
+        </h3>
+        <p className="section-description" style={{ color: 'var(--color-text-secondary)', marginBottom: 'var(--space-16)' }}>
+          All documents uploaded during the submission process:
+        </p>
+
+        <div className="documents-grid">
+          {/* Letterhead with Bank Details */}
+          {(submission?.uploads?.letterhead || submission?.uploadedFiles?.letterhead) && (
+            <div className="document-card">
+              <div className="document-icon">📄</div>
+              <div className="document-info">
+                <h4>Letterhead with Bank Details</h4>
+                <p className="file-name">
+                  {submission?.uploads?.letterhead?.name ||
+                   submission?.uploadedFiles?.letterhead?.name ||
+                   'letterhead.pdf'}
+                </p>
+                <p className="upload-date">Section 2: Pre-screening</p>
+              </div>
+              <div className="document-actions">
+                <button
+                  className="btn-preview"
+                  onClick={() => handlePreviewDocument(
+                    submission?.uploads?.letterhead || submission?.uploadedFiles?.letterhead
+                  )}
+                >
+                  Preview
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Procurement Approval Document */}
+          {(submission?.uploads?.procurementApproval || submission?.uploadedFiles?.procurementApproval) && (
+            <div className="document-card">
+              <div className="document-icon">📄</div>
+              <div className="document-info">
+                <h4>Procurement Approval Document</h4>
+                <p className="file-name">
+                  {submission?.uploads?.procurementApproval?.name ||
+                   submission?.uploadedFiles?.procurementApproval?.name ||
+                   'procurement-approval.pdf'}
+                </p>
+                <p className="upload-date">Section 2: Pre-screening</p>
+              </div>
+              <div className="document-actions">
+                <button
+                  className="btn-preview"
+                  onClick={() => handlePreviewDocument(
+                    submission?.uploads?.procurementApproval || submission?.uploadedFiles?.procurementApproval
+                  )}
+                >
+                  Preview
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* CEST Form */}
+          {(submission?.uploads?.cestForm || submission?.uploadedFiles?.cestForm) && (
+            <div className="document-card">
+              <div className="document-icon">📄</div>
+              <div className="document-info">
+                <h4>CEST Form</h4>
+                <p className="file-name">
+                  {submission?.uploads?.cestForm?.name ||
+                   submission?.uploadedFiles?.cestForm?.name ||
+                   'cest-form.pdf'}
+                </p>
+                <p className="upload-date">Section 2: Pre-screening</p>
+              </div>
+              <div className="document-actions">
+                <button
+                  className="btn-preview"
+                  onClick={() => handlePreviewDocument(
+                    submission?.uploads?.cestForm || submission?.uploadedFiles?.cestForm
+                  )}
+                >
+                  Preview
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Contract Agreement */}
+          {(submission?.contractDrafter?.contract || submission?.uploads?.contract) && (
+            <div className="document-card">
+              <div className="document-icon">📄</div>
+              <div className="document-info">
+                <h4>Contract Agreement</h4>
+                <p className="file-name">
+                  {submission?.contractDrafter?.contract?.name ||
+                   submission?.uploads?.contract?.name ||
+                   'contract.pdf'}
+                </p>
+                <p className="upload-date">
+                  Uploaded by: {submission?.contractDrafter?.uploadedBy || 'Contract Drafter'}
+                </p>
+              </div>
+              <div className="document-actions">
+                <button
+                  className="btn-preview"
+                  onClick={() => handlePreviewDocument(
+                    submission?.contractDrafter?.contract || submission?.uploads?.contract
+                  )}
+                >
+                  Preview
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Passport/ID - Sensitive Document */}
+          {(submission?.uploads?.passportPhoto || submission?.uploadedFiles?.passportPhoto) && (
+            <div className="document-card document-sensitive">
+              <div className="document-icon">🔒</div>
+              <div className="document-info">
+                <h4>Identity Document</h4>
+                <p className="file-name">Passport/Driving Licence</p>
+                <p className="upload-date sensitive-note">
+                  ⚠️ Sensitive document - View restricted
+                </p>
+              </div>
+              <div className="document-actions">
+                <span className="verified-badge">✓ Verified</span>
+              </div>
+            </div>
+          )}
+
+          {/* No documents message */}
+          {!submission?.uploads && !submission?.uploadedFiles && (
+            <p className="no-documents">No documents were uploaded with this submission.</p>
+          )}
+        </div>
+      </div>
+
       {/* AP Verification Checklist */}
       {!apReview && (
         <div style={{

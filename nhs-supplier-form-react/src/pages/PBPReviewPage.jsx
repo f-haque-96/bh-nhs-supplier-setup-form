@@ -312,20 +312,24 @@ const PBPReviewPage = () => {
       if (action === 'reject') {
         const requesterName = `${submission?.formData?.section1?.firstName || submission?.formData?.firstName || ''} ${submission?.formData?.section1?.lastName || submission?.formData?.lastName || ''}`.trim();
         const requesterEmail = submission?.formData?.section1?.nhsEmail || submission?.formData?.nhsEmail || submission?.submittedBy || 'Unknown';
+        const supplierName = submission?.questionnaireData?.supplierName ||
+                           submission?.formData?.section4?.companyName ||
+                           'Not recorded at questionnaire stage';
 
         const auditEntry = {
           submissionId: submissionId,
           timestamp: new Date().toISOString(),
           action: 'PBP_REJECTED',
           user: reviewerName,
-          details: `Submission rejected by PBP. Requester: ${requesterName} (${requesterEmail})`,
+          details: `Submission rejected by PBP. Supplier: ${supplierName} | Requester: ${requesterName} (${requesterEmail})`,
           flag: 'REQUESTER_FLAGGED', // Special flag for rejected requesters
           requesterEmail: requesterEmail,
           requesterName: requesterName,
+          supplierName: supplierName,
           rejectionReason: comments
         };
 
-        // Store audit entry (for production, this would go to SharePoint)
+        // Store audit trail (for production, this would go to SharePoint)
         const auditTrail = JSON.parse(localStorage.getItem('auditTrail') || '[]');
         auditTrail.push(auditEntry);
         localStorage.setItem('auditTrail', JSON.stringify(auditTrail));

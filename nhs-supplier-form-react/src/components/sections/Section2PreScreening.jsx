@@ -271,7 +271,7 @@ const Section2PreScreening = () => {
             control={control}
             render={({ field }) => (
               <RadioGroup
-                label={<QuestionLabel section="2" question="2">Do you have a letterhead with bank details from the supplier?</QuestionLabel>}
+                label={<QuestionLabel section="2" question="3">Do you have a letterhead with bank details from the supplier?</QuestionLabel>}
                 name="letterheadAvailable"
                 options={[
                   { value: 'yes', label: 'Yes' },
@@ -325,7 +325,7 @@ const Section2PreScreening = () => {
             control={control}
             render={({ field }) => (
               <RadioGroup
-                label={<QuestionLabel section="2" question="3">Have you engaged with the Procurement team?</QuestionLabel>}
+                label={<QuestionLabel section="2" question="2">Have you engaged with the Procurement team?</QuestionLabel>}
                 name="procurementEngaged"
                 options={[
                   { value: 'yes', label: 'Yes' },
@@ -567,18 +567,30 @@ const Section2PreScreening = () => {
                 <label style={{ fontWeight: 'bold', marginBottom: '8px', display: 'block' }}>
                   Please describe your connection to this supplier *
                 </label>
-                <textarea
-                  style={{
-                    width: '100%',
-                    minHeight: '100px',
-                    padding: '12px',
-                    border: '2px solid #e5e7eb',
-                    borderRadius: '8px',
-                    fontSize: '1rem',
-                  }}
-                  placeholder="Provide details of your relationship with this supplier..."
-                  required
-                  rows={4}
+                <Controller
+                  name="connectionDetails"
+                  control={control}
+                  defaultValue={formData.connectionDetails || ''}
+                  render={({ field }) => (
+                    <textarea
+                      {...field}
+                      onChange={(e) => {
+                        field.onChange(e);
+                        handleFieldChange('connectionDetails', e.target.value);
+                      }}
+                      style={{
+                        width: '100%',
+                        minHeight: '100px',
+                        padding: '12px',
+                        border: '2px solid #e5e7eb',
+                        borderRadius: '8px',
+                        fontSize: '1rem',
+                      }}
+                      placeholder="Provide details of your relationship with this supplier..."
+                      required
+                      rows={4}
+                    />
+                  )}
                 />
               </div>
             )}

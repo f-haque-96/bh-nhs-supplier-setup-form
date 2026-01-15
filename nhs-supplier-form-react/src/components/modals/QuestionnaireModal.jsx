@@ -13,6 +13,7 @@ import useFormStore from '../../stores/formStore';
 // ===== Validation Schemas =====
 
 const clinicalQuestionnaireSchema = z.object({
+  supplierName: z.string().min(2, 'Supplier name is required').max(200, 'Maximum 200 characters'),
   clinicalServices: z.string().min(10, 'Please provide more detail (minimum 10 characters)').max(500, 'Maximum 500 characters'),
   patientContact: z.enum(['yes', 'no'], { required_error: 'Please select an option' }),
   patientDataAccess: z.enum(['yes', 'no'], { required_error: 'Please select an option' }),
@@ -23,6 +24,7 @@ const clinicalQuestionnaireSchema = z.object({
 });
 
 const nonClinicalQuestionnaireSchema = z.object({
+  supplierName: z.string().min(2, 'Supplier name is required').max(200, 'Maximum 200 characters'),
   goodsServices: z.string().min(10, 'Please provide more detail (minimum 10 characters)').max(500, 'Maximum 500 characters'),
   procurementCategory: z.string().min(1, 'Please select a category'),
   annualValue: z.number().positive('Please enter a valid amount'),
@@ -232,15 +234,44 @@ const QuestionnaireModal = ({ isOpen, onClose, type = 'clinical' }) => {
             <Button variant="secondary" onClick={handleClose} disabled={isSubmitting}>
               Cancel
             </Button>
-            <Button
-              variant="primary"
-              onClick={handleSubmit(onSubmit)}
-              loading={isSubmitting}
-              disabled={isSubmitting}
-              className="btn-submit-questionnaire"
+            <button
+              type="submit"
+              className="btn-primary"
+              disabled={isSubmitting || !isValid}
+              style={{
+                backgroundColor: '#005EB8',
+                color: 'white',
+                padding: '12px 24px',
+                border: 'none',
+                borderRadius: '8px',
+                fontSize: '1rem',
+                fontWeight: '600',
+                cursor: (isSubmitting || !isValid) ? 'not-allowed' : 'pointer',
+                minWidth: '180px',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                opacity: (isSubmitting || !isValid) ? 0.7 : 1,
+              }}
             >
-              {isSubmitting ? 'Submitting...' : 'Submit Questionnaire for PBP Review'}
-            </Button>
+              {isSubmitting ? (
+                <>
+                  <span className="spinner-small" style={{
+                    width: '16px',
+                    height: '16px',
+                    border: '2px solid rgba(255,255,255,0.3)',
+                    borderTopColor: 'white',
+                    borderRadius: '50%',
+                    animation: 'spin 0.8s linear infinite',
+                    display: 'inline-block'
+                  }}></span>
+                  Submitting...
+                </>
+              ) : (
+                'Submit Questionnaire'
+              )}
+            </button>
           </>
         )
       }
@@ -258,6 +289,38 @@ const QuestionnaireModal = ({ isOpen, onClose, type = 'clinical' }) => {
         </NoticeBox>
       ) : (
         <form onSubmit={handleSubmit(onSubmit)}>
+          {/* Supplier Name - Add at the TOP */}
+          <div className="form-group" style={{ marginBottom: '24px' }}>
+            <label className="form-label" style={{ fontWeight: 600, marginBottom: '8px', display: 'block' }}>
+              Supplier/Company Name
+              <span style={{ color: '#dc2626', marginLeft: '4px' }}>*</span>
+            </label>
+            <Controller
+              name="supplierName"
+              control={control}
+              render={({ field }) => (
+                <>
+                  <input
+                    type="text"
+                    {...field}
+                    placeholder="Enter the name of the supplier you wish to set up"
+                    required
+                    style={{
+                      width: '100%',
+                      padding: '12px',
+                      border: '2px solid #e5e7eb',
+                      borderRadius: '8px',
+                      fontSize: '1rem',
+                    }}
+                  />
+                  <p style={{ fontSize: '0.85rem', color: '#6b7280', marginTop: '6px', marginBottom: 0 }}>
+                    This is the company or individual you are requesting to be set up as a supplier.
+                  </p>
+                </>
+              )}
+            />
+          </div>
+
           <NoticeBox type="info" style={{ marginBottom: 'var(--space-24)' }}>
             <strong>Important:</strong> This questionnaire will be reviewed by a Procurement Business
             Partner. Please provide accurate and detailed information.
