@@ -294,18 +294,9 @@ const QuestionnaireModal = ({ isOpen, onClose, type = 'clinical' }) => {
       ) : (
         <form onSubmit={handleSubmit(onSubmit)}>
           {/* INFO BOX - MOVED TO TOP, BEFORE FIRST QUESTION */}
-          <div className="info-box" style={{
-            background: '#eff6ff',
-            border: '1px solid #bfdbfe',
-            borderRadius: '8px',
-            padding: '16px',
-            marginBottom: '24px',
-            display: 'flex',
-            alignItems: 'flex-start',
-            gap: '12px'
-          }}>
-            <span style={{ color: '#3b82f6', fontSize: '1.2rem', flexShrink: 0 }}>ℹ️</span>
-            <span style={{ color: '#1e40af' }}>
+          <div className="info-box">
+            <span className="info-icon">ℹ️</span>
+            <span>
               {isClinical
                 ? 'This questionnaire assesses clinical suppliers who will have direct patient contact or access to patient data.'
                 : 'This questionnaire assesses non-clinical suppliers providing goods or services to the Trust.'}
