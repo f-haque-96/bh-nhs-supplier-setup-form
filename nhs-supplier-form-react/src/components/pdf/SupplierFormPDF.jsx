@@ -522,6 +522,14 @@ const SupplierFormPDF = ({ formData, uploadedFiles, submissionId, submissionDate
         <Field label="Sole Trader Status" value={normalizedData.section2?.soleTraderStatus || normalizedData.soleTraderStatus} />
         <Field label="Usage Frequency" value={normalizedData.section2?.usageFrequency || normalizedData.usageFrequency} />
         <Field label="Supplier Connection" value={normalizedData.section2?.supplierConnection || normalizedData.supplierConnection} />
+        {/* Connection Details - Show if supplier has a connection */}
+        {(normalizedData.section2?.supplierConnection === 'yes' || normalizedData.supplierConnection === 'yes') &&
+         (normalizedData.section2?.connectionDetails || normalizedData.connectionDetails) && (
+          <View style={{ backgroundColor: '#fef3c7', padding: 10, borderRadius: 4, marginBottom: 10, borderLeftWidth: 3, borderLeftColor: '#f59e0b' }}>
+            <Text style={{ fontSize: 10, fontWeight: 'bold', color: '#b45309', marginBottom: 4 }}>⚠ Conflict of Interest - Connection Details:</Text>
+            <Text style={{ fontSize: 10, color: '#92400e', lineHeight: 1.4 }}>{normalizedData.section2?.connectionDetails || normalizedData.connectionDetails}</Text>
+          </View>
+        )}
         <TextBlock label="Justification" content={normalizedData.section2?.justification || normalizedData.justification} />
         <Field label="Section 2 Acknowledgement" value={(normalizedData.section2?.prescreeningAcknowledgement || normalizedData.prescreeningAcknowledgement) ? 'Confirmed' : 'Not confirmed'} />
 

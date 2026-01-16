@@ -1,12 +1,13 @@
 /**
  * useCRNVerification Hook
  * Handles Companies House CRN verification with caching
- * Uses mock data for testing
+ * Uses mock data for testing, with fallback for CORS/API errors
  */
 
 import { useState, useCallback } from 'react';
 import useFormStore from '../stores/formStore';
 import { formatCRN } from '../utils/helpers';
+import { getCompanyDetails, CRN_ERROR_TYPES } from '../utils/companiesHouse';
 
 // Mock CRN data for testing
 const MOCK_CRN_DATA = {
@@ -53,9 +54,11 @@ const MOCK_CRN_DATA = {
 };
 
 const useCRNVerification = () => {
-  const [status, setStatus] = useState('idle'); // 'idle' | 'verifying' | 'valid' | 'invalid' | 'dissolved'
+  // Status: 'idle' | 'verifying' | 'valid' | 'invalid' | 'dissolved' | 'cors_blocked' | 'not_found'
+  const [status, setStatus] = useState('idle');
   const [companyData, setCompanyData] = useState(null);
   const [error, setError] = useState(null);
+  const [errorType, setErrorType] = useState(null);
   const { getCRNData, setCRNData } = useFormStore();
 
   const verify = useCallback(
@@ -63,6 +66,8 @@ const useCRNVerification = () => {
       if (!crn || crn.length < 7) {
         setStatus('idle');
         setCompanyData(null);
+        setError(null);
+        setErrorType(null);
         return null;
       }
 
@@ -71,7 +76,8 @@ const useCRNVerification = () => {
 
       if (cleanCRN.length !== 8) {
         setStatus('invalid');
-        setError('CRN must be 7 or 8 digits');
+        setError('CRN must be 7 or 8 characters');
+        setErrorType(CRN_ERROR_TYPES.INVALID_CRN);
         return null;
       }
 
@@ -83,15 +89,13 @@ const useCRNVerification = () => {
         return cached;
       }
 
-      // Mock verification with simulated delay
+      // Start verification
       setStatus('verifying');
       setError(null);
+      setErrorType(null);
 
       try {
-        // Simulate network delay
-        await new Promise(resolve => setTimeout(resolve, 800));
-
-        // Check mock data
+        // First check mock data (for testing)
         const mockCompany = MOCK_CRN_DATA[cleanCRN];
 
         if (mockCompany) {
@@ -119,25 +123,67 @@ const useCRNVerification = () => {
           }
 
           return data;
-        } else {
-          // Company not found
+        }
+
+        // Try actual API call (may be blocked by CORS)
+        const apiResult = await getCompanyDetails(cleanCRN);
+
+        if (apiResult.success && apiResult.data) {
+          // API call succeeded
+          const companyInfo = apiResult.data;
           const data = {
-            valid: false,
-            message: 'Company not found. Please check the CRN and try again.',
+            valid: true,
+            company: {
+              name: companyInfo.companyName,
+              status: companyInfo.companyStatus,
+              address: `${companyInfo.registeredAddress.addressLine1}, ${companyInfo.registeredAddress.city}, ${companyInfo.registeredAddress.postcode}`,
+              dateOfCreation: companyInfo.dateOfCreation,
+            },
           };
 
           setCRNData(cleanCRN, data);
-          setStatus('invalid');
-          setCompanyData(null);
-          setError(data.message);
+
+          if (companyInfo.companyStatus === 'dissolved') {
+            setStatus('dissolved');
+            setCompanyData(data.company);
+            setError('This company is dissolved');
+          } else {
+            setStatus('valid');
+            setCompanyData(data.company);
+          }
 
           return data;
         }
+
+        // Handle specific error types
+        if (apiResult.error === CRN_ERROR_TYPES.CORS_BLOCKED) {
+          setStatus('cors_blocked');
+          setError(apiResult.message);
+          setErrorType(CRN_ERROR_TYPES.CORS_BLOCKED);
+          setCompanyData(null);
+          return { valid: false, error: CRN_ERROR_TYPES.CORS_BLOCKED, message: apiResult.message };
+        }
+
+        if (apiResult.error === CRN_ERROR_TYPES.NOT_FOUND) {
+          setStatus('not_found');
+          setError(apiResult.message);
+          setErrorType(CRN_ERROR_TYPES.NOT_FOUND);
+          setCompanyData(null);
+          return { valid: false, error: CRN_ERROR_TYPES.NOT_FOUND, message: apiResult.message };
+        }
+
+        // Generic invalid status for other errors
+        setStatus('invalid');
+        setError(apiResult.message || 'Company not found. Please check the CRN and try again.');
+        setCompanyData(null);
+        return { valid: false, message: apiResult.message };
+
       } catch (err) {
         console.error('CRN verification error:', err);
-        setStatus('invalid');
-        setError('Verification failed. Please try again or enter details manually.');
-        return { valid: false, message: err.message };
+        setStatus('cors_blocked');
+        setError('Unable to verify CRN. You can proceed by entering company details manually in the next section.');
+        setErrorType(CRN_ERROR_TYPES.CORS_BLOCKED);
+        return { valid: false, error: CRN_ERROR_TYPES.CORS_BLOCKED, message: err.message };
       }
     },
     [getCRNData, setCRNData]
@@ -147,6 +193,7 @@ const useCRNVerification = () => {
     setStatus('idle');
     setCompanyData(null);
     setError(null);
+    setErrorType(null);
   }, []);
 
   return {
@@ -155,9 +202,13 @@ const useCRNVerification = () => {
     status,
     companyData,
     error,
+    errorType,
     isVerifying: status === 'verifying',
     isValid: status === 'valid',
     isInvalid: status === 'invalid' || status === 'dissolved',
+    isCorsBlocked: status === 'cors_blocked',
+    isNotFound: status === 'not_found',
+    canProceedManually: status === 'cors_blocked' || status === 'not_found' || status === 'invalid',
   };
 };
 

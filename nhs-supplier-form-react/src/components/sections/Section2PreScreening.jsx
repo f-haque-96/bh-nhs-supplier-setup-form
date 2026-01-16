@@ -565,7 +565,8 @@ const Section2PreScreening = () => {
             {supplierConnection === 'yes' && !questionStatus.q7_supplierConnection.locked && (
               <div className="connection-details" style={{ marginTop: '16px' }}>
                 <label style={{ fontWeight: 'bold', marginBottom: '8px', display: 'block' }}>
-                  Please describe your connection to this supplier *
+                  Please describe your connection to this supplier{' '}
+                  <span style={{ color: '#dc2626' }}>*</span>
                 </label>
                 <Controller
                   name="connectionDetails"

@@ -1,9 +1,6 @@
 {
     "workbench.colorTheme": "Default Dark Modern",
-    "security.allowedUNCHosts": [
-        "BH2VMHOM01"
-    ],
-    "terminal.integrated.cwd": "C:/Users/HaqueFah/Downloads/supplier_setup_form_main",
+    "terminal.integrated.cwd": "${workspaceFolder}",
     "claudeCodeChat.thinking.intensity": "think-harder",
     "claudeCodeChat.wsl.enabled": false,
     "claudeCodeChat.wsl.distro": "Ubuntu",

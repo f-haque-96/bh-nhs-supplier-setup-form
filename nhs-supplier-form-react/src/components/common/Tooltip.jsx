@@ -15,7 +15,7 @@ const Tooltip = ({ content, children }) => {
       onMouseLeave={() => setIsVisible(false)}
       style={{ position: 'relative', display: 'inline-block' }}
     >
-      {children || <span className="tooltip-icon">?</span>}
+      {children || <span className="tooltip-icon">ℹ</span>}
 
       {isVisible && (
         <span

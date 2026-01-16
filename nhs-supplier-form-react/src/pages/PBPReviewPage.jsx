@@ -565,6 +565,27 @@ const PBPReviewPage = () => {
         <ReviewField label="Phone Number" value={formData.phoneNumber} />
       </ReviewSection>
 
+      {/* Conflict of Interest Warning */}
+      {(formData.supplierConnection === 'yes' || formData.section2?.supplierConnection === 'yes') && (
+        <div style={{
+          marginBottom: 'var(--space-24)',
+          padding: 'var(--space-16)',
+          backgroundColor: '#fef3c7',
+          borderRadius: 'var(--radius-base)',
+          border: '2px solid #f59e0b',
+        }}>
+          <h4 style={{ margin: '0 0 var(--space-8) 0', color: '#b45309', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            ⚠️ Conflict of Interest Declared
+          </h4>
+          <p style={{ margin: '0 0 var(--space-8) 0', color: '#92400e', fontWeight: 'var(--font-weight-medium)' }}>
+            The requester has declared a connection to this supplier:
+          </p>
+          <p style={{ margin: 0, color: '#92400e', backgroundColor: '#fffbeb', padding: 'var(--space-12)', borderRadius: 'var(--radius-sm)' }}>
+            {formData.connectionDetails || formData.section2?.connectionDetails || 'No details provided'}
+          </p>
+        </div>
+      )}
+
       {/* Questionnaire Responses */}
       <ReviewSection title={`${questionnaireType === 'clinical' ? 'Clinical' : 'Non-Clinical'} Questionnaire Responses`}>
         {questionnaireType === 'clinical' ? (

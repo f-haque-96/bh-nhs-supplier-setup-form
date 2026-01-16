@@ -429,6 +429,18 @@ const Section7ReviewSubmit = () => {
         <ReviewItem label="Service Category" value={formData.serviceCategory} />
         <ReviewItem label="Usage Frequency" value={formData.usageFrequency} />
         <ReviewItem label="Supplier Connection" value={formData.supplierConnection} />
+        {formData.supplierConnection === 'yes' && formData.connectionDetails && (
+          <div style={{
+            marginTop: 'var(--space-12)',
+            padding: 'var(--space-12)',
+            backgroundColor: '#fef3c7',
+            borderRadius: 'var(--radius-base)',
+            border: '1px solid #f59e0b'
+          }}>
+            <strong style={{ color: '#b45309' }}>⚠️ Conflict of Interest - Connection Details:</strong>
+            <p style={{ margin: 'var(--space-8) 0 0 0', color: '#92400e' }}>{formData.connectionDetails}</p>
+          </div>
+        )}
         <div style={{ marginTop: 'var(--space-12)', padding: 'var(--space-12)', backgroundColor: 'var(--color-background)', borderRadius: 'var(--radius-base)' }}>
           <strong>Justification:</strong>
           <p style={{ margin: 'var(--space-8) 0 0 0' }}>{formData.justification}</p>

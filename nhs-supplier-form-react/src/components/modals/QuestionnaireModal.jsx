@@ -238,9 +238,10 @@ const QuestionnaireModal = ({ isOpen, onClose, type = 'clinical' }) => {
               Cancel
             </Button>
             <button
-              type="submit"
+              type="button"
               className="btn-primary"
               disabled={isSubmitting}
+              onClick={handleSubmit(onSubmit)}
               style={{
                 backgroundColor: '#005EB8',
                 color: 'white',

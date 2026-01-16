@@ -32,7 +32,7 @@ import clsx from 'clsx';
 const Section3Classification = () => {
   const { formData, updateFormData, updateMultipleFields, uploadedFiles, setUploadedFile, removeUploadedFile } = useFormStore();
   const { handleNext, handlePrev } = useFormNavigation();
-  const { verify, status: crnStatus, companyData, isVerifying, isValid } = useCRNVerification();
+  const { verify, status: crnStatus, companyData, error: crnError, isVerifying, isValid, isCorsBlocked, isNotFound, canProceedManually } = useCRNVerification();
 
   const [selectedSupplierType, setSelectedSupplierType] = useState(formData.supplierType || '');
   const [companiesHouseValue, setCompaniesHouseValue] = useState(formData.companiesHouseRegistered || '');
@@ -345,7 +345,23 @@ const Section3Classification = () => {
                 </NoticeBox>
               )}
 
-              {crnStatus === 'invalid' && watchCRN && watchCRN.length >= 7 && (
+              {isCorsBlocked && watchCRN && watchCRN.length >= 7 && (
+                <NoticeBox type="info" style={{ marginTop: 'var(--space-8)' }}>
+                  <strong>ℹ️ Verification Unavailable:</strong> Unable to verify CRN due to browser restrictions.
+                  <br />
+                  <small>You can proceed by entering company details manually in the next section. The CRN will still be recorded.</small>
+                </NoticeBox>
+              )}
+
+              {isNotFound && watchCRN && watchCRN.length >= 7 && (
+                <NoticeBox type="warning" style={{ marginTop: 'var(--space-8)' }}>
+                  <strong>⚠️ Company Not Found:</strong> {crnError || 'CRN not found on Companies House.'}
+                  <br />
+                  <small>Please check the number or enter company details manually in the next section.</small>
+                </NoticeBox>
+              )}
+
+              {crnStatus === 'invalid' && !isCorsBlocked && !isNotFound && watchCRN && watchCRN.length >= 7 && (
                 <NoticeBox type="error" style={{ marginTop: 'var(--space-8)' }}>
                   CRN not found. Please check the number or enter company details manually in the next section.
                 </NoticeBox>

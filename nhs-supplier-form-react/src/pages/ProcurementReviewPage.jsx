@@ -347,6 +347,19 @@ const ProcurementReviewPage = () => {
         <ReviewItem label="Sole Trader Status" value={formData.soleTraderStatus} />
         <ReviewItem label="Usage Frequency" value={formData.usageFrequency} />
         <ReviewItem label="Supplier Connection" value={formData.supplierConnection} />
+        {/* Conflict of Interest Warning */}
+        {formData.supplierConnection === 'yes' && formData.connectionDetails && (
+          <div style={{
+            marginTop: 'var(--space-12)',
+            padding: 'var(--space-12)',
+            backgroundColor: '#fef3c7',
+            borderRadius: 'var(--radius-base)',
+            border: '2px solid #f59e0b'
+          }}>
+            <strong style={{ color: '#b45309' }}>⚠️ Conflict of Interest - Connection Details:</strong>
+            <p style={{ margin: 'var(--space-8) 0 0 0', color: '#92400e' }}>{formData.connectionDetails}</p>
+          </div>
+        )}
         {formData.justification && (
           <div style={{ marginTop: 'var(--space-12)', padding: 'var(--space-12)', backgroundColor: 'var(--color-background)', borderRadius: 'var(--radius-base)' }}>
             <strong>Justification:</strong>
