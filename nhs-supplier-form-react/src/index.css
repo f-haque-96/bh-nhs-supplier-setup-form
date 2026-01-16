@@ -979,7 +979,15 @@ textarea + .field-error,
 
 .file-icon,
 .file-type {
-  font-size: 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  height: 40px;
+  padding: 0 8px;
+  background: #eff6ff;
+  border-radius: 6px;
+  font-size: 0.7rem !important;
   font-weight: 600;
   color: #005EB8;
 }
