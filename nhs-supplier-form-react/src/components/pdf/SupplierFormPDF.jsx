@@ -516,21 +516,23 @@ const SupplierFormPDF = ({ formData, uploadedFiles, submissionId, submissionDate
 
         {/* SECTION 2: Pre-screening */}
         <Text style={styles.sectionHeader}>Section 2: Pre-screening & Authorisation</Text>
-        <Field label="Service Category" value={normalizedData.section2?.serviceCategory || normalizedData.serviceCategory} />
-        <Field label="Procurement Engaged" value={normalizedData.section2?.procurementEngaged || normalizedData.procurementEngaged} />
-        <Field label="Letterhead Available" value={normalizedData.section2?.letterheadAvailable || normalizedData.letterheadAvailable} />
-        <Field label="Sole Trader Status" value={normalizedData.section2?.soleTraderStatus || normalizedData.soleTraderStatus} />
-        <Field label="Usage Frequency" value={normalizedData.section2?.usageFrequency || normalizedData.usageFrequency} />
+        {/* Q2.1 Supplier Connection - NOW FIRST */}
         <Field label="Supplier Connection" value={normalizedData.section2?.supplierConnection || normalizedData.supplierConnection} />
         {/* Connection Details - Show if supplier has a connection */}
         {(normalizedData.section2?.supplierConnection === 'yes' || normalizedData.supplierConnection === 'yes') &&
          (normalizedData.section2?.connectionDetails || normalizedData.connectionDetails) && (
-          <View style={{ backgroundColor: '#fef3c7', padding: 10, borderRadius: 4, marginBottom: 10, borderLeftWidth: 3, borderLeftColor: '#f59e0b' }}>
+          <View style={{ backgroundColor: '#fef3c7', padding: 10, borderRadius: 4, marginBottom: 10, borderWidth: 1, borderColor: '#f59e0b' }}>
             <Text style={{ fontSize: 10, fontWeight: 'bold', color: '#b45309', marginBottom: 4 }}>⚠ Conflict of Interest - Connection Details:</Text>
             <Text style={{ fontSize: 10, color: '#92400e', lineHeight: 1.4 }}>{normalizedData.section2?.connectionDetails || normalizedData.connectionDetails}</Text>
           </View>
         )}
+        {/* Q2.2 - Q2.7 */}
+        <Field label="Service Category" value={normalizedData.section2?.serviceCategory || normalizedData.serviceCategory} />
+        <Field label="Letterhead Available" value={normalizedData.section2?.letterheadAvailable || normalizedData.letterheadAvailable} />
+        <Field label="Procurement Engaged" value={normalizedData.section2?.procurementEngaged || normalizedData.procurementEngaged} />
+        <Field label="Sole Trader Status" value={normalizedData.section2?.soleTraderStatus || normalizedData.soleTraderStatus} />
         <TextBlock label="Justification" content={normalizedData.section2?.justification || normalizedData.justification} />
+        <Field label="Usage Frequency" value={normalizedData.section2?.usageFrequency || normalizedData.usageFrequency} />
         <Field label="Section 2 Acknowledgement" value={(normalizedData.section2?.prescreeningAcknowledgement || normalizedData.prescreeningAcknowledgement) ? 'Confirmed' : 'Not confirmed'} />
 
         {/* SECTION 3: Supplier Classification */}

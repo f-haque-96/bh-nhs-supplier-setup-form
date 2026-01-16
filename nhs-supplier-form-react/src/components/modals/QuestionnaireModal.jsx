@@ -150,13 +150,18 @@ const QuestionnaireModal = ({ isOpen, onClose, type = 'clinical' }) => {
       const questionnaireId = `QUEST-${Date.now()}`;
       const submissionDate = new Date().toISOString();
 
-      // Store questionnaire data in form
+      // Store questionnaire data in form (including uploads)
       updateFormData(`${type}Questionnaire`, {
         ...data,
         submittedAt: submissionDate,
         questionnaireId,
         status: 'pending_approval',
+        uploads: questionnaireUploads,
+        uploadedFiles: questionnaireUploads,
       });
+
+      console.log('=== QUESTIONNAIRE SUBMIT ===');
+      console.log('Questionnaire Uploads:', questionnaireUploads);
 
       // Create a submission for PBP review
       const questionnaireSubmission = {
@@ -170,13 +175,32 @@ const QuestionnaireModal = ({ isOpen, onClose, type = 'clinical' }) => {
           [`${type}Questionnaire`]: data,
         },
         uploadedFiles: {},
+        // Save uploads in multiple formats for compatibility
         questionnaireUploads: questionnaireUploads,
+        uploads: questionnaireUploads,
+        questionnaireData: {
+          ...data,
+          uploads: questionnaireUploads,
+          uploadedFiles: questionnaireUploads,
+        },
         submittedBy: formData.nhsEmail || 'Unknown',
         isQuestionnaire: true,
       };
 
+      console.log('Full questionnaire submission:', questionnaireSubmission);
+
       // Save to localStorage for PBP review
       localStorage.setItem(`submission_${questionnaireId}`, JSON.stringify(questionnaireSubmission));
+
+      // Also save questionnaire submission separately for backup retrieval
+      localStorage.setItem('questionnaireSubmission', JSON.stringify({
+        questionnaireId,
+        type,
+        data,
+        uploads: questionnaireUploads,
+        uploadedFiles: questionnaireUploads,
+        submittedAt: submissionDate,
+      }));
 
       // Add to submissions list
       const submissions = JSON.parse(localStorage.getItem('all_submissions') || '[]');

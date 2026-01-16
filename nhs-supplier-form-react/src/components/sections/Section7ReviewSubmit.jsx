@@ -423,11 +423,7 @@ const Section7ReviewSubmit = () => {
 
       {/* Section 2: Pre-screening */}
       <ReviewCard title="Pre-screening" sectionNumber={2}>
-        <ReviewItem label="Procurement Engaged" value={formData.procurementEngaged} />
-        <ReviewItem label="Letterhead Available" value={formData.letterheadAvailable} />
-        <ReviewItem label="Sole Trader" value={formData.soleTraderStatus} />
-        <ReviewItem label="Service Category" value={formData.serviceCategory} />
-        <ReviewItem label="Usage Frequency" value={formData.usageFrequency} />
+        {/* Q2.1 Supplier Connection - NOW FIRST */}
         <ReviewItem label="Supplier Connection" value={formData.supplierConnection} />
         {formData.supplierConnection === 'yes' && formData.connectionDetails && (
           <div style={{
@@ -435,12 +431,18 @@ const Section7ReviewSubmit = () => {
             padding: 'var(--space-12)',
             backgroundColor: '#fef3c7',
             borderRadius: 'var(--radius-base)',
-            border: '1px solid #f59e0b'
+            border: '2px solid #f59e0b'
           }}>
             <strong style={{ color: '#b45309' }}>⚠️ Conflict of Interest - Connection Details:</strong>
             <p style={{ margin: 'var(--space-8) 0 0 0', color: '#92400e' }}>{formData.connectionDetails}</p>
           </div>
         )}
+        {/* Q2.2 - Q2.7 */}
+        <ReviewItem label="Service Category" value={formData.serviceCategory} />
+        <ReviewItem label="Letterhead Available" value={formData.letterheadAvailable} />
+        <ReviewItem label="Procurement Engaged" value={formData.procurementEngaged} />
+        <ReviewItem label="Sole Trader" value={formData.soleTraderStatus} />
+        <ReviewItem label="Usage Frequency" value={formData.usageFrequency} />
         <div style={{ marginTop: 'var(--space-12)', padding: 'var(--space-12)', backgroundColor: 'var(--color-background)', borderRadius: 'var(--radius-base)' }}>
           <strong>Justification:</strong>
           <p style={{ margin: 'var(--space-8) 0 0 0' }}>{formData.justification}</p>

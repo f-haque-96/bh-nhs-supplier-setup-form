@@ -185,33 +185,95 @@ const PBPReviewPage = () => {
   const [reviewerName, setReviewerName] = useState('');
   const [signatureDate, setSignatureDate] = useState(new Date().toISOString().split('T')[0]);
   const [questionnaireUploads, setQuestionnaireUploads] = useState({});
+  const [allUploads, setAllUploads] = useState({
+    letterhead: null,
+    procurementApproval: null
+  });
 
   useEffect(() => {
+    console.log('=== PBP PAGE: LOADING SUBMISSION ===');
     // Load submission from localStorage
     const submissionData = localStorage.getItem(`submission_${submissionId}`);
 
     if (submissionData) {
       try {
         const parsed = JSON.parse(submissionData);
+        console.log('Parsed submission:', parsed);
         setSubmission(parsed);
 
+        // Load letterhead and procurement approval from multiple locations
+        let letterhead = null;
+        let procurementApproval = null;
+
+        // Check uploadedFiles object
+        if (parsed.uploadedFiles) {
+          letterhead = parsed.uploadedFiles.letterhead || null;
+          procurementApproval = parsed.uploadedFiles.procurementApproval || null;
+        }
+
+        // Check formData.uploadedFiles
+        if (!letterhead && parsed.formData?.uploadedFiles?.letterhead) {
+          letterhead = parsed.formData.uploadedFiles.letterhead;
+        }
+        if (!procurementApproval && parsed.formData?.uploadedFiles?.procurementApproval) {
+          procurementApproval = parsed.formData.uploadedFiles.procurementApproval;
+        }
+
+        // Check uploads object
+        if (!letterhead && parsed.uploads?.letterhead) {
+          letterhead = parsed.uploads.letterhead;
+        }
+        if (!procurementApproval && parsed.uploads?.procurementApproval) {
+          procurementApproval = parsed.uploads.procurementApproval;
+        }
+
+        // Also check supplier-form-uploads in localStorage
+        const storedFormUploads = localStorage.getItem('supplier-form-uploads');
+        if (storedFormUploads) {
+          try {
+            const formUploads = JSON.parse(storedFormUploads);
+            if (!letterhead && formUploads.letterhead) {
+              letterhead = formUploads.letterhead;
+            }
+            if (!procurementApproval && formUploads.procurementApproval) {
+              procurementApproval = formUploads.procurementApproval;
+            }
+          } catch (e) {
+            console.error('Error parsing form uploads:', e);
+          }
+        }
+
+        console.log('Letterhead found:', !!letterhead);
+        console.log('Procurement Approval found:', !!procurementApproval);
+
+        setAllUploads({
+          letterhead,
+          procurementApproval
+        });
+
         // Load questionnaire uploads with multiple fallback paths
+        let qUploads = {};
         if (parsed.questionnaireUploads) {
-          setQuestionnaireUploads(parsed.questionnaireUploads);
+          qUploads = parsed.questionnaireUploads;
         } else if (parsed.questionnaireData?.uploads) {
-          setQuestionnaireUploads(parsed.questionnaireData.uploads);
+          qUploads = parsed.questionnaireData.uploads;
         } else if (parsed.questionnaireData?.uploadedFiles) {
-          setQuestionnaireUploads(parsed.questionnaireData.uploadedFiles);
+          qUploads = parsed.questionnaireData.uploadedFiles;
         } else if (parsed.formData?.section2?.questionnaireUploads) {
-          setQuestionnaireUploads(parsed.formData.section2.questionnaireUploads);
+          qUploads = parsed.formData.section2.questionnaireUploads;
+        } else if (parsed.formData?.section2?.questionnaireData?.uploads) {
+          qUploads = parsed.formData.section2.questionnaireData.uploads;
         } else {
           // Try localStorage directly as last resort
           const storedQuestionnaire = localStorage.getItem('questionnaireSubmission');
           if (storedQuestionnaire) {
             const parsedQ = JSON.parse(storedQuestionnaire);
-            setQuestionnaireUploads(parsedQ.uploads || parsedQ.uploadedFiles || {});
+            qUploads = parsedQ.uploads || parsedQ.uploadedFiles || {};
           }
         }
+
+        console.log('Questionnaire Uploads found:', Object.keys(qUploads));
+        setQuestionnaireUploads(qUploads);
       } catch (error) {
         console.error('Error parsing submission:', error);
       }
@@ -595,53 +657,110 @@ const PBPReviewPage = () => {
         )}
       </ReviewSection>
 
-      {/* Questionnaire Uploads */}
-      {Object.keys(questionnaireUploads).length > 0 && (
-        <ReviewSection title="Supporting Documents">
-          <div style={{ gridColumn: '1 / -1' }}>
-            {Object.entries(questionnaireUploads).map(([key, file]) => (
-              <div key={key} style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 'var(--space-12)',
-                padding: 'var(--space-12)',
-                backgroundColor: 'var(--color-background)',
-                borderRadius: 'var(--radius-base)',
-                border: '1px solid var(--color-border)',
-                marginBottom: 'var(--space-8)',
-              }}>
-                <span style={{ fontSize: '24px' }}>📄</span>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: 'var(--font-weight-semibold)' }}>
-                    {file.name}
-                  </div>
-                  <div style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)' }}>
-                    {Math.round(file.size / 1024)} KB • Uploaded {formatDate(file.uploadedAt)}
-                  </div>
+      {/* All Uploads Section - Letterhead, Procurement Approval, and Questionnaire Uploads */}
+      <ReviewSection title="Uploaded Documents">
+        <div style={{ gridColumn: '1 / -1' }}>
+          {/* Letterhead Document */}
+          {allUploads.letterhead && (
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 'var(--space-12)',
+              padding: 'var(--space-12)',
+              backgroundColor: '#f0fdf4',
+              borderRadius: 'var(--radius-base)',
+              border: '1px solid #86efac',
+              marginBottom: 'var(--space-8)',
+            }}>
+              <span style={{ fontSize: '24px' }}>📋</span>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontWeight: 'var(--font-weight-semibold)', color: '#166534' }}>
+                  Letterhead with Bank Details
                 </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handlePreviewDocument(file)}
-                >
-                  Preview
-                </Button>
+                <div style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)' }}>
+                  {allUploads.letterhead.name} • {Math.round((allUploads.letterhead.size || 0) / 1024)} KB
+                </div>
               </div>
-            ))}
-          </div>
-        </ReviewSection>
-      )}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handlePreviewDocument(allUploads.letterhead)}
+              >
+                Preview
+              </Button>
+            </div>
+          )}
 
-      {/* Show message if no uploads */}
-      {Object.keys(questionnaireUploads).length === 0 && (
-        <ReviewSection title="Supporting Documents">
-          <div style={{ gridColumn: '1 / -1' }}>
+          {/* Procurement Approval Document */}
+          {allUploads.procurementApproval && (
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 'var(--space-12)',
+              padding: 'var(--space-12)',
+              backgroundColor: '#eff6ff',
+              borderRadius: 'var(--radius-base)',
+              border: '1px solid #93c5fd',
+              marginBottom: 'var(--space-8)',
+            }}>
+              <span style={{ fontSize: '24px' }}>✅</span>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontWeight: 'var(--font-weight-semibold)', color: '#1e40af' }}>
+                  Procurement Approval Document
+                </div>
+                <div style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)' }}>
+                  {allUploads.procurementApproval.name} • {Math.round((allUploads.procurementApproval.size || 0) / 1024)} KB
+                </div>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handlePreviewDocument(allUploads.procurementApproval)}
+              >
+                Preview
+              </Button>
+            </div>
+          )}
+
+          {/* Questionnaire Uploads */}
+          {Object.entries(questionnaireUploads).map(([key, file]) => (
+            <div key={key} style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 'var(--space-12)',
+              padding: 'var(--space-12)',
+              backgroundColor: 'var(--color-background)',
+              borderRadius: 'var(--radius-base)',
+              border: '1px solid var(--color-border)',
+              marginBottom: 'var(--space-8)',
+            }}>
+              <span style={{ fontSize: '24px' }}>📄</span>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontWeight: 'var(--font-weight-semibold)' }}>
+                  {key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
+                </div>
+                <div style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)' }}>
+                  {file.name} • {Math.round((file.size || 0) / 1024)} KB
+                </div>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handlePreviewDocument(file)}
+              >
+                Preview
+              </Button>
+            </div>
+          ))}
+
+          {/* Show message if no uploads at all */}
+          {!allUploads.letterhead && !allUploads.procurementApproval && Object.keys(questionnaireUploads).length === 0 && (
             <p style={{ color: '#6b7280', fontStyle: 'italic', margin: 0 }}>
-              No documents were uploaded with this questionnaire.
+              No documents were uploaded with this submission.
             </p>
-          </div>
-        </ReviewSection>
-      )}
+          )}
+        </div>
+      </ReviewSection>
 
       {/* Approval Actions */}
       {submission.status === 'pending_review' && (
