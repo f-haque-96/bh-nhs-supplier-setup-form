@@ -53,6 +53,7 @@ const ProcurementReviewPage = () => {
   const [signatureName, setSignatureName] = useState('');
   const [signatureDate, setSignatureDate] = useState(new Date().toISOString().split('T')[0]);
   const [supplierClassification, setSupplierClassification] = useState('standard'); // 'standard' | 'opw_ir35'
+  const [alembaReference, setAlembaReference] = useState('');
 
   // Handle document preview
   const handlePreviewDocument = (file) => {
@@ -158,6 +159,11 @@ const ProcurementReviewPage = () => {
       return;
     }
 
+    if (action === 'approved' && !alembaReference.trim()) {
+      alert('Please provide the Alemba Call Reference Number');
+      return;
+    }
+
     if (!signatureName.trim()) {
       alert('Please provide your digital signature (full name)');
       return;
@@ -177,11 +183,15 @@ const ProcurementReviewPage = () => {
       // Update submission with procurement review
       const updatedSubmission = {
         ...currentSubmission, // Use fresh data from localStorage
+        // Store Alemba reference at top level for easy access
+        alembaReference: action === 'approved' ? alembaReference : currentSubmission.alembaReference,
+        displayReference: action === 'approved' ? alembaReference : currentSubmission.displayReference,
         // Add procurement review
         procurementReview: {
           supplierClassification,
           decision: action,
           comments,
+          alembaReference: action === 'approved' ? alembaReference : null,
           signature: signatureName,
           date: signatureDate,
           reviewedBy: 'Procurement Team', // In real app, this would come from auth
@@ -284,36 +294,7 @@ const ProcurementReviewPage = () => {
               size="large"
             />
           )}
-          {procurementReview && (
-            <PDFDownloadLink
-              document={
-                <SupplierFormPDF
-                  formData={submission.formData}
-                  uploadedFiles={submission.uploadedFiles || {}}
-                  submissionId={submission.submissionId}
-                  submissionDate={submission.submissionDate}
-                  submission={{
-                    ...submission,
-                    pbpReview: submission.pbpReview, // Include PBP if exists
-                    procurementReview,
-                  }}
-                />
-              }
-              fileName={`NHS-Supplier-Form-${submission.formData?.companyName?.replace(/\s+/g, '_') || 'Supplier'}-${new Date().toISOString().split('T')[0]}.pdf`}
-              style={{ textDecoration: 'none' }}
-            >
-              {({ loading }) => (
-                <Button
-                  variant="outline"
-                  disabled={loading}
-                  style={{ fontSize: 'var(--font-size-sm)' }}
-                >
-                  {loading ? 'Generating...' : 'Download Supplier Form PDF'}
-                </Button>
-              )}
-            </PDFDownloadLink>
-          )}
-        </div>
+                  </div>
       </div>
 
       {/* Status Notice */}
@@ -599,6 +580,36 @@ const ProcurementReviewPage = () => {
                 style={{ marginTop: 'var(--space-16)' }}
               />
 
+              {approvalAction === 'approved' && (
+                <div className="form-group" style={{ marginTop: 'var(--space-16)' }}>
+                  <label style={{ fontWeight: '600', marginBottom: '8px', display: 'block' }}>
+                    Alemba Call Reference Number
+                    <span style={{ color: '#dc2626' }}> *</span>
+                  </label>
+                  <div className="info-box" style={{ marginBottom: '12px' }}>
+                    <span className="info-icon">ℹ️</span>
+                    <span style={{ color: '#1e40af' }}>
+                      Enter the Alemba call reference number for this supplier setup request.
+                      This will become the primary reference for tracking this supplier.
+                    </span>
+                  </div>
+                  <input
+                    type="text"
+                    value={alembaReference}
+                    onChange={(e) => setAlembaReference(e.target.value)}
+                    placeholder="e.g., 3000545"
+                    required
+                    style={{
+                      width: '100%',
+                      padding: '12px 16px',
+                      border: '1px solid #d1d5db',
+                      borderRadius: '8px',
+                      fontSize: '1rem'
+                    }}
+                  />
+                </div>
+              )}
+
               <SignatureSection
                 signatureName={signatureName}
                 signatureDate={signatureDate}
@@ -612,7 +623,7 @@ const ProcurementReviewPage = () => {
                 <Button
                   variant={approvalAction === 'approved' ? 'primary' : 'danger'}
                   onClick={() => handleDecision(approvalAction)}
-                  disabled={isSubmitting || (approvalAction !== 'approved' && !comments.trim())}
+                  disabled={isSubmitting || (approvalAction !== 'approved' && !comments.trim()) || (approvalAction === 'approved' && !alembaReference.trim())}
                 >
                   {isSubmitting ? 'Processing...' : `Confirm ${approvalAction === 'approved' ? 'Approval' : 'Rejection'}`}
                 </Button>
@@ -632,11 +643,44 @@ const ProcurementReviewPage = () => {
         </div>
       )}
 
-      {/* Back Button */}
-      <div style={{ marginTop: 'var(--space-32)', textAlign: 'center' }}>
+      {/* Back Button & PDF Download */}
+      <div style={{ marginTop: 'var(--space-32)', display: 'flex', justifyContent: 'center', gap: '12px' }}>
         <Button variant="outline" onClick={() => window.close()}>
           Close Preview
         </Button>
+        {procurementReview?.decision && (
+          <PDFDownloadLink
+            document={
+              <SupplierFormPDF
+                formData={submission.formData}
+                uploadedFiles={submission.uploadedFiles || {}}
+                submissionId={submission.submissionId}
+                submissionDate={submission.submissionDate}
+                submission={{
+                  ...submission,
+                  pbpReview: submission.pbpReview || null,
+                  procurementReview: procurementReview,
+                  opwReview: null,
+                  contractDrafter: null,
+                  apReview: null,
+                }}
+              />
+            }
+            fileName={`Supplier_Form_${submission?.alembaReference || submission?.submissionId || 'unknown'}_Procurement.pdf`}
+            style={{
+              padding: '12px 24px',
+              background: '#005EB8',
+              color: 'white',
+              borderRadius: '8px',
+              textDecoration: 'none',
+              fontWeight: '600',
+              display: 'inline-flex',
+              alignItems: 'center'
+            }}
+          >
+            {({ loading }) => loading ? 'Generating PDF...' : 'Download Supplier Form PDF'}
+          </PDFDownloadLink>
+        )}
       </div>
     </div>
   );

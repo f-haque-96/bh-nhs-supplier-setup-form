@@ -347,7 +347,15 @@ const APControlReviewPage = () => {
 
       setSubmission(updatedSubmission);
 
-      alert('AP verification completed successfully!');
+      // Auto-download complete PDF after a short delay to ensure state is updated
+      setTimeout(() => {
+        const downloadLink = document.getElementById('ap-complete-pdf-download');
+        if (downloadLink) {
+          downloadLink.click();
+        }
+      }, 1000);
+
+      alert('AP Verification Complete! The complete PDF has been downloaded. In production, this will also be emailed to the requester.');
     } catch (error) {
       console.error('Error updating submission:', error);
       alert('Failed to update submission. Please try again.');
@@ -1235,6 +1243,39 @@ const APControlReviewPage = () => {
           </div>
         </div>
       )}
+
+      {/* Hidden PDF Download Link for auto-download after verification */}
+      <PDFDownloadLink
+        id="ap-complete-pdf-download"
+        document={
+          <SupplierFormPDF
+            formData={submission?.formData}
+            uploadedFiles={submission?.uploadedFiles || {}}
+            submissionId={submission?.submissionId}
+            submissionDate={submission?.submissionDate}
+            submission={{
+              ...submission,
+              pbpReview: submission?.pbpReview || null,
+              procurementReview: submission?.procurementReview || null,
+              opwReview: submission?.opwReview || null,
+              contractDrafter: submission?.contractDrafter || null,
+              apReview: submission?.apReview || {
+                decision: 'verified',
+                supplierName: supplierName,
+                supplierNumber: supplierNumber,
+                signature: signatureName,
+                date: signatureDate,
+                bankDetailsVerified,
+                companyDetailsVerified,
+              },
+            }}
+          />
+        }
+        fileName={`Supplier_Form_COMPLETE_${submission?.alembaReference || submission?.submissionId || 'unknown'}.pdf`}
+        style={{ display: 'none' }}
+      >
+        {({ loading }) => null}
+      </PDFDownloadLink>
 
       {/* Back Button */}
       <div style={{ marginTop: 'var(--space-32)', textAlign: 'center' }}>

@@ -9,7 +9,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { PDFDownloadLink } from '@react-pdf/renderer';
 import { Button, NoticeBox, ApprovalStamp, Textarea } from '../components/common';
 import { formatDate, formatCurrency } from '../utils/helpers';
-import SupplierFormPDF from '../components/pdf/SupplierFormPDF';
 import PBPApprovalPDF from '../components/pdf/PBPApprovalPDF';
 
 const ReviewField = ({ label, value, isLongText = false }) => {
@@ -511,38 +510,7 @@ const PBPReviewPage = () => {
             approver={submission.approver}
             size="large"
           />
-          <PDFDownloadLink
-            document={
-              <SupplierFormPDF
-                formData={submission.formData}
-                uploadedFiles={submission.uploadedFiles || {}}
-                submissionId={submission.submissionId}
-                submissionDate={submission.submissionDate}
-                submission={{
-                  ...submission,
-                  pbpReview: {
-                    status: submission.status,
-                    approver: submission.approver,
-                    approvalDate: submission.approvalDate,
-                    approvalComments: submission.approvalComments,
-                  },
-                }}
-              />
-            }
-            fileName={`NHS-Supplier-Form-${submission.formData?.companyName?.replace(/\s+/g, '_') || 'Supplier'}-${new Date().toISOString().split('T')[0]}.pdf`}
-            style={{ textDecoration: 'none' }}
-          >
-            {({ loading }) => (
-              <Button
-                variant="outline"
-                disabled={loading}
-                style={{ fontSize: 'var(--font-size-sm)' }}
-              >
-                {loading ? 'Generating...' : 'Download Supplier Form PDF'}
-              </Button>
-            )}
-          </PDFDownloadLink>
-        </div>
+                  </div>
       </div>
 
       {/* Status Notice */}

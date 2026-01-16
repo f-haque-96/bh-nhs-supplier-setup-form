@@ -381,38 +381,7 @@ const OPWReviewPage = () => {
               </div>
             </div>
           )}
-          {opwReview && (
-            <PDFDownloadLink
-              document={
-                <SupplierFormPDF
-                  formData={submission.formData}
-                  uploadedFiles={submission.uploadedFiles || {}}
-                  submissionId={submission.submissionId}
-                  submissionDate={submission.submissionDate}
-                  submission={{
-                    ...submission,
-                    pbpReview: submission.pbpReview, // Include PBP
-                    procurementReview: submission.procurementReview, // Include Procurement
-                    opwReview,
-                    contractDrafter: submission.contractDrafter, // Include Contract if exists
-                  }}
-                />
-              }
-              fileName={`NHS-Supplier-Form-${submission.formData?.companyName?.replace(/\s+/g, '_') || 'Supplier'}-${new Date().toISOString().split('T')[0]}.pdf`}
-              style={{ textDecoration: 'none' }}
-            >
-              {({ loading }) => (
-                <Button
-                  variant="outline"
-                  disabled={loading}
-                  style={{ fontSize: 'var(--font-size-sm)' }}
-                >
-                  {loading ? 'Generating...' : 'Download Supplier Form PDF'}
-                </Button>
-              )}
-            </PDFDownloadLink>
-          )}
-        </div>
+                  </div>
       </div>
 
       {/* Warning if not sole trader */}
@@ -855,11 +824,44 @@ const OPWReviewPage = () => {
         </div>
       )}
 
-      {/* Back Button */}
-      <div style={{ marginTop: 'var(--space-32)', textAlign: 'center' }}>
+      {/* Back Button & PDF Download */}
+      <div style={{ marginTop: 'var(--space-32)', display: 'flex', justifyContent: 'center', gap: '12px' }}>
         <Button variant="outline" onClick={() => window.close()}>
           Close Preview
         </Button>
+        {opwReview?.decision && (
+          <PDFDownloadLink
+            document={
+              <SupplierFormPDF
+                formData={submission.formData}
+                uploadedFiles={submission.uploadedFiles || {}}
+                submissionId={submission.submissionId}
+                submissionDate={submission.submissionDate}
+                submission={{
+                  ...submission,
+                  pbpReview: submission.pbpReview || null,
+                  procurementReview: submission.procurementReview || null,
+                  opwReview: opwReview,
+                  contractDrafter: submission.contractDrafter || null,
+                  apReview: null,
+                }}
+              />
+            }
+            fileName={`Supplier_Form_${submission?.alembaReference || submission?.submissionId || 'unknown'}_OPW.pdf`}
+            style={{
+              padding: '12px 24px',
+              background: '#005EB8',
+              color: 'white',
+              borderRadius: '8px',
+              textDecoration: 'none',
+              fontWeight: '600',
+              display: 'inline-flex',
+              alignItems: 'center'
+            }}
+          >
+            {({ loading }) => loading ? 'Generating PDF...' : 'Download Supplier Form PDF'}
+          </PDFDownloadLink>
+        )}
       </div>
     </div>
   );

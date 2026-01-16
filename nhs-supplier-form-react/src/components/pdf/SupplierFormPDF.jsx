@@ -468,9 +468,9 @@ const SupplierFormPDF = ({ formData, uploadedFiles, submissionId, submissionDate
           <Text style={styles.coverSubtitle}>Supplier Setup Form</Text>
 
           <View style={{ marginTop: 40 }}>
-            {submissionId && (
+            {(submission?.alembaReference || submission?.displayReference || submissionId) && (
               <Text style={styles.coverInfo}>
-                Reference: {submissionId}
+                Reference: {submission?.alembaReference || submission?.displayReference || submissionId}
               </Text>
             )}
             <Text style={styles.coverInfo}>
@@ -772,6 +772,9 @@ const SupplierFormPDF = ({ formData, uploadedFiles, submissionId, submissionDate
                     </Text>
                   </View>
                 </View>
+                {submission.procurementReview.alembaReference && (
+                  <Text style={styles.authField}>Alemba Reference: {submission.procurementReview.alembaReference}</Text>
+                )}
                 {submission.procurementReview.comments && (
                   <Text style={styles.authComments}>Comments: {submission.procurementReview.comments}</Text>
                 )}
@@ -850,9 +853,32 @@ const SupplierFormPDF = ({ formData, uploadedFiles, submissionId, submissionDate
               </View>
             )}
 
-            {/* AP Control Review - REMOVED */}
-            {/* AP Control is the one downloading this PDF, so they don't need to see their own signature */}
-            {/* Only previous authorizations (PBP, Procurement, OPW, Contract Drafter) are shown */}
+            {/* 5. AP Control Review - Only show if apReview exists */}
+            {submission.apReview && (
+              <View style={styles.authBlock}>
+                <View style={styles.authBlockHeader}>
+                  <Text style={styles.authBlockTitle}>AP Control Verification</Text>
+                  <View style={[styles.authBadge, styles.badgeGreen]}>
+                    <Text style={styles.badgeText}>VERIFIED</Text>
+                  </View>
+                </View>
+                {submission.apReview.supplierNumber && (
+                  <Text style={styles.authField}>Supplier Number: {submission.apReview.supplierNumber}</Text>
+                )}
+                {submission.apReview.notes && (
+                  <Text style={styles.authComments}>Notes: {submission.apReview.notes}</Text>
+                )}
+                <View style={styles.signatureRow}>
+                  <Text>Signature: {submission.apReview.signature || '_______________'}</Text>
+                  <Text>
+                    Date:{' '}
+                    {submission.apReview.date
+                      ? formatDate(submission.apReview.date)
+                      : '_______________'}
+                  </Text>
+                </View>
+              </View>
+            )}
           </View>
 
           <Text style={styles.footer}>Page 5 - NHS Barts Health Trust</Text>
