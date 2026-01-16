@@ -526,7 +526,17 @@ const QuestionnaireModal = ({ isOpen, onClose, type = 'clinical' }) => {
                     }}
                   />
                   <div style={{ textAlign: 'center', padding: 'var(--space-20)' }}>
-                    <div style={{ fontSize: '2rem', marginBottom: 'var(--space-8)' }}>📎</div>
+                    <svg
+                      width="32"
+                      height="32"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="#005EB8"
+                      strokeWidth="2"
+                      style={{ marginBottom: 'var(--space-8)' }}
+                    >
+                      <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48" />
+                    </svg>
                     <p style={{ margin: 0, fontWeight: 'var(--font-weight-medium)' }}>
                       Click to upload or drag and drop
                     </p>
@@ -541,7 +551,21 @@ const QuestionnaireModal = ({ isOpen, onClose, type = 'clinical' }) => {
                   <div className="questionnaire-uploaded-files">
                     {Object.entries(questionnaireUploads).map(([name, file]) => (
                       <div key={name} className="uploaded-file-item">
-                        <span style={{ fontSize: '20px', marginRight: 'var(--space-8)' }}>📄</span>
+                        <span style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          width: '32px',
+                          height: '32px',
+                          background: '#eff6ff',
+                          borderRadius: '6px',
+                          color: '#005EB8',
+                          fontSize: '0.75rem',
+                          fontWeight: '600',
+                          marginRight: 'var(--space-8)'
+                        }}>
+                          {file.type?.includes('pdf') ? 'PDF' : 'FILE'}
+                        </span>
                         <div style={{ flex: 1 }}>
                           <span className="file-name">{file.name}</span>
                           <span className="file-size"> ({formatFileSize(file.size)})</span>
@@ -723,7 +747,17 @@ const QuestionnaireModal = ({ isOpen, onClose, type = 'clinical' }) => {
                     }}
                   />
                   <div style={{ textAlign: 'center', padding: 'var(--space-20)' }}>
-                    <div style={{ fontSize: '2rem', marginBottom: 'var(--space-8)' }}>📎</div>
+                    <svg
+                      width="32"
+                      height="32"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="#005EB8"
+                      strokeWidth="2"
+                      style={{ marginBottom: 'var(--space-8)' }}
+                    >
+                      <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48" />
+                    </svg>
                     <p style={{ margin: 0, fontWeight: 'var(--font-weight-medium)' }}>
                       Click to upload or drag and drop
                     </p>
@@ -738,7 +772,21 @@ const QuestionnaireModal = ({ isOpen, onClose, type = 'clinical' }) => {
                   <div className="questionnaire-uploaded-files">
                     {Object.entries(questionnaireUploads).map(([name, file]) => (
                       <div key={name} className="uploaded-file-item">
-                        <span style={{ fontSize: '20px', marginRight: 'var(--space-8)' }}>📄</span>
+                        <span style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          width: '32px',
+                          height: '32px',
+                          background: '#eff6ff',
+                          borderRadius: '6px',
+                          color: '#005EB8',
+                          fontSize: '0.75rem',
+                          fontWeight: '600',
+                          marginRight: 'var(--space-8)'
+                        }}>
+                          {file.type?.includes('pdf') ? 'PDF' : 'FILE'}
+                        </span>
                         <div style={{ flex: 1 }}>
                           <span className="file-name">{file.name}</span>
                           <span className="file-size"> ({formatFileSize(file.size)})</span>

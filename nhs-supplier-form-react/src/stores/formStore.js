@@ -340,6 +340,32 @@ const useFormStore = create(
 
       // ----- Reset & Clear Actions -----
       resetForm: () => {
+        console.log('=== RESETTING FORM ===');
+
+        // Clear form data from localStorage
+        localStorage.removeItem('formData');
+        localStorage.removeItem('formUploads');
+        localStorage.removeItem('questionnaireSubmission');
+        localStorage.removeItem('currentSubmission');
+
+        // Also clear any submission-related items
+        const keysToRemove = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && (
+            key.startsWith('submission-') ||
+            key.startsWith('submission_') ||
+            key.includes('questionnaire') ||
+            key.includes('upload')
+          )) {
+            keysToRemove.push(key);
+          }
+        }
+        keysToRemove.forEach(key => localStorage.removeItem(key));
+
+        console.log('Cleared localStorage keys:', keysToRemove);
+
+        // Reset store state
         set({
           currentSection: 1,
           completedSections: new Set(),
@@ -368,6 +394,14 @@ const useFormStore = create(
           lastSaved: null,
           submissionId: null,
           submissionStatus: null,
+        });
+      },
+
+      // Clear uploads specifically
+      clearUploads: () => {
+        localStorage.removeItem('formUploads');
+        set({
+          uploadedFiles: {}
         });
       },
 

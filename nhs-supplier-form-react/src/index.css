@@ -854,7 +854,8 @@ textarea + .field-error,
 .notice-box--info {
   background: #eff6ff;
   border: 1px solid #bfdbfe;
-  color: var(--color-info-text);
+  border-left: 1px solid #bfdbfe;
+  color: #1e40af;
 }
 
 .notice-box--success {

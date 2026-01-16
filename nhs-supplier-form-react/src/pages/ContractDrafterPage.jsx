@@ -193,7 +193,18 @@ const ContractDrafterPage = () => {
           <label htmlFor="contract-upload" className="upload-label">
             {contractFile ? (
               <div className="file-selected">
-                <span className="file-icon">📄</span>
+                <span className="file-icon" style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '32px',
+                  height: '32px',
+                  background: '#eff6ff',
+                  borderRadius: '6px',
+                  color: '#005EB8',
+                  fontSize: '0.75rem',
+                  fontWeight: '600'
+                }}>PDF</span>
                 <div className="file-info">
                   <span className="file-name">{contractFile.name}</span>
                   <span className="file-size">({(contractFile.size / 1024).toFixed(1)} KB)</span>

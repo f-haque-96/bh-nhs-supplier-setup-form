@@ -308,7 +308,7 @@ const ProcurementReviewPage = () => {
                   disabled={loading}
                   style={{ fontSize: 'var(--font-size-sm)' }}
                 >
-                  {loading ? '⏳ Generating...' : '📄 Download Supplier Form PDF'}
+                  {loading ? 'Generating...' : 'Download Supplier Form PDF'}
                 </Button>
               )}
             </PDFDownloadLink>
@@ -444,7 +444,18 @@ const ProcurementReviewPage = () => {
                 borderRadius: 'var(--radius-base)',
                 marginBottom: 'var(--space-8)',
               }}>
-                <span style={{ fontSize: '24px' }}>📄</span>
+                <span style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '32px',
+                  height: '32px',
+                  background: '#eff6ff',
+                  borderRadius: '6px',
+                  color: '#005EB8',
+                  fontSize: '0.75rem',
+                  fontWeight: '600'
+                }}>PDF</span>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontWeight: 'var(--font-weight-semibold)' }}>
                     {labels[fieldName] || fieldName}

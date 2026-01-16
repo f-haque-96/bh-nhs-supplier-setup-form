@@ -458,7 +458,7 @@ const APControlReviewPage = () => {
                   disabled={loading}
                   style={{ fontSize: 'var(--font-size-base)', padding: '12px 24px' }}
                 >
-                  {loading ? '⏳ Generating PDF...' : '📄 Download Complete Supplier Form with All Authorisations'}
+                  {loading ? 'Generating PDF...' : 'Download Complete Supplier Form with All Authorisations'}
                 </Button>
               )}
             </PDFDownloadLink>
@@ -495,7 +495,7 @@ const APControlReviewPage = () => {
       <div className="ap-download-section">
         <div className="download-card">
           <div className="download-info">
-            <h4>📄 Complete Supplier Form with All Authorisations</h4>
+            <h4>Complete Supplier Form with All Authorisations</h4>
             <p>Download the full supplier form PDF including all authorisation signatures from PBP, Procurement, OPW Panel (if applicable), and AP Control.</p>
           </div>
           <PDFDownloadLink
@@ -858,7 +858,7 @@ const APControlReviewPage = () => {
                       onClick={() => handlePreviewDocument(submission.opwReview.contract)}
                       style={{ fontSize: 'var(--font-size-sm)' }}
                     >
-                      📄 Preview Contract
+                      Preview Contract
                     </Button>
                   </div>
                 )}
@@ -926,8 +926,11 @@ const APControlReviewPage = () => {
 
       {/* Uploaded Documents Section */}
       <div className="section-card" style={{ marginTop: 'var(--space-32)' }}>
-        <h3 style={{ margin: '0 0 var(--space-8) 0', color: 'var(--nhs-blue)' }}>
-          📎 Uploaded Documents
+        <h3 style={{ margin: '0 0 var(--space-8) 0', color: 'var(--nhs-blue)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#005EB8" strokeWidth="2">
+            <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48" />
+          </svg>
+          Uploaded Documents
         </h3>
         <p className="section-description" style={{ color: 'var(--color-text-secondary)', marginBottom: 'var(--space-16)' }}>
           All documents uploaded during the submission process:
@@ -937,7 +940,18 @@ const APControlReviewPage = () => {
           {/* Letterhead with Bank Details */}
           {(submission?.uploads?.letterhead || submission?.uploadedFiles?.letterhead) && (
             <div className="document-card">
-              <div className="document-icon">📄</div>
+              <div className="document-icon" style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '40px',
+                height: '40px',
+                background: '#eff6ff',
+                borderRadius: '8px',
+                color: '#005EB8',
+                fontSize: '0.85rem',
+                fontWeight: '600'
+              }}>PDF</div>
               <div className="document-info">
                 <h4>Letterhead with Bank Details</h4>
                 <p className="file-name">
@@ -963,7 +977,18 @@ const APControlReviewPage = () => {
           {/* Procurement Approval Document */}
           {(submission?.uploads?.procurementApproval || submission?.uploadedFiles?.procurementApproval) && (
             <div className="document-card">
-              <div className="document-icon">📄</div>
+              <div className="document-icon" style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '40px',
+                height: '40px',
+                background: '#eff6ff',
+                borderRadius: '8px',
+                color: '#005EB8',
+                fontSize: '0.85rem',
+                fontWeight: '600'
+              }}>PDF</div>
               <div className="document-info">
                 <h4>Procurement Approval Document</h4>
                 <p className="file-name">
@@ -989,7 +1014,18 @@ const APControlReviewPage = () => {
           {/* CEST Form */}
           {(submission?.uploads?.cestForm || submission?.uploadedFiles?.cestForm) && (
             <div className="document-card">
-              <div className="document-icon">📄</div>
+              <div className="document-icon" style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '40px',
+                height: '40px',
+                background: '#eff6ff',
+                borderRadius: '8px',
+                color: '#005EB8',
+                fontSize: '0.85rem',
+                fontWeight: '600'
+              }}>PDF</div>
               <div className="document-info">
                 <h4>CEST Form</h4>
                 <p className="file-name">
@@ -1015,7 +1051,18 @@ const APControlReviewPage = () => {
           {/* Contract Agreement */}
           {(submission?.contractDrafter?.contract || submission?.uploads?.contract) && (
             <div className="document-card">
-              <div className="document-icon">📄</div>
+              <div className="document-icon" style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '40px',
+                height: '40px',
+                background: '#eff6ff',
+                borderRadius: '8px',
+                color: '#005EB8',
+                fontSize: '0.85rem',
+                fontWeight: '600'
+              }}>PDF</div>
               <div className="document-info">
                 <h4>Contract Agreement</h4>
                 <p className="file-name">
