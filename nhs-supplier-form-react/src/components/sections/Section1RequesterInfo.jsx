@@ -145,7 +145,7 @@ const Section1RequesterInfo = () => {
               placeholder="firstname.lastname@nhs.net"
             />
             <div className="info-box">
-              <span className="info-icon">ℹ</span>
+              <span className="info-icon">ℹ️</span>
               <span>This must be your official NHS email address (ending in @nhs.net)</span>
             </div>
           </div>
