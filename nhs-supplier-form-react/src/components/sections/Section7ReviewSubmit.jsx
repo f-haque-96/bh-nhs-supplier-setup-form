@@ -11,21 +11,25 @@ import { Checkbox, Button, NoticeBox, QuestionLabel } from '../common';
 import { FormNavigation } from '../layout';
 import { section7Schema } from '../../utils/validation';
 import { formatDate, formatCurrency } from '../../utils/helpers';
+import { formatFieldValue, formatSupplierType, formatServiceCategory, formatUsageFrequency } from '../../utils/formatters';
 import useFormStore from '../../stores/formStore';
 import useFormNavigation from '../../hooks/useFormNavigation';
 import UploadedDocuments from '../review/UploadedDocuments';
 import SupplierFormPDF from '../pdf/SupplierFormPDF';
 
-const ReviewItem = ({ label, value, badge }) => {
-  if (!value) return null;
+const ReviewItem = ({ label, value, badge, raw = false }) => {
+  if (!value && value !== 0) return null;
+
+  // Format the value unless raw is true (for pre-formatted values)
+  const displayValue = raw ? value : formatFieldValue(value);
 
   return (
     <div style={{ display: 'flex', marginBottom: 'var(--space-8)' }}>
       <div style={{ fontWeight: 'var(--font-weight-medium)', minWidth: '200px', color: 'var(--color-text-secondary)' }}>
         {label}:
       </div>
-      <div style={{ color: 'var(--color-text)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-        {value}
+      <div style={{ color: 'var(--color-text)', display: 'flex', alignItems: 'center', gap: '8px', paddingLeft: '16px' }}>
+        {displayValue}
         {badge}
       </div>
     </div>
@@ -438,11 +442,11 @@ const Section7ReviewSubmit = () => {
           </div>
         )}
         {/* Q2.2 - Q2.7 */}
-        <ReviewItem label="Service Category" value={formData.serviceCategory} />
+        <ReviewItem label="Service Category" value={formatServiceCategory(formData.serviceCategory)} raw />
         <ReviewItem label="Letterhead Available" value={formData.letterheadAvailable} />
         <ReviewItem label="Procurement Engaged" value={formData.procurementEngaged} />
         <ReviewItem label="Sole Trader" value={formData.soleTraderStatus} />
-        <ReviewItem label="Usage Frequency" value={formData.usageFrequency} />
+        <ReviewItem label="Usage Frequency" value={formatUsageFrequency(formData.usageFrequency)} raw />
         <div style={{ marginTop: 'var(--space-12)', padding: 'var(--space-12)', backgroundColor: 'var(--color-background)', borderRadius: 'var(--radius-base)' }}>
           <strong>Justification:</strong>
           <p style={{ margin: 'var(--space-8) 0 0 0' }}>{formData.justification}</p>
@@ -452,7 +456,7 @@ const Section7ReviewSubmit = () => {
       {/* Section 3: Supplier Classification */}
       <ReviewCard title="Supplier Classification" sectionNumber={3}>
         <ReviewItem label="Companies House Registered" value={formData.companiesHouseRegistered} />
-        <ReviewItem label="Supplier Type" value={formData.supplierType?.replace(/_/g, ' ')} />
+        <ReviewItem label="Supplier Type" value={formatSupplierType(formData.supplierType)} raw />
 
         {/* CRN - Only show if applicable (not for sole traders, individuals) */}
         {formData.crn && !['sole_trader', 'individual'].includes(formData.supplierType) && (
