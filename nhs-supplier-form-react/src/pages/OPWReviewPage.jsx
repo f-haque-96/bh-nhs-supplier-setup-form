@@ -416,7 +416,18 @@ const OPWReviewPage = () => {
               </div>
             </div>
           )}
-                  </div>
+          {/* Download PDF button - always available */}
+          <PDFDownloadLink
+            document={<SupplierFormPDF submission={submission} />}
+            fileName={`NHS-Supplier-Form-${submission?.formData?.companyName?.replace(/\s+/g, '_') || 'Supplier'}-${new Date().toISOString().split('T')[0]}.pdf`}
+          >
+            {({ loading }) => (
+              <Button variant="outline" disabled={loading}>
+                {loading ? 'Generating...' : '📄 Download PDF'}
+              </Button>
+            )}
+          </PDFDownloadLink>
+        </div>
       </div>
 
       {/* Warning if not sole trader */}
