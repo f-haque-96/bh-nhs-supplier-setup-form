@@ -108,28 +108,39 @@ const Section2PreScreening = () => {
   // Q2.1 Supplier Connection is now FIRST and always unlocked
   const isBlockedByLetterhead = letterheadAvailable === 'no';
 
+  // Check if connection details are required but not filled
+  const connectionDetailsRequired = supplierConnection === 'yes';
+  const connectionDetailsMissing = connectionDetailsRequired && (!formData.connectionDetails || formData.connectionDetails.trim() === '');
+
   const questionStatus = {
     q1_supplierConnection: {
       locked: false,
       reason: ''
     },
     q2_serviceCategory: {
-      locked: !supplierConnection,
-      reason: 'Please answer the supplier connection question first'
+      locked: !supplierConnection || connectionDetailsMissing,
+      reason: connectionDetailsMissing
+        ? 'Please describe your connection to this supplier first'
+        : 'Please answer the supplier connection question first'
     },
     q3_letterhead: {
-      locked: !supplierConnection || !serviceCategory,
+      locked: !supplierConnection || connectionDetailsMissing || !serviceCategory,
       reason: !supplierConnection
         ? 'Please answer the supplier connection question first'
+        : connectionDetailsMissing
+        ? 'Please describe your connection to this supplier first'
         : 'Please select the service category first'
     },
     q4_procurement: {
       locked: !supplierConnection ||
+              connectionDetailsMissing ||
               isBlockedByLetterhead ||
               !letterheadAvailable ||
               (letterheadAvailable === 'yes' && !uploadedFiles.letterhead),
       reason: !supplierConnection
         ? 'Please answer the supplier connection question first'
+        : connectionDetailsMissing
+        ? 'Please describe your connection to this supplier first'
         : isBlockedByLetterhead
         ? 'You must select "Yes" and upload a letterhead to proceed'
         : letterheadAvailable === 'yes' && !uploadedFiles.letterhead
@@ -138,12 +149,15 @@ const Section2PreScreening = () => {
     },
     q5_soleTrader: {
       locked: !supplierConnection ||
+              connectionDetailsMissing ||
               isBlockedByLetterhead ||
               !procurementEngaged ||
               (procurementEngaged === 'yes' && !uploadedFiles.procurementApproval) ||
               (procurementEngaged === 'no' && !prescreeningProgress.procurementApproved),
       reason: !supplierConnection
         ? 'Please answer the supplier connection question first'
+        : connectionDetailsMissing
+        ? 'Please describe your connection to this supplier first'
         : isBlockedByLetterhead
         ? 'You must select "Yes" and upload a letterhead to proceed'
         : procurementEngaged === 'yes' && !uploadedFiles.procurementApproval
@@ -154,11 +168,14 @@ const Section2PreScreening = () => {
     },
     q6_justification: {
       locked: !supplierConnection ||
+              connectionDetailsMissing ||
               isBlockedByLetterhead ||
               !soleTraderStatus ||
               (soleTraderStatus === 'yes' && !uploadedFiles.cestForm),
       reason: !supplierConnection
         ? 'Please answer the supplier connection question first'
+        : connectionDetailsMissing
+        ? 'Please describe your connection to this supplier first'
         : isBlockedByLetterhead
         ? 'You must select "Yes" and upload a letterhead to proceed'
         : soleTraderStatus === 'yes' && !uploadedFiles.cestForm
@@ -167,18 +184,23 @@ const Section2PreScreening = () => {
     },
     q7_usageFrequency: {
       locked: !supplierConnection ||
+              connectionDetailsMissing ||
               isBlockedByLetterhead ||
               !formData.justification || formData.justification.trim() === '',
       reason: !supplierConnection
         ? 'Please answer the supplier connection question first'
+        : connectionDetailsMissing
+        ? 'Please describe your connection to this supplier first'
         : isBlockedByLetterhead
         ? 'You must select "Yes" and upload a letterhead to proceed'
         : 'Please provide justification first'
     },
     q8_acknowledgement: {
-      locked: !supplierConnection || isBlockedByLetterhead || !usageFrequency,
+      locked: !supplierConnection || connectionDetailsMissing || isBlockedByLetterhead || !usageFrequency,
       reason: !supplierConnection
         ? 'Please answer the supplier connection question first'
+        : connectionDetailsMissing
+        ? 'Please describe your connection to this supplier first'
         : isBlockedByLetterhead
         ? 'You must select "Yes" and upload a letterhead to proceed'
         : 'Please select usage frequency first'
@@ -204,6 +226,15 @@ const Section2PreScreening = () => {
   );
 
   const onSubmit = (data) => {
+    // Validate connection details if supplier connection is 'yes'
+    if (data.supplierConnection === 'yes') {
+      const connectionDetails = formData.connectionDetails?.trim();
+      if (!connectionDetails) {
+        alert('Please describe your connection to this supplier before proceeding.');
+        return;
+      }
+    }
+
     // Validate required files
     const requiredFiles = [];
 
