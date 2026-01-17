@@ -540,7 +540,7 @@ const APControlReviewPage = () => {
         <ReviewItem label="City" value={formData.city?.toUpperCase()} />
         <ReviewItem label="Postcode" value={formData.postcode?.toUpperCase()} />
         <ReviewItem label="Contact Name" value={formData.contactName?.toUpperCase()} />
-        <ReviewItem label="Contact Email" value={formData.contactEmail} highlight />
+        <ReviewItem label="Contact Email" value={formData.contactEmail} highlight raw />
         <ReviewItem label="Contact Phone" value={formData.contactPhone} />
         {formData.website && <ReviewItem label="Website" value={formData.website} />}
       </ReviewCard>
@@ -596,7 +596,7 @@ const APControlReviewPage = () => {
           <ReviewItem label="City" value={formData.accountsCity} />
           <ReviewItem label="Postcode" value={formData.accountsPostcode} />
           <ReviewItem label="Phone" value={formData.accountsPhone} />
-          <ReviewItem label="Email" value={formData.accountsEmail} />
+          <ReviewItem label="Email" value={formData.accountsEmail} raw />
         </ReviewCard>
       )}
 

@@ -518,7 +518,7 @@ const SupplierFormPDF = ({ formData, uploadedFiles, submissionId, submissionDate
         <Field label="Last Name" value={normalizedData.section1?.lastName || normalizedData.lastName} />
         <Field label="Job Title" value={normalizedData.section1?.jobTitle || normalizedData.jobTitle} />
         <Field label="Department" value={normalizedData.section1?.department || normalizedData.department} />
-        <Field label="NHS Email" value={normalizedData.section1?.nhsEmail || normalizedData.nhsEmail} />
+        <Field label="NHS Email" value={normalizedData.section1?.nhsEmail || normalizedData.nhsEmail} raw />
         <Field label="Phone Number" value={normalizedData.section1?.phoneNumber || normalizedData.phoneNumber} />
 
         {/* SECTION 2: Pre-screening */}
@@ -589,7 +589,7 @@ const SupplierFormPDF = ({ formData, uploadedFiles, submissionId, submissionDate
         <Field label="City" value={normalizedData.section4?.city || normalizedData.city} />
         <Field label="Postcode" value={normalizedData.section4?.postcode || normalizedData.postcode} />
         <Field label="Contact Name" value={normalizedData.section4?.contactName || normalizedData.contactName} />
-        <Field label="Contact Email" value={normalizedData.section4?.contactEmail || normalizedData.contactEmail} />
+        <Field label="Contact Email" value={normalizedData.section4?.contactEmail || normalizedData.contactEmail} raw />
         <Field label="Contact Phone" value={normalizedData.section4?.contactPhone || normalizedData.contactPhone} />
         <Field label="Website" value={normalizedData.section4?.website || normalizedData.website} />
 
@@ -620,7 +620,7 @@ const SupplierFormPDF = ({ formData, uploadedFiles, submissionId, submissionDate
             <Field label="Accounts City" value={normalizedData.section6?.accountsCity || normalizedData.accountsCity} />
             <Field label="Accounts Postcode" value={normalizedData.section6?.accountsPostcode || normalizedData.accountsPostcode} />
             <Field label="Accounts Phone" value={normalizedData.section6?.accountsPhone || normalizedData.accountsPhone} />
-            <Field label="Accounts Email" value={normalizedData.section6?.accountsEmail || normalizedData.accountsEmail} />
+            <Field label="Accounts Email" value={normalizedData.section6?.accountsEmail || normalizedData.accountsEmail} raw />
           </>
         )}
         <Field label="GHX/DUNS Known" value={normalizedData.section6?.ghxDunsKnown || normalizedData.ghxDunsKnown} />

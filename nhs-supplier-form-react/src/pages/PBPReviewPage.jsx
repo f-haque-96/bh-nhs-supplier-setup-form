@@ -595,7 +595,7 @@ const PBPReviewPage = () => {
         />
         <ReviewField label="Job Title" value={formData.jobTitle} />
         <ReviewField label="Department" value={formData.department} />
-        <ReviewField label="NHS Email" value={formData.nhsEmail} />
+        <ReviewField label="NHS Email" value={formData.nhsEmail} raw />
         <ReviewField label="Phone Number" value={formData.phoneNumber} />
       </ReviewSection>
 

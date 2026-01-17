@@ -320,7 +320,7 @@ const ProcurementReviewPage = () => {
         <ReviewItem label="Name" value={`${formData.firstName || ''} ${formData.lastName || ''}`} />
         <ReviewItem label="Job Title" value={formData.jobTitle} />
         <ReviewItem label="Department" value={formData.department} />
-        <ReviewItem label="NHS Email" value={formData.nhsEmail} />
+        <ReviewItem label="NHS Email" value={formData.nhsEmail} raw />
         <ReviewItem label="Phone" value={formData.phoneNumber} />
       </ReviewCard>
 
@@ -371,7 +371,7 @@ const ProcurementReviewPage = () => {
         <ReviewItem label="City" value={formData.city} />
         <ReviewItem label="Postcode" value={formData.postcode} />
         <ReviewItem label="Contact Name" value={formData.contactName} />
-        <ReviewItem label="Contact Email" value={formData.contactEmail} />
+        <ReviewItem label="Contact Email" value={formData.contactEmail} raw />
         <ReviewItem label="Contact Phone" value={formData.contactPhone} />
         {formData.website && <ReviewItem label="Website" value={formData.website} />}
       </ReviewCard>

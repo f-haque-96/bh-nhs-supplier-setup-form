@@ -416,7 +416,7 @@ const OPWReviewPage = () => {
       <ReviewCard title="Requester Information">
         <ReviewItem label="Name" value={`${formData.firstName || ''} ${formData.lastName || ''}`} />
         <ReviewItem label="Department" value={formData.department} />
-        <ReviewItem label="NHS Email" value={formData.nhsEmail} />
+        <ReviewItem label="NHS Email" value={formData.nhsEmail} raw />
       </ReviewCard>
 
       {/* Conflict of Interest Warning */}
@@ -479,7 +479,7 @@ const OPWReviewPage = () => {
       <ReviewCard title="Supplier Details">
         <ReviewItem label="Company/Individual Name" value={formData.companyName} />
         <ReviewItem label="Contact Name" value={formData.contactName} />
-        <ReviewItem label="Contact Email" value={formData.contactEmail} />
+        <ReviewItem label="Contact Email" value={formData.contactEmail} raw />
         <ReviewItem label="Contact Phone" value={formData.contactPhone} />
       </ReviewCard>
 
