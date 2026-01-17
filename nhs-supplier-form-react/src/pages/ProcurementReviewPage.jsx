@@ -258,6 +258,32 @@ const ProcurementReviewPage = () => {
     );
   }
 
+  // Check if PBP has rejected the submission - block access if so
+  const pbpRejected = submission.pbpReview?.decision === 'rejected';
+  if (pbpRejected) {
+    return (
+      <div style={{ padding: 'var(--space-32)', maxWidth: '800px', margin: '0 auto' }}>
+        <NoticeBox type="error">
+          <h3 style={{ marginTop: 0 }}>⛔ Submission Rejected by PBP</h3>
+          <p>This submission was rejected at the PBP Review stage and cannot proceed to Procurement Review.</p>
+          <div style={{
+            marginTop: 'var(--space-16)',
+            padding: 'var(--space-16)',
+            backgroundColor: 'rgba(0,0,0,0.05)',
+            borderRadius: 'var(--radius-base)'
+          }}>
+            <p style={{ margin: '0 0 var(--space-8) 0' }}><strong>Rejected by:</strong> {submission.pbpReview?.signature || 'PBP Reviewer'}</p>
+            <p style={{ margin: '0 0 var(--space-8) 0' }}><strong>Date:</strong> {submission.pbpReview?.date ? formatDate(submission.pbpReview.date) : 'Not recorded'}</p>
+            <p style={{ margin: 0 }}><strong>Reason:</strong> {submission.pbpReview?.comments || 'No reason provided'}</p>
+          </div>
+          <p style={{ marginTop: 'var(--space-16)', marginBottom: 0, fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)' }}>
+            The requester has been notified of this rejection and must address the issues before resubmitting.
+          </p>
+        </NoticeBox>
+      </div>
+    );
+  }
+
   const formData = submission.formData;
   const isPreview = submission.isPreview === true;
   const procurementReview = submission.procurementReview;

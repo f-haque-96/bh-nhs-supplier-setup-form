@@ -394,6 +394,37 @@ const APControlReviewPage = () => {
     );
   }
 
+  // Check if any previous stage has rejected the submission - block access if so
+  const pbpRejected = submission.pbpReview?.decision === 'rejected';
+  const procurementRejected = submission.procurementReview?.decision === 'rejected';
+
+  if (pbpRejected || procurementRejected) {
+    const rejectedBy = pbpRejected ? 'PBP' : 'Procurement';
+    const rejectionData = pbpRejected ? submission.pbpReview : submission.procurementReview;
+
+    return (
+      <div style={{ padding: 'var(--space-32)', maxWidth: '800px', margin: '0 auto' }}>
+        <NoticeBox type="error">
+          <h3 style={{ marginTop: 0 }}>⛔ Submission Rejected by {rejectedBy}</h3>
+          <p>This submission was rejected at the {rejectedBy} Review stage and cannot proceed to AP Control Verification.</p>
+          <div style={{
+            marginTop: 'var(--space-16)',
+            padding: 'var(--space-16)',
+            backgroundColor: 'rgba(0,0,0,0.05)',
+            borderRadius: 'var(--radius-base)'
+          }}>
+            <p style={{ margin: '0 0 var(--space-8) 0' }}><strong>Rejected by:</strong> {rejectionData?.signature || rejectionData?.reviewedBy || `${rejectedBy} Reviewer`}</p>
+            <p style={{ margin: '0 0 var(--space-8) 0' }}><strong>Date:</strong> {rejectionData?.date ? formatDate(rejectionData.date) : 'Not recorded'}</p>
+            <p style={{ margin: 0 }}><strong>Reason:</strong> {rejectionData?.comments || 'No reason provided'}</p>
+          </div>
+          <p style={{ marginTop: 'var(--space-16)', marginBottom: 0, fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)' }}>
+            The requester has been notified of this rejection and must address the issues before resubmitting.
+          </p>
+        </NoticeBox>
+      </div>
+    );
+  }
+
   const formData = submission.formData;
   const isPreview = submission.isPreview === true;
   const apReview = submission.apReview;
