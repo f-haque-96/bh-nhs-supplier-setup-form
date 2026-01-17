@@ -1111,13 +1111,28 @@ const APControlReviewPage = () => {
             </div>
           )}
 
-          {/* Passport/ID - Sensitive Document */}
-          {(submission?.uploads?.passportPhoto || submission?.uploadedFiles?.passportPhoto) && (
+          {/* Identity Document - Check for all ID types (Passport or Driving Licence) */}
+          {(submission?.uploads?.passportPhoto ||
+            submission?.uploadedFiles?.passportPhoto ||
+            submission?.uploads?.drivingLicence ||
+            submission?.uploadedFiles?.drivingLicence ||
+            submission?.uploads?.drivingLicenceFront ||
+            submission?.uploadedFiles?.drivingLicenceFront ||
+            submission?.uploads?.licenceFront ||
+            submission?.uploadedFiles?.licenceFront ||
+            submission?.uploads?.identityDocument ||
+            submission?.uploadedFiles?.identityDocument ||
+            submission?.formData?.section3?.idType) && (
             <div className="document-card document-sensitive">
               <div className="document-icon">🔒</div>
               <div className="document-info">
                 <h4>Identity Document</h4>
-                <p className="file-name">Passport/Driving Licence</p>
+                <p className="file-name">
+                  {submission?.formData?.section3?.idType === 'driving_licence' ||
+                   submission?.formData?.idType === 'driving_licence'
+                    ? 'Driving Licence'
+                    : 'Passport'}
+                </p>
                 <p className="upload-date sensitive-note">
                   ⚠️ Sensitive document - View restricted
                 </p>

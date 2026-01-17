@@ -69,17 +69,31 @@ const Textarea = ({
         {...props}
       />
 
-      {(showCharCount || maxLength) && (
-        <div className={clsx('char-counter', getCharCountClass())}>
-          {charCount}{maxLength ? ` / ${maxLength}` : ''} characters
-        </div>
-      )}
-
-      {error && (
-        <span id={`${name}-error`} className="error-message" role="alert">
-          {error}
+      {/* Error and character count on SAME ROW */}
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginTop: '4px'
+      }}>
+        <span
+          id={`${name}-error`}
+          className="error-message"
+          role="alert"
+          style={{
+            color: '#dc2626',
+            fontSize: '0.85rem',
+            visibility: error ? 'visible' : 'hidden'
+          }}
+        >
+          {error || 'Placeholder'}
         </span>
-      )}
+        {(showCharCount || maxLength) && (
+          <span className={clsx('char-counter', getCharCountClass())} style={{ color: '#6b7280', fontSize: '0.85rem' }}>
+            {charCount}{maxLength ? ` / ${maxLength}` : ''} characters
+          </span>
+        )}
+      </div>
     </div>
   );
 };

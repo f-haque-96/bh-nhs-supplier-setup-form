@@ -461,6 +461,49 @@ const OPWReviewPage = () => {
         <ReviewItem label="NHS Email" value={formData.nhsEmail} raw />
       </ReviewCard>
 
+      {/* Section 2: Pre-Screening */}
+      <ReviewCard title="Section 2: Pre-Screening">
+        <ReviewItem label="Supplier Connection" value={formData.supplierConnection} />
+        {formData.supplierConnection === 'yes' && formData.connectionDetails && (
+          <div style={{
+            marginTop: 'var(--space-8)',
+            padding: 'var(--space-12)',
+            backgroundColor: '#fef3c7',
+            borderRadius: 'var(--radius-base)',
+            border: '1px solid #f59e0b'
+          }}>
+            <strong style={{ color: '#b45309' }}>Connection Details:</strong>
+            <p style={{ margin: 'var(--space-4) 0 0 0', color: '#92400e' }}>{formData.connectionDetails}</p>
+          </div>
+        )}
+        <ReviewItem label="Letterhead Available" value={formData.letterheadAvailable} />
+        <ReviewItem label="Service Category" value={formatServiceCategory(formData.serviceCategory)} raw />
+        <ReviewItem label="Procurement Engaged" value={formData.procurementEngaged} />
+        <ReviewItem label="Usage Frequency" value={formatUsageFrequency(formData.usageFrequency)} raw />
+        <ReviewItem label="Estimated Value" value={formData.estimatedValue} />
+        {formData.justification && (
+          <div style={{ marginTop: 'var(--space-8)', padding: 'var(--space-12)', backgroundColor: 'var(--color-background)', borderRadius: 'var(--radius-base)' }}>
+            <strong>Justification:</strong>
+            <p style={{ margin: 'var(--space-4) 0 0 0' }}>{formData.justification}</p>
+          </div>
+        )}
+      </ReviewCard>
+
+      {/* Section 3: Supplier Classification */}
+      <ReviewCard title="Section 3: Supplier Classification">
+        <ReviewItem label="Companies House Registered" value={formData.companiesHouseRegistered} />
+        {formData.companiesHouseRegistered === 'yes' && formData.crn && (
+          <ReviewItem label="Company Registration Number" value={formData.crn} />
+        )}
+        <ReviewItem label="Supplier Type" value={formData.supplierType} />
+        {(formData.supplierType === 'sole_trader' || formData.supplierType === 'individual') && (
+          <>
+            <ReviewItem label="ID Type" value={formData.idType === 'driving_licence' ? 'Driving Licence' : 'Passport'} raw />
+            <ReviewItem label="ID Uploaded" value={formData.idUploaded ? 'Yes' : 'No'} raw />
+          </>
+        )}
+      </ReviewCard>
+
       {/* Conflict of Interest Warning */}
       {formData.supplierConnection === 'yes' && formData.connectionDetails && (
         <div style={{

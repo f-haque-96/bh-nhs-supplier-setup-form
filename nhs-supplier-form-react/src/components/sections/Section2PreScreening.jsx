@@ -42,9 +42,9 @@ const Section2PreScreening = () => {
       serviceCategory: formData.serviceCategory || '',
       procurementEngaged: formData.procurementEngaged || '',
       letterheadAvailable: formData.letterheadAvailable || '',
-      soleTraderStatus: formData.soleTraderStatus || '',
       justification: formData.justification || '',
       usageFrequency: formData.usageFrequency || '',
+      estimatedValue: formData.estimatedValue || '',
       supplierConnection: formData.supplierConnection || '',
       prescreeningAcknowledgement: formData.prescreeningAcknowledgement || false,
     },
@@ -54,8 +54,9 @@ const Section2PreScreening = () => {
   const serviceCategory = watch('serviceCategory');
   const procurementEngaged = watch('procurementEngaged');
   const letterheadAvailable = watch('letterheadAvailable');
-  const soleTraderStatus = watch('soleTraderStatus');
+  const justification = watch('justification');
   const usageFrequency = watch('usageFrequency');
+  const estimatedValue = watch('estimatedValue');
   const supplierConnection = watch('supplierConnection');
 
   // Update prescreening progress when serviceCategory is answered
@@ -105,28 +106,37 @@ const Section2PreScreening = () => {
   }, [prescreeningProgress.questionnaireId, prescreeningProgress.procurementApproved, updatePrescreeningProgress]);
 
   // Determine which questions should be active/locked (strict one-by-one)
-  // Q2.1 Supplier Connection is now FIRST and always unlocked
+  // NEW ORDER: Q2.1 Supplier Connection, Q2.2 Letterhead, Q2.3 Justification, Q2.4 Usage Frequency,
+  // Q2.5 Estimated Value, Q2.6 Procurement, Q2.7 Clinical/Non-clinical (LAST)
+
   const isBlockedByLetterhead = letterheadAvailable === 'no';
 
   // Check if connection details are required but not filled
   const connectionDetailsRequired = supplierConnection === 'yes';
   const connectionDetailsMissing = connectionDetailsRequired && (!formData.connectionDetails || formData.connectionDetails.trim() === '');
 
+  // Check if justification meets minimum 10 character requirement
+  const justificationText = formData.justification?.trim() || '';
+  const isJustificationValid = justificationText.length >= 10;
+
   // Check if blocked by procurement - if "No" is selected, block all subsequent questions
   const isBlockedByProcurement = procurementEngaged === 'no';
 
   const questionStatus = {
+    // Q2.1 - Supplier Connection (always unlocked, first question)
     q1_supplierConnection: {
       locked: false,
       reason: ''
     },
+    // Q2.2 - Letterhead with Bank Details
     q2_letterhead: {
       locked: !supplierConnection || connectionDetailsMissing,
       reason: connectionDetailsMissing
         ? 'Please describe your connection to this supplier first'
         : 'Please answer the supplier connection question first'
     },
-    q3_serviceCategory: {
+    // Q2.3 - Justification (moved from Q6)
+    q3_justification: {
       locked: !supplierConnection || connectionDetailsMissing || isBlockedByLetterhead || !letterheadAvailable || (letterheadAvailable === 'yes' && !uploadedFiles.letterhead),
       reason: !supplierConnection
         ? 'Please answer the supplier connection question first'
@@ -138,12 +148,85 @@ const Section2PreScreening = () => {
         ? 'Please upload the letterhead document'
         : 'Answer the letterhead question first'
     },
-    q4_procurement: {
+    // Q2.4 - Usage Frequency (moved from Q7)
+    q4_usageFrequency: {
       locked: !supplierConnection ||
               connectionDetailsMissing ||
               isBlockedByLetterhead ||
               !letterheadAvailable ||
               (letterheadAvailable === 'yes' && !uploadedFiles.letterhead) ||
+              !isJustificationValid,
+      reason: !supplierConnection
+        ? 'Please answer the supplier connection question first'
+        : connectionDetailsMissing
+        ? 'Please describe your connection to this supplier first'
+        : isBlockedByLetterhead
+        ? 'You must select "Yes" and upload a letterhead to proceed'
+        : letterheadAvailable === 'yes' && !uploadedFiles.letterhead
+        ? 'Please upload the letterhead document'
+        : !isJustificationValid
+        ? 'Please provide justification (minimum 10 characters)'
+        : 'Answer the letterhead question first'
+    },
+    // Q2.5 - Estimated Annual Value (NEW)
+    q5_estimatedValue: {
+      locked: !supplierConnection ||
+              connectionDetailsMissing ||
+              isBlockedByLetterhead ||
+              !letterheadAvailable ||
+              (letterheadAvailable === 'yes' && !uploadedFiles.letterhead) ||
+              !isJustificationValid ||
+              !usageFrequency,
+      reason: !supplierConnection
+        ? 'Please answer the supplier connection question first'
+        : connectionDetailsMissing
+        ? 'Please describe your connection to this supplier first'
+        : isBlockedByLetterhead
+        ? 'You must select "Yes" and upload a letterhead to proceed'
+        : letterheadAvailable === 'yes' && !uploadedFiles.letterhead
+        ? 'Please upload the letterhead document'
+        : !isJustificationValid
+        ? 'Please provide justification (minimum 10 characters)'
+        : !usageFrequency
+        ? 'Please select usage frequency first'
+        : 'Please select usage frequency first'
+    },
+    // Q2.6 - Clinical/Non-clinical
+    q6_serviceCategory: {
+      locked: !supplierConnection ||
+              connectionDetailsMissing ||
+              isBlockedByLetterhead ||
+              !letterheadAvailable ||
+              (letterheadAvailable === 'yes' && !uploadedFiles.letterhead) ||
+              !isJustificationValid ||
+              !usageFrequency ||
+              !estimatedValue,
+      reason: !supplierConnection
+        ? 'Please answer the supplier connection question first'
+        : connectionDetailsMissing
+        ? 'Please describe your connection to this supplier first'
+        : isBlockedByLetterhead
+        ? 'You must select "Yes" and upload a letterhead to proceed'
+        : letterheadAvailable === 'yes' && !uploadedFiles.letterhead
+        ? 'Please upload the letterhead document'
+        : !isJustificationValid
+        ? 'Please provide justification (minimum 10 characters)'
+        : !usageFrequency
+        ? 'Please select usage frequency first'
+        : !estimatedValue
+        ? 'Please select estimated annual value first'
+        : 'Please complete all previous questions'
+    },
+    // Q2.7 - Procurement Engagement (LAST question)
+    q7_procurement: {
+      locked: !supplierConnection ||
+              connectionDetailsMissing ||
+              isBlockedByLetterhead ||
+              !letterheadAvailable ||
+              (letterheadAvailable === 'yes' && !uploadedFiles.letterhead) ||
+              !isJustificationValid ||
+              !usageFrequency ||
+              !estimatedValue ||
               !serviceCategory,
       reason: !supplierConnection
         ? 'Please answer the supplier connection question first'
@@ -153,17 +236,19 @@ const Section2PreScreening = () => {
         ? 'You must select "Yes" and upload a letterhead to proceed'
         : letterheadAvailable === 'yes' && !uploadedFiles.letterhead
         ? 'Please upload the letterhead document'
+        : !isJustificationValid
+        ? 'Please provide justification (minimum 10 characters)'
+        : !usageFrequency
+        ? 'Please select usage frequency first'
+        : !estimatedValue
+        ? 'Please select estimated annual value first'
         : !serviceCategory
-        ? 'Please select the service category first'
-        : 'Answer the letterhead question first'
+        ? 'Please select service category first'
+        : 'Please complete all previous questions'
     },
-    q5_soleTrader: {
-      locked: !supplierConnection ||
-              connectionDetailsMissing ||
-              isBlockedByLetterhead ||
-              isBlockedByProcurement ||
-              !procurementEngaged ||
-              (procurementEngaged === 'yes' && !uploadedFiles.procurementApproval),
+    // Q2.8 - Acknowledgement (stays at end)
+    q8_acknowledgement: {
+      locked: !supplierConnection || connectionDetailsMissing || isBlockedByLetterhead || isBlockedByProcurement || !procurementEngaged || (procurementEngaged === 'yes' && !uploadedFiles.procurementApproval),
       reason: !supplierConnection
         ? 'Please answer the supplier connection question first'
         : connectionDetailsMissing
@@ -174,54 +259,7 @@ const Section2PreScreening = () => {
         ? 'You must engage with Procurement before proceeding. Please select "Yes" and upload the approval document.'
         : procurementEngaged === 'yes' && !uploadedFiles.procurementApproval
         ? 'Please upload the procurement approval document'
-        : 'Answer the procurement question first'
-    },
-    q6_justification: {
-      locked: !supplierConnection ||
-              connectionDetailsMissing ||
-              isBlockedByLetterhead ||
-              isBlockedByProcurement ||
-              !soleTraderStatus ||
-              (soleTraderStatus === 'yes' && !uploadedFiles.cestForm),
-      reason: !supplierConnection
-        ? 'Please answer the supplier connection question first'
-        : connectionDetailsMissing
-        ? 'Please describe your connection to this supplier first'
-        : isBlockedByLetterhead
-        ? 'You must select "Yes" and upload a letterhead to proceed'
-        : isBlockedByProcurement
-        ? 'You must engage with Procurement before proceeding. Please select "Yes" and upload the approval document.'
-        : soleTraderStatus === 'yes' && !uploadedFiles.cestForm
-        ? 'Please upload CEST form'
-        : 'Answer the sole trader question first'
-    },
-    q7_usageFrequency: {
-      locked: !supplierConnection ||
-              connectionDetailsMissing ||
-              isBlockedByLetterhead ||
-              isBlockedByProcurement ||
-              !formData.justification || formData.justification.trim() === '',
-      reason: !supplierConnection
-        ? 'Please answer the supplier connection question first'
-        : connectionDetailsMissing
-        ? 'Please describe your connection to this supplier first'
-        : isBlockedByLetterhead
-        ? 'You must select "Yes" and upload a letterhead to proceed'
-        : isBlockedByProcurement
-        ? 'You must engage with Procurement before proceeding. Please select "Yes" and upload the approval document.'
-        : 'Please provide justification first'
-    },
-    q8_acknowledgement: {
-      locked: !supplierConnection || connectionDetailsMissing || isBlockedByLetterhead || isBlockedByProcurement || !usageFrequency,
-      reason: !supplierConnection
-        ? 'Please answer the supplier connection question first'
-        : connectionDetailsMissing
-        ? 'Please describe your connection to this supplier first'
-        : isBlockedByLetterhead
-        ? 'You must select "Yes" and upload a letterhead to proceed'
-        : isBlockedByProcurement
-        ? 'You must engage with Procurement before proceeding. Please select "Yes" and upload the approval document.'
-        : 'Please select usage frequency first'
+        : 'Please complete all previous questions'
     }
   };
 
@@ -253,6 +291,13 @@ const Section2PreScreening = () => {
       }
     }
 
+    // Validate justification minimum 10 characters
+    const justificationValue = formData.justification?.trim() || '';
+    if (justificationValue.length < 10) {
+      alert('Please provide justification with at least 10 characters.');
+      return;
+    }
+
     // Block submission if procurement engagement is 'no'
     if (data.procurementEngaged === 'no') {
       alert('You must engage with the Procurement team before proceeding. Please select "Yes" and upload the procurement approval document.');
@@ -267,9 +312,6 @@ const Section2PreScreening = () => {
     }
     if (data.letterheadAvailable === 'yes' && !uploadedFiles.letterhead) {
       requiredFiles.push('Letterhead Document');
-    }
-    if (data.soleTraderStatus === 'yes') {
-      if (!uploadedFiles.cestForm) requiredFiles.push('CEST Form');
     }
 
     if (requiredFiles.length > 0) {
@@ -451,16 +493,122 @@ const Section2PreScreening = () => {
           )}
         </div>
 
-        {/* QUESTION 3: Service Category */}
-        <div className={getQuestionClass(questionStatus.q3_serviceCategory.locked)}>
-          {questionStatus.q3_serviceCategory.locked && <LockOverlay reason={questionStatus.q3_serviceCategory.reason} />}
+        {/* QUESTION 3: Justification (moved from Q6) */}
+        <div className={getQuestionClass(questionStatus.q3_justification.locked)}>
+          {questionStatus.q3_justification.locked && <LockOverlay reason={questionStatus.q3_justification.reason} />}
+
+          <Controller
+            name="justification"
+            control={control}
+            render={({ field }) => (
+              <Textarea
+                label={<QuestionLabel section="2" question="3">Why do you need this supplier?</QuestionLabel>}
+                name="justification"
+                value={field.value}
+                onChange={(e) => {
+                  field.onChange(e);
+                  handleFieldChange('justification', e.target.value);
+                }}
+                onBlur={field.onBlur}
+                error={!isJustificationValid && justificationText.length > 0 ? 'Please provide more detail (minimum 10 characters)' : errors.justification?.message}
+                required
+                maxLength={350}
+                showCharCount
+                rows={5}
+                placeholder="Explain why this supplier is needed and what service they will provide..."
+                minCharWarning={10}
+              />
+            )}
+          />
+        </div>
+
+        {/* QUESTION 4: Usage Frequency (moved from Q7) */}
+        <div className={getQuestionClass(questionStatus.q4_usageFrequency.locked)}>
+          {questionStatus.q4_usageFrequency.locked && <LockOverlay reason={questionStatus.q4_usageFrequency.reason} />}
+
+          <Controller
+            name="usageFrequency"
+            control={control}
+            render={({ field }) => (
+              <RadioGroup
+                label={<QuestionLabel section="2" question="4">How often will you use this supplier?</QuestionLabel>}
+                name="usageFrequency"
+                options={[
+                  {
+                    value: 'one-off',
+                    label: 'One-off',
+                    tooltip: 'Select this if you only need to use this supplier once'
+                  },
+                  {
+                    value: 'occasional',
+                    label: 'Occasional',
+                    tooltip: 'Select this if you plan to use this supplier a few times'
+                  },
+                  {
+                    value: 'regular',
+                    label: 'Regular',
+                    tooltip: 'Select this if you plan to use this supplier regularly'
+                  },
+                ]}
+                value={field.value}
+                onChange={(value) => {
+                  field.onChange(value);
+                  handleFieldChange('usageFrequency', value);
+                }}
+                error={errors.usageFrequency?.message}
+                required
+                horizontal
+              />
+            )}
+          />
+
+          {usageFrequency === 'one-off' && !questionStatus.q4_usageFrequency.locked && (
+            <NoticeBox type="info">
+              For one-off purchases, you may be able to use a purchase card instead of setting up a new supplier.
+              Please check with your Procurement team.
+            </NoticeBox>
+          )}
+        </div>
+
+        {/* QUESTION 5: Estimated Annual Value (NEW) */}
+        <div className={getQuestionClass(questionStatus.q5_estimatedValue.locked)}>
+          {questionStatus.q5_estimatedValue.locked && <LockOverlay reason={questionStatus.q5_estimatedValue.reason} />}
+
+          <Controller
+            name="estimatedValue"
+            control={control}
+            render={({ field }) => (
+              <RadioGroup
+                label={<QuestionLabel section="2" question="5">What is the estimated annual value?</QuestionLabel>}
+                name="estimatedValue"
+                options={[
+                  { value: 'under_5000', label: 'Under £5,000' },
+                  { value: '5000_25000', label: '£5,000 - £25,000' },
+                  { value: '25000_50000', label: '£25,000 - £50,000' },
+                  { value: 'over_50000', label: 'Over £50,000' },
+                ]}
+                value={field.value}
+                onChange={(value) => {
+                  field.onChange(value);
+                  handleFieldChange('estimatedValue', value);
+                }}
+                error={errors.estimatedValue?.message}
+                required
+              />
+            )}
+          />
+        </div>
+
+        {/* QUESTION 6: Clinical/Non-clinical */}
+        <div className={getQuestionClass(questionStatus.q6_serviceCategory.locked)}>
+          {questionStatus.q6_serviceCategory.locked && <LockOverlay reason={questionStatus.q6_serviceCategory.reason} />}
 
           <Controller
             name="serviceCategory"
             control={control}
             render={({ field }) => (
               <RadioGroup
-                label={<QuestionLabel section="2" question="3">Is this service Clinical or Non-clinical?</QuestionLabel>}
+                label={<QuestionLabel section="2" question="6">Is this service Clinical or Non-clinical?</QuestionLabel>}
                 name="serviceCategory"
                 options={[
                   { value: 'clinical', label: 'Clinical' },
@@ -479,16 +627,16 @@ const Section2PreScreening = () => {
           />
         </div>
 
-        {/* QUESTION 4: Procurement Engagement (was Q2.2) */}
-        <div className={getQuestionClass(questionStatus.q4_procurement.locked)}>
-          {questionStatus.q4_procurement.locked && <LockOverlay reason={questionStatus.q4_procurement.reason} />}
+        {/* QUESTION 7: Procurement Engagement (LAST question) */}
+        <div className={getQuestionClass(questionStatus.q7_procurement.locked)}>
+          {questionStatus.q7_procurement.locked && <LockOverlay reason={questionStatus.q7_procurement.reason} />}
 
           <Controller
             name="procurementEngaged"
             control={control}
             render={({ field }) => (
               <RadioGroup
-                label={<QuestionLabel section="2" question="4">Have you engaged with the Procurement team?</QuestionLabel>}
+                label={<QuestionLabel section="2" question="7">Have you engaged with the Procurement team?</QuestionLabel>}
                 name="procurementEngaged"
                 options={[
                   { value: 'yes', label: 'Yes' },
@@ -506,35 +654,14 @@ const Section2PreScreening = () => {
             )}
           />
 
-          {procurementEngaged === 'no' && !questionStatus.q4_procurement.locked && (
-            <>
-              {prescreeningProgress.questionnaireSubmitted ? (
-                <div className="questionnaire-submitted-notice">
-                  <div className="notice-icon">✓</div>
-                  <div className="notice-content">
-                    <h4>Questionnaire Submitted Successfully</h4>
-                    <p>
-                      Please check your email for a response from a Procurement Business Partner.
-                      This typically takes 3-5 business days.
-                    </p>
-                    <p className="notice-ref">
-                      Reference: {prescreeningProgress.questionnaireId}
-                    </p>
-                  </div>
-                </div>
-              ) : (
-                <NoticeBox type="info">
-                  <strong>Procurement Questionnaire Required</strong>
-                  <p>You need to complete a questionnaire to proceed. Click the button below to get started.</p>
-                  <Button variant="primary" onClick={handleOpenQuestionnaire} style={{ marginTop: 'var(--space-12)' }}>
-                    Complete {serviceCategory === 'clinical' ? 'Clinical' : 'Non-Clinical'} Questionnaire
-                  </Button>
-                </NoticeBox>
-              )}
-            </>
+          {procurementEngaged === 'no' && !questionStatus.q7_procurement.locked && (
+            <div className="blocking-warning">
+              <span className="warning-icon">⚠</span>
+              <p>You must engage with the Procurement team before proceeding. Please select "Yes" and upload the approval document.</p>
+            </div>
           )}
 
-          {procurementEngaged === 'yes' && !questionStatus.q4_procurement.locked && (
+          {procurementEngaged === 'yes' && !questionStatus.q7_procurement.locked && (
             <FileUpload
               label="Upload Procurement Approval Document"
               name="procurementApproval"
@@ -547,131 +674,6 @@ const Section2PreScreening = () => {
               onRemove={() => removeUploadedFile('procurementApproval')}
               required
             />
-          )}
-        </div>
-
-        {/* QUESTION 5: Sole Trader Status (was Q2.4) */}
-        <div className={getQuestionClass(questionStatus.q5_soleTrader.locked)}>
-          {questionStatus.q5_soleTrader.locked && <LockOverlay reason={questionStatus.q5_soleTrader.reason} />}
-
-          <Controller
-            name="soleTraderStatus"
-            control={control}
-            render={({ field }) => (
-              <RadioGroup
-                label={<QuestionLabel section="2" question="5" tooltip="A sole trader is an individual who runs their own business as a self-employed person. If the supplier operates as a limited company, charity, or other entity type, select 'No'.">Is this supplier a Sole Trader?</QuestionLabel>}
-                name="soleTraderStatus"
-                options={[
-                  { value: 'yes', label: 'Yes' },
-                  { value: 'no', label: 'No' },
-                ]}
-                value={field.value}
-                onChange={(value) => {
-                  field.onChange(value);
-                  handleFieldChange('soleTraderStatus', value);
-                }}
-                error={errors.soleTraderStatus?.message}
-                required
-                horizontal
-              />
-            )}
-          />
-
-          {soleTraderStatus === 'yes' && !questionStatus.q5_soleTrader.locked && (
-            <>
-              <NoticeBox type="info">
-                <strong>Sole Trader Requirements:</strong> For sole traders, we require a completed CEST form to determine IR35 status.
-              </NoticeBox>
-
-              <FileUpload
-                label="Upload CEST Form"
-                name="cestForm"
-                acceptedTypes={['application/pdf']}
-                acceptedExtensions={['.pdf']}
-                maxSize={FILE_UPLOAD_CONFIG.maxSize}
-                errorMessage="Only PDF files are accepted"
-                currentFile={uploadedFiles.cestForm}
-                onUpload={(file) => setUploadedFile('cestForm', file)}
-                onRemove={() => removeUploadedFile('cestForm')}
-                required
-              />
-            </>
-          )}
-        </div>
-
-        {/* QUESTION 6: Justification (was Q2.5) */}
-        <div className={getQuestionClass(questionStatus.q6_justification.locked)}>
-          {questionStatus.q6_justification.locked && <LockOverlay reason={questionStatus.q6_justification.reason} />}
-
-          <Controller
-            name="justification"
-            control={control}
-            render={({ field }) => (
-              <Textarea
-                label={<QuestionLabel section="2" question="6">Please provide justification for this supplier setup</QuestionLabel>}
-                name="justification"
-                value={field.value}
-                onChange={(e) => {
-                  field.onChange(e);
-                  handleFieldChange('justification', e.target.value);
-                }}
-                onBlur={field.onBlur}
-                error={errors.justification?.message}
-                required
-                maxLength={350}
-                showCharCount
-                rows={5}
-                placeholder="Explain why this supplier is needed and what service they will provide..."
-              />
-            )}
-          />
-        </div>
-
-        {/* QUESTION 7: Usage Frequency (was Q2.6) */}
-        <div className={getQuestionClass(questionStatus.q7_usageFrequency.locked)}>
-          {questionStatus.q7_usageFrequency.locked && <LockOverlay reason={questionStatus.q7_usageFrequency.reason} />}
-
-          <Controller
-            name="usageFrequency"
-            control={control}
-            render={({ field }) => (
-              <RadioGroup
-                label={<QuestionLabel section="2" question="7">How frequently will this supplier be used?</QuestionLabel>}
-                name="usageFrequency"
-                options={[
-                  {
-                    value: 'one-off',
-                    label: 'One-off',
-                    tooltip: 'Select this if you only need to use this supplier once'
-                  },
-                  {
-                    value: 'occasional',
-                    label: 'Occasional',
-                    tooltip: 'Select this if you plan to use this supplier a few times'
-                  },
-                  {
-                    value: 'frequent',
-                    label: 'Frequent',
-                    tooltip: 'Select this if you plan to use this supplier regularly'
-                  },
-                ]}
-                value={field.value}
-                onChange={(value) => {
-                  field.onChange(value);
-                  handleFieldChange('usageFrequency', value);
-                }}
-                error={errors.usageFrequency?.message}
-                required
-                horizontal
-              />
-            )}
-          />
-
-          {usageFrequency === 'one-off' && !questionStatus.q7_usageFrequency.locked && (
-            <NoticeBox type="info">
-              For one-off purchases, you may be able to use a purchase card instead of setting up a new supplier.
-              Please check with your Procurement team.
-            </NoticeBox>
           )}
         </div>
 

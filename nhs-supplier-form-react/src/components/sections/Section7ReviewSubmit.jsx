@@ -427,8 +427,8 @@ const Section7ReviewSubmit = () => {
 
       {/* Section 2: Pre-screening */}
       <ReviewCard title="Pre-screening" sectionNumber={2}>
-        {/* Q2.1 Supplier Connection - NOW FIRST */}
-        <ReviewItem label="Supplier Connection" value={formData.supplierConnection} />
+        {/* Q2.1 Supplier Connection */}
+        <ReviewItem label="2.1 Supplier Connection" value={formData.supplierConnection} />
         {formData.supplierConnection === 'yes' && formData.connectionDetails && (
           <div style={{
             marginTop: 'var(--space-12)',
@@ -441,16 +441,21 @@ const Section7ReviewSubmit = () => {
             <p style={{ margin: 'var(--space-8) 0 0 0', color: '#92400e' }}>{formData.connectionDetails}</p>
           </div>
         )}
-        {/* Q2.2 - Q2.7 */}
-        <ReviewItem label="Service Category" value={formatServiceCategory(formData.serviceCategory)} raw />
-        <ReviewItem label="Letterhead Available" value={formData.letterheadAvailable} />
-        <ReviewItem label="Procurement Engaged" value={formData.procurementEngaged} />
-        <ReviewItem label="Sole Trader" value={formData.soleTraderStatus} />
-        <ReviewItem label="Usage Frequency" value={formatUsageFrequency(formData.usageFrequency)} raw />
+        {/* Q2.2 Letterhead */}
+        <ReviewItem label="2.2 Letterhead Available" value={formData.letterheadAvailable} />
+        {/* Q2.3 Justification */}
         <div style={{ marginTop: 'var(--space-12)', padding: 'var(--space-12)', backgroundColor: 'var(--color-background)', borderRadius: 'var(--radius-base)' }}>
-          <strong>Justification:</strong>
+          <strong>2.3 Justification:</strong>
           <p style={{ margin: 'var(--space-8) 0 0 0' }}>{formData.justification}</p>
         </div>
+        {/* Q2.4 Usage Frequency */}
+        <ReviewItem label="2.4 Usage Frequency" value={formatUsageFrequency(formData.usageFrequency)} raw />
+        {/* Q2.5 Estimated Value */}
+        <ReviewItem label="2.5 Estimated Value" value={formData.estimatedValue} />
+        {/* Q2.6 Service Category */}
+        <ReviewItem label="2.6 Service Category" value={formatServiceCategory(formData.serviceCategory)} raw />
+        {/* Q2.7 Procurement Engaged */}
+        <ReviewItem label="2.7 Procurement Engaged" value={formData.procurementEngaged} />
       </ReviewCard>
 
       {/* Section 3: Supplier Classification */}

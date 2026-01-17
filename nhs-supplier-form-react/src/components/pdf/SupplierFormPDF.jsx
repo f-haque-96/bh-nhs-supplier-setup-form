@@ -523,8 +523,8 @@ const SupplierFormPDF = ({ formData, uploadedFiles, submissionId, submissionDate
 
         {/* SECTION 2: Pre-screening */}
         <Text style={styles.sectionHeader}>Section 2: Pre-screening & Authorisation</Text>
-        {/* Q2.1 Supplier Connection - NOW FIRST */}
-        <Field label="Supplier Connection" value={normalizedData.section2?.supplierConnection || normalizedData.supplierConnection} />
+        {/* Q2.1 Supplier Connection */}
+        <Field label="2.1 Supplier Connection" value={normalizedData.section2?.supplierConnection || normalizedData.supplierConnection} />
         {/* Connection Details - Show if supplier has a connection */}
         {(normalizedData.section2?.supplierConnection === 'yes' || normalizedData.supplierConnection === 'yes') &&
          (normalizedData.section2?.connectionDetails || normalizedData.connectionDetails) && (
@@ -533,13 +533,18 @@ const SupplierFormPDF = ({ formData, uploadedFiles, submissionId, submissionDate
             <Text style={{ fontSize: 10, color: '#92400e', lineHeight: 1.4 }}>{normalizedData.section2?.connectionDetails || normalizedData.connectionDetails}</Text>
           </View>
         )}
-        {/* Q2.2 - Q2.7 */}
-        <Field label="Service Category" value={formatServiceCategory(normalizedData.section2?.serviceCategory || normalizedData.serviceCategory)} raw />
-        <Field label="Letterhead Available" value={normalizedData.section2?.letterheadAvailable || normalizedData.letterheadAvailable} />
-        <Field label="Procurement Engaged" value={normalizedData.section2?.procurementEngaged || normalizedData.procurementEngaged} />
-        <Field label="Sole Trader Status" value={normalizedData.section2?.soleTraderStatus || normalizedData.soleTraderStatus} />
-        <TextBlock label="Justification" content={normalizedData.section2?.justification || normalizedData.justification} />
-        <Field label="Usage Frequency" value={formatUsageFrequency(normalizedData.section2?.usageFrequency || normalizedData.usageFrequency)} raw />
+        {/* Q2.2 Letterhead */}
+        <Field label="2.2 Letterhead Available" value={normalizedData.section2?.letterheadAvailable || normalizedData.letterheadAvailable} />
+        {/* Q2.3 Justification */}
+        <TextBlock label="2.3 Justification" content={normalizedData.section2?.justification || normalizedData.justification} />
+        {/* Q2.4 Usage Frequency */}
+        <Field label="2.4 Usage Frequency" value={formatUsageFrequency(normalizedData.section2?.usageFrequency || normalizedData.usageFrequency)} raw />
+        {/* Q2.5 Estimated Value */}
+        <Field label="2.5 Estimated Value" value={normalizedData.section2?.estimatedValue || normalizedData.estimatedValue} />
+        {/* Q2.6 Service Category */}
+        <Field label="2.6 Service Category" value={formatServiceCategory(normalizedData.section2?.serviceCategory || normalizedData.serviceCategory)} raw />
+        {/* Q2.7 Procurement Engaged */}
+        <Field label="2.7 Procurement Engaged" value={normalizedData.section2?.procurementEngaged || normalizedData.procurementEngaged} />
         <Field label="Section 2 Acknowledgement" value={(normalizedData.section2?.prescreeningAcknowledgement || normalizedData.prescreeningAcknowledgement) ? 'Confirmed' : 'Not confirmed'} raw />
 
         {/* SECTION 3: Supplier Classification */}
