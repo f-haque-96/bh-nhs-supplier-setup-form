@@ -112,6 +112,9 @@ const Section2PreScreening = () => {
   const connectionDetailsRequired = supplierConnection === 'yes';
   const connectionDetailsMissing = connectionDetailsRequired && (!formData.connectionDetails || formData.connectionDetails.trim() === '');
 
+  // Check if blocked by procurement - if "No" is selected, block all subsequent questions
+  const isBlockedByProcurement = procurementEngaged === 'no';
+
   const questionStatus = {
     q1_supplierConnection: {
       locked: false,
@@ -151,25 +154,26 @@ const Section2PreScreening = () => {
       locked: !supplierConnection ||
               connectionDetailsMissing ||
               isBlockedByLetterhead ||
+              isBlockedByProcurement ||
               !procurementEngaged ||
-              (procurementEngaged === 'yes' && !uploadedFiles.procurementApproval) ||
-              (procurementEngaged === 'no' && !prescreeningProgress.procurementApproved),
+              (procurementEngaged === 'yes' && !uploadedFiles.procurementApproval),
       reason: !supplierConnection
         ? 'Please answer the supplier connection question first'
         : connectionDetailsMissing
         ? 'Please describe your connection to this supplier first'
         : isBlockedByLetterhead
         ? 'You must select "Yes" and upload a letterhead to proceed'
+        : isBlockedByProcurement
+        ? 'You must engage with Procurement before proceeding. Please select "Yes" and upload the approval document.'
         : procurementEngaged === 'yes' && !uploadedFiles.procurementApproval
         ? 'Please upload the procurement approval document'
-        : procurementEngaged === 'no' && !prescreeningProgress.procurementApproved
-        ? 'Questionnaire must be approved by PBP to unlock'
         : 'Answer the procurement question first'
     },
     q6_justification: {
       locked: !supplierConnection ||
               connectionDetailsMissing ||
               isBlockedByLetterhead ||
+              isBlockedByProcurement ||
               !soleTraderStatus ||
               (soleTraderStatus === 'yes' && !uploadedFiles.cestForm),
       reason: !supplierConnection
@@ -178,6 +182,8 @@ const Section2PreScreening = () => {
         ? 'Please describe your connection to this supplier first'
         : isBlockedByLetterhead
         ? 'You must select "Yes" and upload a letterhead to proceed'
+        : isBlockedByProcurement
+        ? 'You must engage with Procurement before proceeding. Please select "Yes" and upload the approval document.'
         : soleTraderStatus === 'yes' && !uploadedFiles.cestForm
         ? 'Please upload CEST form'
         : 'Answer the sole trader question first'
@@ -186,6 +192,7 @@ const Section2PreScreening = () => {
       locked: !supplierConnection ||
               connectionDetailsMissing ||
               isBlockedByLetterhead ||
+              isBlockedByProcurement ||
               !formData.justification || formData.justification.trim() === '',
       reason: !supplierConnection
         ? 'Please answer the supplier connection question first'
@@ -193,16 +200,20 @@ const Section2PreScreening = () => {
         ? 'Please describe your connection to this supplier first'
         : isBlockedByLetterhead
         ? 'You must select "Yes" and upload a letterhead to proceed'
+        : isBlockedByProcurement
+        ? 'You must engage with Procurement before proceeding. Please select "Yes" and upload the approval document.'
         : 'Please provide justification first'
     },
     q8_acknowledgement: {
-      locked: !supplierConnection || connectionDetailsMissing || isBlockedByLetterhead || !usageFrequency,
+      locked: !supplierConnection || connectionDetailsMissing || isBlockedByLetterhead || isBlockedByProcurement || !usageFrequency,
       reason: !supplierConnection
         ? 'Please answer the supplier connection question first'
         : connectionDetailsMissing
         ? 'Please describe your connection to this supplier first'
         : isBlockedByLetterhead
         ? 'You must select "Yes" and upload a letterhead to proceed'
+        : isBlockedByProcurement
+        ? 'You must engage with Procurement before proceeding. Please select "Yes" and upload the approval document.'
         : 'Please select usage frequency first'
     }
   };
@@ -233,6 +244,12 @@ const Section2PreScreening = () => {
         alert('Please describe your connection to this supplier before proceeding.');
         return;
       }
+    }
+
+    // Block submission if procurement engagement is 'no'
+    if (data.procurementEngaged === 'no') {
+      alert('You must engage with the Procurement team before proceeding. Please select "Yes" and upload the procurement approval document.');
+      return;
     }
 
     // Validate required files
