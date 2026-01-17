@@ -18,9 +18,9 @@ const HelpButton = () => {
     },
     {
       label: 'FAQ & Guidance',
-      url: 'https://servicedeskbartshealth.alembacloud.com/production/Portal.aspx?Form=Dashboard&DATABASE=Production&JAVA_FLAG=1&PORTAL=procurement&HTML_TYPE=LITE',
+      url: '/help/faq',
       icon: '❓',
-      external: true,
+      external: false,
     },
   ];
 
