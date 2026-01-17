@@ -99,3 +99,13 @@ export const formatUsageFrequency = (value) => {
   const lower = value.toLowerCase();
   return mappings[lower] || capitalizeWords(value);
 };
+
+/**
+ * Format service types array for display
+ * Takes an array of service types and capitalises each one
+ * e.g., ["goods", "services", "consultancy"] → "Goods, Services, Consultancy"
+ */
+export const formatServiceTypes = (types) => {
+  if (!types || !Array.isArray(types) || types.length === 0) return 'Not specified';
+  return types.map(type => capitalizeFirst(type)).join(', ');
+};

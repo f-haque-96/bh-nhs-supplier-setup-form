@@ -8,7 +8,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { PDFDownloadLink } from '@react-pdf/renderer';
 import { Button, NoticeBox, ApprovalStamp, Textarea, SignatureSection } from '../components/common';
 import { formatDate, formatCurrency } from '../utils/helpers';
-import { formatYesNo, formatFieldValue, capitalizeWords, formatSupplierType, formatServiceCategory, formatUsageFrequency } from '../utils/formatters';
+import { formatYesNo, formatFieldValue, capitalizeWords, formatSupplierType, formatServiceCategory, formatUsageFrequency, formatServiceTypes } from '../utils/formatters';
 import SupplierFormPDF from '../components/pdf/SupplierFormPDF';
 
 const ReviewItem = ({ label, value, raw = false }) => {
@@ -378,7 +378,7 @@ const ProcurementReviewPage = () => {
 
       {/* Section 5: Service Description */}
       <ReviewCard title="Section 5: Service Description">
-        <ReviewItem label="Service Types" value={formData.serviceType?.join(', ')} />
+        <ReviewItem label="Service Types" value={formatServiceTypes(formData.serviceType)} raw />
         {formData.serviceDescription && (
           <div style={{ marginTop: 'var(--space-12)', padding: 'var(--space-12)', backgroundColor: 'var(--color-background)', borderRadius: 'var(--radius-base)' }}>
             <strong>Service Description:</strong>

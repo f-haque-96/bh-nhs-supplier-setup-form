@@ -8,7 +8,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { PDFDownloadLink } from '@react-pdf/renderer';
 import { Button, NoticeBox, Checkbox, Textarea, SignatureSection, Input } from '../components/common';
 import { formatDate, formatCurrency } from '../utils/helpers';
-import { formatYesNo, formatFieldValue, capitalizeWords, formatSupplierType, formatServiceCategory, formatUsageFrequency } from '../utils/formatters';
+import { formatYesNo, formatFieldValue, capitalizeWords, formatSupplierType, formatServiceCategory, formatUsageFrequency, formatServiceTypes } from '../utils/formatters';
 import SupplierFormPDF from '../components/pdf/SupplierFormPDF';
 
 const ReviewItem = ({ label, value, highlight, raw = false }) => {
@@ -640,7 +640,7 @@ const APControlReviewPage = () => {
       <ReviewCard title="Financial Context">
         <ReviewItem label="Annual Value" value={formData.annualValue ? formatCurrency(formData.annualValue) : ''} />
         <ReviewItem label="Employee Count" value={formData.employeeCount} />
-        <ReviewItem label="Service Types" value={formData.serviceType?.join(', ')} />
+        <ReviewItem label="Service Types" value={formatServiceTypes(formData.serviceType)} raw />
       </ReviewCard>
 
       {/* Previous Authorisations Section */}

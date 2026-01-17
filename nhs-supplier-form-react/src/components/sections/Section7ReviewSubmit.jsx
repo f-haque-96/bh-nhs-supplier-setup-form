@@ -11,7 +11,7 @@ import { Checkbox, Button, NoticeBox, QuestionLabel } from '../common';
 import { FormNavigation } from '../layout';
 import { section7Schema } from '../../utils/validation';
 import { formatDate, formatCurrency } from '../../utils/helpers';
-import { formatFieldValue, formatSupplierType, formatServiceCategory, formatUsageFrequency } from '../../utils/formatters';
+import { formatFieldValue, formatSupplierType, formatServiceCategory, formatUsageFrequency, formatServiceTypes } from '../../utils/formatters';
 import useFormStore from '../../stores/formStore';
 import useFormNavigation from '../../hooks/useFormNavigation';
 import UploadedDocuments from '../review/UploadedDocuments';
@@ -496,7 +496,7 @@ const Section7ReviewSubmit = () => {
 
       {/* Section 5: Service Description */}
       <ReviewCard title="Service Description" sectionNumber={5}>
-        <ReviewItem label="Service Types" value={formData.serviceType?.join(', ')} />
+        <ReviewItem label="Service Types" value={formatServiceTypes(formData.serviceType)} raw />
         <div style={{ marginTop: 'var(--space-12)', padding: 'var(--space-12)', backgroundColor: 'var(--color-background)', borderRadius: 'var(--radius-base)' }}>
           <strong>Service Description:</strong>
           <p style={{ margin: 'var(--space-8) 0 0 0' }}>{formData.serviceDescription}</p>

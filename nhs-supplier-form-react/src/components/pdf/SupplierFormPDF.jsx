@@ -14,7 +14,7 @@ import {
   Font,
 } from '@react-pdf/renderer';
 import { formatDate, formatCurrency } from '../../utils/helpers';
-import { formatYesNo, formatFieldValue, capitalizeWords, formatSupplierType, formatServiceCategory, formatUsageFrequency } from '../../utils/formatters';
+import { formatYesNo, formatFieldValue, capitalizeWords, formatSupplierType, formatServiceCategory, formatUsageFrequency, formatServiceTypes } from '../../utils/formatters';
 
 // Register fonts (optional - can use default fonts)
 // Font.register({
@@ -595,7 +595,7 @@ const SupplierFormPDF = ({ formData, uploadedFiles, submissionId, submissionDate
 
         {/* SECTION 5: Service Description */}
         <Text style={styles.sectionHeader}>Section 5: Service Description</Text>
-        <Field label="Service Types" value={(normalizedData.section5?.serviceType || normalizedData.serviceType)?.join(', ')} />
+        <Field label="Service Types" value={formatServiceTypes(normalizedData.section5?.serviceType || normalizedData.serviceType)} raw />
         <TextBlock label="Service Description" content={normalizedData.section5?.serviceDescription || normalizedData.serviceDescription} />
 
         {/* SECTION 6: Financial Information */}
