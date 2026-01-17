@@ -120,26 +120,14 @@ const Section2PreScreening = () => {
       locked: false,
       reason: ''
     },
-    q2_serviceCategory: {
+    q2_letterhead: {
       locked: !supplierConnection || connectionDetailsMissing,
       reason: connectionDetailsMissing
         ? 'Please describe your connection to this supplier first'
         : 'Please answer the supplier connection question first'
     },
-    q3_letterhead: {
-      locked: !supplierConnection || connectionDetailsMissing || !serviceCategory,
-      reason: !supplierConnection
-        ? 'Please answer the supplier connection question first'
-        : connectionDetailsMissing
-        ? 'Please describe your connection to this supplier first'
-        : 'Please select the service category first'
-    },
-    q4_procurement: {
-      locked: !supplierConnection ||
-              connectionDetailsMissing ||
-              isBlockedByLetterhead ||
-              !letterheadAvailable ||
-              (letterheadAvailable === 'yes' && !uploadedFiles.letterhead),
+    q3_serviceCategory: {
+      locked: !supplierConnection || connectionDetailsMissing || isBlockedByLetterhead || !letterheadAvailable || (letterheadAvailable === 'yes' && !uploadedFiles.letterhead),
       reason: !supplierConnection
         ? 'Please answer the supplier connection question first'
         : connectionDetailsMissing
@@ -148,6 +136,25 @@ const Section2PreScreening = () => {
         ? 'You must select "Yes" and upload a letterhead to proceed'
         : letterheadAvailable === 'yes' && !uploadedFiles.letterhead
         ? 'Please upload the letterhead document'
+        : 'Answer the letterhead question first'
+    },
+    q4_procurement: {
+      locked: !supplierConnection ||
+              connectionDetailsMissing ||
+              isBlockedByLetterhead ||
+              !letterheadAvailable ||
+              (letterheadAvailable === 'yes' && !uploadedFiles.letterhead) ||
+              !serviceCategory,
+      reason: !supplierConnection
+        ? 'Please answer the supplier connection question first'
+        : connectionDetailsMissing
+        ? 'Please describe your connection to this supplier first'
+        : isBlockedByLetterhead
+        ? 'You must select "Yes" and upload a letterhead to proceed'
+        : letterheadAvailable === 'yes' && !uploadedFiles.letterhead
+        ? 'Please upload the letterhead document'
+        : !serviceCategory
+        ? 'Please select the service category first'
         : 'Answer the letterhead question first'
     },
     q5_soleTrader: {
@@ -390,44 +397,16 @@ const Section2PreScreening = () => {
           </div>
         </div>
 
-        {/* QUESTION 2: Service Category (was Q2.1) */}
-        <div className={getQuestionClass(questionStatus.q2_serviceCategory.locked)}>
-          {questionStatus.q2_serviceCategory.locked && <LockOverlay reason={questionStatus.q2_serviceCategory.reason} />}
-
-          <Controller
-            name="serviceCategory"
-            control={control}
-            render={({ field }) => (
-              <RadioGroup
-                label={<QuestionLabel section="2" question="2">Is this service Clinical or Non-clinical?</QuestionLabel>}
-                name="serviceCategory"
-                options={[
-                  { value: 'clinical', label: 'Clinical' },
-                  { value: 'non-clinical', label: 'Non-clinical' },
-                ]}
-                value={field.value}
-                onChange={(value) => {
-                  field.onChange(value);
-                  handleFieldChange('serviceCategory', value);
-                }}
-                error={errors.serviceCategory?.message}
-                required
-                horizontal
-              />
-            )}
-          />
-        </div>
-
-        {/* QUESTION 3: Letterhead with Bank Details (was Q2.3) */}
-        <div className={getQuestionClass(questionStatus.q3_letterhead.locked)}>
-          {questionStatus.q3_letterhead.locked && <LockOverlay reason={questionStatus.q3_letterhead.reason} />}
+        {/* QUESTION 2: Letterhead with Bank Details */}
+        <div className={getQuestionClass(questionStatus.q2_letterhead.locked)}>
+          {questionStatus.q2_letterhead.locked && <LockOverlay reason={questionStatus.q2_letterhead.reason} />}
 
           <Controller
             name="letterheadAvailable"
             control={control}
             render={({ field }) => (
               <RadioGroup
-                label={<QuestionLabel section="2" question="3">Do you have a letterhead with bank details from the supplier?</QuestionLabel>}
+                label={<QuestionLabel section="2" question="2">Do you have a letterhead with bank details from the supplier?</QuestionLabel>}
                 name="letterheadAvailable"
                 options={[
                   { value: 'yes', label: 'Yes' },
@@ -449,14 +428,14 @@ const Section2PreScreening = () => {
             )}
           />
 
-          {letterheadAvailable === 'no' && !questionStatus.q3_letterhead.locked && (
+          {letterheadAvailable === 'no' && !questionStatus.q2_letterhead.locked && (
             <div className="blocking-warning">
               <span className="warning-icon">⚠</span>
               <p>You must upload bank details on supplier letterhead to proceed. Please select "Yes" and upload the document.</p>
             </div>
           )}
 
-          {letterheadAvailable === 'yes' && !questionStatus.q3_letterhead.locked && (
+          {letterheadAvailable === 'yes' && !questionStatus.q2_letterhead.locked && (
             <FileUpload
               label="Upload Letterhead Document"
               name="letterhead"
@@ -470,6 +449,34 @@ const Section2PreScreening = () => {
               required
             />
           )}
+        </div>
+
+        {/* QUESTION 3: Service Category */}
+        <div className={getQuestionClass(questionStatus.q3_serviceCategory.locked)}>
+          {questionStatus.q3_serviceCategory.locked && <LockOverlay reason={questionStatus.q3_serviceCategory.reason} />}
+
+          <Controller
+            name="serviceCategory"
+            control={control}
+            render={({ field }) => (
+              <RadioGroup
+                label={<QuestionLabel section="2" question="3">Is this service Clinical or Non-clinical?</QuestionLabel>}
+                name="serviceCategory"
+                options={[
+                  { value: 'clinical', label: 'Clinical' },
+                  { value: 'non-clinical', label: 'Non-clinical' },
+                ]}
+                value={field.value}
+                onChange={(value) => {
+                  field.onChange(value);
+                  handleFieldChange('serviceCategory', value);
+                }}
+                error={errors.serviceCategory?.message}
+                required
+                horizontal
+              />
+            )}
+          />
         </div>
 
         {/* QUESTION 4: Procurement Engagement (was Q2.2) */}
