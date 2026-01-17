@@ -71,13 +71,9 @@ const HelpPage = () => {
         <section className="contact-section">
           <h2>Still need help?</h2>
           <div className="contact-cards">
-            <a href="https://alemba.bartshealth.nhs.uk" className="contact-card" target="_blank" rel="noopener noreferrer">
-              <h3>🎫 Alemba Helpdesk</h3>
+            <a href="https://servicedeskbartshealth.alembacloud.com/production/Portal.aspx?Form=Dashboard&DATABASE=Production&JAVA_FLAG=1&PORTAL=procurement&HTML_TYPE=LITE" className="contact-card" target="_blank" rel="noopener noreferrer">
+              <h3>🎫 Procurement Helpdesk</h3>
               <p>Submit a support ticket</p>
-            </a>
-            <a href="mailto:procurement@bartshealth.nhs.uk" className="contact-card">
-              <h3>✉️ Email Procurement</h3>
-              <p>procurement@bartshealth.nhs.uk</p>
             </a>
           </div>
         </section>
