@@ -21,6 +21,7 @@ const HelpButton = () => {
       url: '/help/faq',
       icon: '❓',
       external: false,
+      newTab: true,
     },
   ];
 
@@ -41,7 +42,7 @@ const HelpButton = () => {
             <a
               key={index}
               href={link.url}
-              target={link.url.startsWith('http') ? '_blank' : '_self'}
+              target={link.url.startsWith('http') || link.newTab ? '_blank' : '_self'}
               rel="noopener noreferrer"
               className="help-link"
             >
