@@ -8,17 +8,21 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { PDFDownloadLink } from '@react-pdf/renderer';
 import { Button, NoticeBox, ApprovalStamp, Textarea, SignatureSection } from '../components/common';
 import { formatDate, formatCurrency } from '../utils/helpers';
+import { formatYesNo, formatFieldValue, capitalizeWords, formatSupplierType, formatServiceCategory, formatUsageFrequency } from '../utils/formatters';
 import SupplierFormPDF from '../components/pdf/SupplierFormPDF';
 
-const ReviewItem = ({ label, value }) => {
-  if (!value) return null;
+const ReviewItem = ({ label, value, raw = false }) => {
+  if (!value && value !== 0) return null;
+
+  // Format the value unless raw is true
+  const displayValue = raw ? value : formatFieldValue(value);
 
   return (
     <div style={{ display: 'flex', marginBottom: 'var(--space-8)' }}>
       <div style={{ fontWeight: 'var(--font-weight-medium)', minWidth: '200px', color: 'var(--color-text-secondary)' }}>
         {label}:
       </div>
-      <div style={{ color: 'var(--color-text)' }}>{value}</div>
+      <div style={{ color: 'var(--color-text)', paddingLeft: '16px' }}>{displayValue}</div>
     </div>
   );
 };
@@ -322,11 +326,11 @@ const ProcurementReviewPage = () => {
 
       {/* Section 2: Pre-screening */}
       <ReviewCard title="Section 2: Pre-screening & Authorisation">
-        <ReviewItem label="Service Category" value={formData.serviceCategory} />
+        <ReviewItem label="Service Category" value={formatServiceCategory(formData.serviceCategory)} raw />
         <ReviewItem label="Procurement Engaged" value={formData.procurementEngaged} />
         <ReviewItem label="Letterhead Available" value={formData.letterheadAvailable} />
         <ReviewItem label="Sole Trader Status" value={formData.soleTraderStatus} />
-        <ReviewItem label="Usage Frequency" value={formData.usageFrequency} />
+        <ReviewItem label="Usage Frequency" value={formatUsageFrequency(formData.usageFrequency)} raw />
         <ReviewItem label="Supplier Connection" value={formData.supplierConnection} />
         {/* Conflict of Interest Warning */}
         {formData.supplierConnection === 'yes' && formData.connectionDetails && (
@@ -352,7 +356,7 @@ const ProcurementReviewPage = () => {
       {/* Section 3: Supplier Classification */}
       <ReviewCard title="Section 3: Supplier Classification">
         <ReviewItem label="Companies House Registered" value={formData.companiesHouseRegistered} />
-        <ReviewItem label="Supplier Type" value={formData.supplierType?.replace(/_/g, ' ')} />
+        <ReviewItem label="Supplier Type" value={formatSupplierType(formData.supplierType)} raw />
         {formData.crn && <ReviewItem label="CRN" value={formData.crn} />}
         {formData.charityNumber && <ReviewItem label="Charity Number" value={formData.charityNumber} />}
         <ReviewItem label="Annual Value" value={formData.annualValue ? formatCurrency(formData.annualValue) : ''} />

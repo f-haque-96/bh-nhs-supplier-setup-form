@@ -9,10 +9,14 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { PDFDownloadLink } from '@react-pdf/renderer';
 import { Button, NoticeBox, ApprovalStamp, Textarea } from '../components/common';
 import { formatDate, formatCurrency } from '../utils/helpers';
+import { formatYesNo, formatFieldValue, capitalizeWords } from '../utils/formatters';
 import PBPApprovalPDF from '../components/pdf/PBPApprovalPDF';
 
-const ReviewField = ({ label, value, isLongText = false }) => {
+const ReviewField = ({ label, value, isLongText = false, raw = false }) => {
   if (!value && value !== 0) return null;
+
+  // Format the value unless raw is true
+  const displayValue = raw ? value : formatFieldValue(value);
 
   return (
     <div style={{ marginBottom: 'var(--space-16)' }}>
@@ -34,11 +38,11 @@ const ReviewField = ({ label, value, isLongText = false }) => {
           border: '1px solid var(--color-border)',
           lineHeight: 1.6,
         }}>
-          {value}
+          {displayValue}
         </p>
       ) : (
-        <div style={{ fontSize: 'var(--font-size-base)', color: 'var(--color-text)' }}>
-          {value}
+        <div style={{ fontSize: 'var(--font-size-base)', color: 'var(--color-text)', paddingLeft: '0' }}>
+          {displayValue}
         </div>
       )}
     </div>

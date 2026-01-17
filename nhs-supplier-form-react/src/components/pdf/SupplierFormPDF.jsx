@@ -14,6 +14,7 @@ import {
   Font,
 } from '@react-pdf/renderer';
 import { formatDate, formatCurrency } from '../../utils/helpers';
+import { formatYesNo, formatFieldValue, capitalizeWords, formatSupplierType, formatServiceCategory, formatUsageFrequency } from '../../utils/formatters';
 
 // Register fonts (optional - can use default fonts)
 // Font.register({
@@ -98,6 +99,9 @@ const styles = StyleSheet.create({
   fieldRow: {
     flexDirection: 'row',
     marginBottom: 8,
+    paddingBottom: 4,
+    borderBottomWidth: 0.5,
+    borderBottomColor: '#e5e7eb',
   },
   fieldLabel: {
     width: '40%',
@@ -109,6 +113,7 @@ const styles = StyleSheet.create({
     width: '60%',
     fontSize: 10,
     color: '#212B32',
+    paddingLeft: 8,
   },
 
   // Text blocks (justification, description)
@@ -363,12 +368,14 @@ const getSectionData = (submission, formData, sectionNum) => {
 };
 
 // Field display component
-const Field = ({ label, value }) => {
-  if (!value) return null;
+const Field = ({ label, value, raw = false }) => {
+  if (!value && value !== 0) return null;
+  // Format the value unless raw is true
+  const displayValue = raw ? value : formatFieldValue(value);
   return (
     <View style={styles.fieldRow}>
       <Text style={styles.fieldLabel}>{label}:</Text>
-      <Text style={styles.fieldValue}>{value}</Text>
+      <Text style={styles.fieldValue}>{displayValue}</Text>
     </View>
   );
 };
@@ -527,18 +534,18 @@ const SupplierFormPDF = ({ formData, uploadedFiles, submissionId, submissionDate
           </View>
         )}
         {/* Q2.2 - Q2.7 */}
-        <Field label="Service Category" value={normalizedData.section2?.serviceCategory || normalizedData.serviceCategory} />
+        <Field label="Service Category" value={formatServiceCategory(normalizedData.section2?.serviceCategory || normalizedData.serviceCategory)} raw />
         <Field label="Letterhead Available" value={normalizedData.section2?.letterheadAvailable || normalizedData.letterheadAvailable} />
         <Field label="Procurement Engaged" value={normalizedData.section2?.procurementEngaged || normalizedData.procurementEngaged} />
         <Field label="Sole Trader Status" value={normalizedData.section2?.soleTraderStatus || normalizedData.soleTraderStatus} />
         <TextBlock label="Justification" content={normalizedData.section2?.justification || normalizedData.justification} />
-        <Field label="Usage Frequency" value={normalizedData.section2?.usageFrequency || normalizedData.usageFrequency} />
-        <Field label="Section 2 Acknowledgement" value={(normalizedData.section2?.prescreeningAcknowledgement || normalizedData.prescreeningAcknowledgement) ? 'Confirmed' : 'Not confirmed'} />
+        <Field label="Usage Frequency" value={formatUsageFrequency(normalizedData.section2?.usageFrequency || normalizedData.usageFrequency)} raw />
+        <Field label="Section 2 Acknowledgement" value={(normalizedData.section2?.prescreeningAcknowledgement || normalizedData.prescreeningAcknowledgement) ? 'Confirmed' : 'Not confirmed'} raw />
 
         {/* SECTION 3: Supplier Classification */}
         <Text style={styles.sectionHeader}>Section 3: Supplier Classification</Text>
         <Field label="Companies House Registered" value={normalizedData.section3?.companiesHouseRegistered || normalizedData.companiesHouseRegistered} />
-        <Field label="Supplier Type" value={(normalizedData.section3?.supplierType || normalizedData.supplierType)?.replace(/_/g, ' ')} />
+        <Field label="Supplier Type" value={formatSupplierType(normalizedData.section3?.supplierType || normalizedData.supplierType)} raw />
 
         {/* CRN - Only show if not sole trader/individual */}
         {(normalizedData.section3?.crn || normalizedData.crn) && !['sole_trader', 'individual'].includes(normalizedData.section3?.supplierType || normalizedData.supplierType) && (
@@ -693,8 +700,7 @@ const SupplierFormPDF = ({ formData, uploadedFiles, submissionId, submissionDate
       )}
 
       {/* AUTHORISATION USE ONLY - Only show if there are any authorisation decisions */}
-      {/* Note: AP Review is NOT included here since AP Control is the one downloading this PDF */}
-      {submission && (submission.pbpReview || submission.procurementReview || submission.opwReview || submission.contractDrafter) && (
+      {submission && (submission.pbpReview || submission.procurementReview || submission.opwReview || submission.contractDrafter || submission.apReview) && (
         <Page size="A4" style={styles.page}>
           <View style={styles.authorisationSection} wrap={false}>
             {/* Header with red underline */}

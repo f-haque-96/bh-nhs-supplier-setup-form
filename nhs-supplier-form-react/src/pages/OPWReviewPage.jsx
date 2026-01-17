@@ -8,17 +8,21 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { PDFDownloadLink } from '@react-pdf/renderer';
 import { Button, NoticeBox, ApprovalStamp, Textarea, RadioGroup, SignatureSection, FileUpload, Input } from '../components/common';
 import { formatDate } from '../utils/helpers';
+import { formatYesNo, formatFieldValue, capitalizeWords, formatServiceCategory, formatUsageFrequency } from '../utils/formatters';
 import SupplierFormPDF from '../components/pdf/SupplierFormPDF';
 
-const ReviewItem = ({ label, value }) => {
-  if (!value) return null;
+const ReviewItem = ({ label, value, raw = false }) => {
+  if (!value && value !== 0) return null;
+
+  // Format the value unless raw is true
+  const displayValue = raw ? value : formatFieldValue(value);
 
   return (
     <div style={{ display: 'flex', marginBottom: 'var(--space-8)' }}>
       <div style={{ fontWeight: 'var(--font-weight-medium)', minWidth: '200px', color: 'var(--color-text-secondary)' }}>
         {label}:
       </div>
-      <div style={{ color: 'var(--color-text)' }}>{value}</div>
+      <div style={{ color: 'var(--color-text)', paddingLeft: '16px' }}>{displayValue}</div>
     </div>
   );
 };
@@ -454,9 +458,9 @@ const OPWReviewPage = () => {
 
       {/* Service Details */}
       <ReviewCard title="Service Details">
-        <ReviewItem label="Service Category" value={formData.serviceCategory} />
-        <ReviewItem label="Service Types" value={formData.serviceType?.join(', ')} />
-        <ReviewItem label="Usage Frequency" value={formData.usageFrequency} />
+        <ReviewItem label="Service Category" value={formatServiceCategory(formData.serviceCategory)} raw />
+        <ReviewItem label="Service Types" value={formData.serviceType?.join(', ')} raw />
+        <ReviewItem label="Usage Frequency" value={formatUsageFrequency(formData.usageFrequency)} raw />
         {formData.serviceDescription && (
           <div style={{ marginTop: 'var(--space-12)', padding: 'var(--space-12)', backgroundColor: 'var(--color-background)', borderRadius: 'var(--radius-base)' }}>
             <strong>Service Description:</strong>

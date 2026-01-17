@@ -8,10 +8,14 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { PDFDownloadLink } from '@react-pdf/renderer';
 import { Button, NoticeBox, Checkbox, Textarea, SignatureSection, Input } from '../components/common';
 import { formatDate, formatCurrency } from '../utils/helpers';
+import { formatYesNo, formatFieldValue, capitalizeWords, formatSupplierType, formatServiceCategory, formatUsageFrequency } from '../utils/formatters';
 import SupplierFormPDF from '../components/pdf/SupplierFormPDF';
 
-const ReviewItem = ({ label, value, highlight }) => {
-  if (!value) return null;
+const ReviewItem = ({ label, value, highlight, raw = false }) => {
+  if (!value && value !== 0) return null;
+
+  // Format the value unless raw is true (for pre-formatted values)
+  const displayValue = raw ? value : formatFieldValue(value);
 
   return (
     <div style={{ display: 'flex', marginBottom: 'var(--space-8)' }}>
@@ -23,9 +27,10 @@ const ReviewItem = ({ label, value, highlight }) => {
         fontWeight: highlight ? 'var(--font-weight-semibold)' : 'normal',
         backgroundColor: highlight ? '#FFF9E6' : 'transparent',
         padding: highlight ? '2px 8px' : '0',
+        paddingLeft: highlight ? '8px' : '16px',
         borderRadius: highlight ? 'var(--radius-sm)' : '0',
       }}>
-        {value}
+        {displayValue}
       </div>
     </div>
   );
@@ -438,39 +443,6 @@ const APControlReviewPage = () => {
               </div>
             </div>
           )}
-          {apReview && (
-            <PDFDownloadLink
-              document={
-                <SupplierFormPDF
-                  formData={submission.formData}
-                  uploadedFiles={submission.uploadedFiles || {}}
-                  submissionId={submission.submissionId}
-                  submissionDate={submission.submissionDate}
-                  submission={{
-                    ...submission,
-                    pbpReview: submission.pbpReview, // Include PBP
-                    procurementReview: submission.procurementReview, // Include Procurement
-                    opwReview: submission.opwReview, // Include OPW if exists
-                    contractDrafter: submission.contractDrafter, // Include Contract if exists
-                    apReview,
-                  }}
-                  isAPControlPDF={true}
-                />
-              }
-              fileName={`NHS-Supplier-Form-${submission.formData?.companyName?.replace(/\s+/g, '_') || 'Supplier'}-${new Date().toISOString().split('T')[0]}.pdf`}
-              style={{ textDecoration: 'none' }}
-            >
-              {({ loading }) => (
-                <Button
-                  variant="primary"
-                  disabled={loading}
-                  style={{ fontSize: 'var(--font-size-base)', padding: '12px 24px' }}
-                >
-                  {loading ? 'Generating PDF...' : 'Download Complete Supplier Form with All Authorisations'}
-                </Button>
-              )}
-            </PDFDownloadLink>
-          )}
         </div>
       </div>
 
@@ -499,29 +471,31 @@ const APControlReviewPage = () => {
         </NoticeBox>
       )}
 
-      {/* Download Complete PDF Section */}
-      <div className="ap-download-section">
-        <div className="download-card">
-          <div className="download-info">
-            <h4>Complete Supplier Form with All Authorisations</h4>
-            <p>Download the full supplier form PDF including all authorisation signatures from PBP, Procurement, OPW Panel (if applicable), and AP Control.</p>
+      {/* Download Complete PDF Section - Only show if AP review exists */}
+      {apReview && (
+        <div className="ap-download-section">
+          <div className="download-card">
+            <div className="download-info">
+              <h4>Complete Supplier Form with All Authorisations</h4>
+              <p>Download the full supplier form PDF including all authorisation signatures from PBP, Procurement, OPW Panel (if applicable), and AP Control.</p>
+            </div>
+            <PDFDownloadLink
+              document={<SupplierFormPDF submission={getFullSubmissionForPDF()} isAPControlPDF={true} />}
+              fileName={`NHS-Supplier-Form-${submission?.formData?.companyName?.replace(/\s+/g, '_') || 'Supplier'}-COMPLETE-${new Date().toISOString().split('T')[0]}.pdf`}
+            >
+              {({ loading, error }) => (
+                <button className="btn-download-complete" disabled={loading}>
+                  {loading ? (
+                    <>⏳ Generating PDF...</>
+                  ) : (
+                    <>📥 Download Complete PDF with All Authorisations</>
+                  )}
+                </button>
+              )}
+            </PDFDownloadLink>
           </div>
-          <PDFDownloadLink
-            document={<SupplierFormPDF submission={getFullSubmissionForPDF()} isAPControlPDF={true} />}
-            fileName={`NHS-Supplier-Form-${submission?.formData?.companyName?.replace(/\s+/g, '_') || 'Supplier'}-COMPLETE-${new Date().toISOString().split('T')[0]}.pdf`}
-          >
-            {({ loading, error }) => (
-              <button className="btn-download-complete" disabled={loading}>
-                {loading ? (
-                  <>⏳ Generating PDF...</>
-                ) : (
-                  <>📥 Download Complete PDF with All Authorisations</>
-                )}
-              </button>
-            )}
-          </PDFDownloadLink>
         </div>
-      </div>
+      )}
 
       {/* Conflict of Interest Warning */}
       {formData.supplierConnection === 'yes' && formData.connectionDetails && (
@@ -546,9 +520,9 @@ const APControlReviewPage = () => {
 
       {/* Supplier Details */}
       <ReviewCard title="Supplier Details" highlight>
-        <ReviewItem label="Company Name" value={formData.companyName?.toUpperCase()} highlight />
-        {formData.tradingName && <ReviewItem label="Trading Name" value={formData.tradingName?.toUpperCase()} />}
-        <ReviewItem label="Supplier Type" value={formData.supplierType?.replace(/_/g, ' ')?.toUpperCase()} />
+        <ReviewItem label="Company Name" value={formData.companyName?.toUpperCase()} highlight raw />
+        {formData.tradingName && <ReviewItem label="Trading Name" value={formData.tradingName?.toUpperCase()} raw />}
+        <ReviewItem label="Supplier Type" value={formatSupplierType(formData.supplierType)} raw />
         {formData.crn && <ReviewItem label="CRN" value={formData.crn} highlight />}
         {formData.charityNumber && <ReviewItem label="Charity Number" value={formData.charityNumber} />}
         <ReviewItem label="Registered Address" value={formData.registeredAddress?.toUpperCase()} />
