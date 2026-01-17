@@ -109,3 +109,20 @@ export const formatServiceTypes = (types) => {
   if (!types || !Array.isArray(types) || types.length === 0) return 'Not specified';
   return types.map(type => capitalizeFirst(type)).join(', ');
 };
+
+/**
+ * Format organisation type for display
+ * Maps stored values to their proper display labels (preserving acronyms like NHS)
+ */
+export const formatOrganisationType = (value) => {
+  if (!value) return 'Not specified';
+  const mappings = {
+    'nhs': 'NHS Organisation',
+    'local_authority': 'Local Authority',
+    'government': 'Government Department',
+    'education': 'Educational Institution',
+    'other': 'Other Public Sector',
+  };
+  const lower = value.toLowerCase();
+  return mappings[lower] || value;
+};

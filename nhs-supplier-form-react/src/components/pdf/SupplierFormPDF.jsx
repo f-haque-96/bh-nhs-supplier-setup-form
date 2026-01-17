@@ -14,7 +14,7 @@ import {
   Font,
 } from '@react-pdf/renderer';
 import { formatDate, formatCurrency } from '../../utils/helpers';
-import { formatYesNo, formatFieldValue, capitalizeWords, formatSupplierType, formatServiceCategory, formatUsageFrequency, formatServiceTypes } from '../../utils/formatters';
+import { formatYesNo, formatFieldValue, capitalizeWords, formatSupplierType, formatServiceCategory, formatUsageFrequency, formatServiceTypes, formatOrganisationType } from '../../utils/formatters';
 
 // Register fonts (optional - can use default fonts)
 // Font.register({
@@ -564,7 +564,7 @@ const SupplierFormPDF = ({ formData, uploadedFiles, submissionId, submissionDate
 
         {/* Organisation Type - Only show for public sector */}
         {(normalizedData.section3?.supplierType || normalizedData.supplierType) === 'public_sector' && (normalizedData.section3?.organisationType || normalizedData.organisationType) && (
-          <Field label="Organisation Type" value={normalizedData.section3?.organisationType || normalizedData.organisationType} />
+          <Field label="Organisation Type" value={formatOrganisationType(normalizedData.section3?.organisationType || normalizedData.organisationType)} raw />
         )}
 
         <Field label="Annual Value" value={(normalizedData.section3?.annualValue || normalizedData.annualValue) ? formatCurrency(normalizedData.section3?.annualValue || normalizedData.annualValue) : ''} />

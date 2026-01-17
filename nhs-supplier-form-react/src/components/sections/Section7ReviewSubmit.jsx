@@ -11,7 +11,7 @@ import { Checkbox, Button, NoticeBox, QuestionLabel } from '../common';
 import { FormNavigation } from '../layout';
 import { section7Schema } from '../../utils/validation';
 import { formatDate, formatCurrency } from '../../utils/helpers';
-import { formatFieldValue, formatSupplierType, formatServiceCategory, formatUsageFrequency, formatServiceTypes } from '../../utils/formatters';
+import { formatFieldValue, formatSupplierType, formatServiceCategory, formatUsageFrequency, formatServiceTypes, formatOrganisationType } from '../../utils/formatters';
 import useFormStore from '../../stores/formStore';
 import useFormNavigation from '../../hooks/useFormNavigation';
 import UploadedDocuments from '../review/UploadedDocuments';
@@ -474,7 +474,7 @@ const Section7ReviewSubmit = () => {
 
         {/* Organisation Type - Only show for public sector */}
         {formData.organisationType && formData.supplierType === 'public_sector' && (
-          <ReviewItem label="Organisation Type" value={formData.organisationType} />
+          <ReviewItem label="Organisation Type" value={formatOrganisationType(formData.organisationType)} raw />
         )}
 
         <ReviewItem label="Annual Value" value={formData.annualValue ? formatCurrency(formData.annualValue) : ''} />
