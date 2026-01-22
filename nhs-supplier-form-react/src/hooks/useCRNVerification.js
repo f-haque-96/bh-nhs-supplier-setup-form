@@ -107,6 +107,13 @@ const useCRNVerification = () => {
               status: mockCompany.company_status,
               address: `${mockCompany.registered_office_address.address_line_1}, ${mockCompany.registered_office_address.locality}, ${mockCompany.registered_office_address.postal_code}`,
               dateOfCreation: mockCompany.date_of_creation,
+              // Individual address fields for auto-population
+              registeredAddress: mockCompany.registered_office_address.address_line_1 || '',
+              addressLine2: mockCompany.registered_office_address.address_line_2 || '',
+              city: mockCompany.registered_office_address.locality || '',
+              county: mockCompany.registered_office_address.region || '',
+              postcode: mockCompany.registered_office_address.postal_code || '',
+              country: mockCompany.registered_office_address.country || 'United Kingdom',
             },
           };
 
@@ -138,6 +145,13 @@ const useCRNVerification = () => {
               status: companyInfo.companyStatus,
               address: `${companyInfo.registeredAddress.addressLine1}, ${companyInfo.registeredAddress.city}, ${companyInfo.registeredAddress.postcode}`,
               dateOfCreation: companyInfo.dateOfCreation,
+              // Individual address fields for auto-population
+              registeredAddress: companyInfo.registeredAddress.addressLine1 || '',
+              addressLine2: companyInfo.registeredAddress.addressLine2 || '',
+              city: companyInfo.registeredAddress.city || '',
+              county: companyInfo.registeredAddress.county || '',
+              postcode: companyInfo.registeredAddress.postcode || '',
+              country: companyInfo.registeredAddress.country || 'United Kingdom',
             },
           };
 

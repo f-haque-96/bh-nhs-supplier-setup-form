@@ -20,9 +20,11 @@ const Textarea = ({
   rows = 4,
   showCharCount = false,
   className,
+  minCharWarning, // Destructure to prevent passing to DOM
   ...props
 }) => {
   const [charCount, setCharCount] = useState(value.length);
+  const showMinCharWarning = minCharWarning && charCount > 0 && charCount < minCharWarning;
 
   useEffect(() => {
     setCharCount(value.length);
@@ -83,10 +85,10 @@ const Textarea = ({
           style={{
             color: '#dc2626',
             fontSize: '0.85rem',
-            visibility: error ? 'visible' : 'hidden'
+            visibility: (error || showMinCharWarning) ? 'visible' : 'hidden'
           }}
         >
-          {error || 'Placeholder'}
+          {error || (showMinCharWarning ? `Please provide more detail (minimum ${minCharWarning} characters)` : 'Placeholder')}
         </span>
         {(showCharCount || maxLength) && (
           <span className={clsx('char-counter', getCharCountClass())} style={{ color: '#6b7280', fontSize: '0.85rem' }}>

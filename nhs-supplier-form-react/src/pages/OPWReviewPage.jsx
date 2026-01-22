@@ -480,7 +480,6 @@ const OPWReviewPage = () => {
         <ReviewItem label="Service Category" value={formatServiceCategory(formData.serviceCategory)} raw />
         <ReviewItem label="Procurement Engaged" value={formData.procurementEngaged} />
         <ReviewItem label="Usage Frequency" value={formatUsageFrequency(formData.usageFrequency)} raw />
-        <ReviewItem label="Estimated Value" value={formData.estimatedValue} />
         {formData.justification && (
           <div style={{ marginTop: 'var(--space-8)', padding: 'var(--space-12)', backgroundColor: 'var(--color-background)', borderRadius: 'var(--radius-base)' }}>
             <strong>Justification:</strong>

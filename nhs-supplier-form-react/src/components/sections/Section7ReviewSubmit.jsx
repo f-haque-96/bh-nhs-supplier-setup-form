@@ -450,12 +450,10 @@ const Section7ReviewSubmit = () => {
         </div>
         {/* Q2.4 Usage Frequency */}
         <ReviewItem label="2.4 Usage Frequency" value={formatUsageFrequency(formData.usageFrequency)} raw />
-        {/* Q2.5 Estimated Value */}
-        <ReviewItem label="2.5 Estimated Value" value={formData.estimatedValue} />
-        {/* Q2.6 Service Category */}
-        <ReviewItem label="2.6 Service Category" value={formatServiceCategory(formData.serviceCategory)} raw />
-        {/* Q2.7 Procurement Engaged */}
-        <ReviewItem label="2.7 Procurement Engaged" value={formData.procurementEngaged} />
+        {/* Q2.5 Service Category */}
+        <ReviewItem label="2.5 Service Category" value={formatServiceCategory(formData.serviceCategory)} raw />
+        {/* Q2.6 Procurement Engaged */}
+        <ReviewItem label="2.6 Procurement Engaged" value={formData.procurementEngaged} />
       </ReviewCard>
 
       {/* Section 3: Supplier Classification */}

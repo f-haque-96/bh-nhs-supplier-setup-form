@@ -30,9 +30,9 @@ const Section4SupplierDetails = () => {
     defaultValues: {
       companyName: formData.companyName || formData._verifiedCompanyName || '',
       tradingName: formData.tradingName || '',
-      registeredAddress: formData.registeredAddress || '',
-      city: formData.city || '',
-      postcode: formData.postcode || '',
+      registeredAddress: formData.registeredAddress || formData._verifiedAddress || '',
+      city: formData.city || formData._verifiedCity || '',
+      postcode: formData.postcode || formData._verifiedPostcode || '',
       contactName: formData.contactName || '',
       contactEmail: formData.contactEmail || '',
       contactPhone: formData.contactPhone || '',
@@ -42,12 +42,21 @@ const Section4SupplierDetails = () => {
 
   const postcode = watch('postcode');
 
-  // Auto-populate company name from CRN verification if available
+  // Auto-populate company name and address from CRN verification if available
   useEffect(() => {
     if (formData._verifiedCompanyName && !formData.companyName) {
       setValue('companyName', formData._verifiedCompanyName);
     }
-  }, [formData._verifiedCompanyName, formData.companyName, setValue]);
+    if (formData._verifiedAddress && !formData.registeredAddress) {
+      setValue('registeredAddress', formData._verifiedAddress);
+    }
+    if (formData._verifiedCity && !formData.city) {
+      setValue('city', formData._verifiedCity);
+    }
+    if (formData._verifiedPostcode && !formData.postcode) {
+      setValue('postcode', formData._verifiedPostcode);
+    }
+  }, [formData._verifiedCompanyName, formData._verifiedAddress, formData._verifiedCity, formData._verifiedPostcode, formData.companyName, formData.registeredAddress, formData.city, formData.postcode, setValue]);
 
   // Format postcode as user types
   useEffect(() => {

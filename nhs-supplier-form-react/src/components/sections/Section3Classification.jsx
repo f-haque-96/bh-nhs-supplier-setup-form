@@ -118,11 +118,16 @@ const Section3Classification = () => {
     }
   }, [watchCRN, watchSupplierType, verify]);
 
-  // Auto-populate company name if CRN is verified
+  // Auto-populate company name and address if CRN is verified
   useEffect(() => {
     if (isValid && companyData && companyData.name) {
-      // We'll use this in Section 4 for company name auto-population
+      // Save verified company data for Section 4 auto-population
       updateFormData('_verifiedCompanyName', companyData.name);
+      updateFormData('_verifiedAddress', companyData.registeredAddress || '');
+      updateFormData('_verifiedCity', companyData.city || '');
+      updateFormData('_verifiedPostcode', companyData.postcode || '');
+      updateFormData('_verifiedCounty', companyData.county || '');
+      updateFormData('crnVerification', companyData);
     }
   }, [isValid, companyData, updateFormData]);
 

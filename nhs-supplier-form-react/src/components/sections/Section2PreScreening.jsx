@@ -47,7 +47,6 @@ const Section2PreScreening = () => {
       letterheadAvailable: formData.letterheadAvailable || '',
       justification: formData.justification || '',
       usageFrequency: formData.usageFrequency || '',
-      estimatedValue: formData.estimatedValue || '',
       supplierConnection: formData.supplierConnection || '',
       prescreeningAcknowledgement: formData.prescreeningAcknowledgement || false,
     },
@@ -59,7 +58,6 @@ const Section2PreScreening = () => {
   const letterheadAvailable = watch('letterheadAvailable');
   const justification = watch('justification');
   const usageFrequency = watch('usageFrequency');
-  const estimatedValue = watch('estimatedValue');
   const supplierConnection = watch('supplierConnection');
 
   // Update prescreening progress when serviceCategory is answered
@@ -109,8 +107,8 @@ const Section2PreScreening = () => {
   }, [prescreeningProgress.questionnaireId, prescreeningProgress.procurementApproved, updatePrescreeningProgress]);
 
   // Determine which questions should be active/locked (strict one-by-one)
-  // NEW ORDER: Q2.1 Supplier Connection, Q2.2 Letterhead, Q2.3 Justification, Q2.4 Usage Frequency,
-  // Q2.5 Estimated Value, Q2.6 Procurement, Q2.7 Clinical/Non-clinical (LAST)
+  // ORDER: Q2.1 Supplier Connection, Q2.2 Letterhead, Q2.3 Justification, Q2.4 Usage Frequency,
+  // Q2.5 Service Category (Clinical/Non-clinical), Q2.6 Procurement, Q2.7 Acknowledgement
 
   const isBlockedByLetterhead = letterheadAvailable === 'no';
 
@@ -151,7 +149,7 @@ const Section2PreScreening = () => {
         ? 'Please upload the letterhead document'
         : 'Answer the letterhead question first'
     },
-    // Q2.4 - Usage Frequency (moved from Q7)
+    // Q2.4 - Usage Frequency
     q4_usageFrequency: {
       locked: !supplierConnection ||
               connectionDetailsMissing ||
@@ -171,8 +169,8 @@ const Section2PreScreening = () => {
         ? 'Please provide justification (minimum 10 characters)'
         : 'Answer the letterhead question first'
     },
-    // Q2.5 - Estimated Annual Value (NEW)
-    q5_estimatedValue: {
+    // Q2.5 - Service Category (Clinical/Non-clinical)
+    q5_serviceCategory: {
       locked: !supplierConnection ||
               connectionDetailsMissing ||
               isBlockedByLetterhead ||
@@ -192,36 +190,10 @@ const Section2PreScreening = () => {
         ? 'Please provide justification (minimum 10 characters)'
         : !usageFrequency
         ? 'Please select usage frequency first'
-        : 'Please select usage frequency first'
-    },
-    // Q2.6 - Clinical/Non-clinical
-    q6_serviceCategory: {
-      locked: !supplierConnection ||
-              connectionDetailsMissing ||
-              isBlockedByLetterhead ||
-              !letterheadAvailable ||
-              (letterheadAvailable === 'yes' && !uploadedFiles.letterhead) ||
-              !isJustificationValid ||
-              !usageFrequency ||
-              !estimatedValue,
-      reason: !supplierConnection
-        ? 'Please answer the supplier connection question first'
-        : connectionDetailsMissing
-        ? 'Please describe your connection to this supplier first'
-        : isBlockedByLetterhead
-        ? 'You must select "Yes" and upload a letterhead to proceed'
-        : letterheadAvailable === 'yes' && !uploadedFiles.letterhead
-        ? 'Please upload the letterhead document'
-        : !isJustificationValid
-        ? 'Please provide justification (minimum 10 characters)'
-        : !usageFrequency
-        ? 'Please select usage frequency first'
-        : !estimatedValue
-        ? 'Please select estimated annual value first'
         : 'Please complete all previous questions'
     },
-    // Q2.7 - Procurement Engagement (LAST question)
-    q7_procurement: {
+    // Q2.6 - Procurement Engagement
+    q6_procurement: {
       locked: !supplierConnection ||
               connectionDetailsMissing ||
               isBlockedByLetterhead ||
@@ -229,7 +201,6 @@ const Section2PreScreening = () => {
               (letterheadAvailable === 'yes' && !uploadedFiles.letterhead) ||
               !isJustificationValid ||
               !usageFrequency ||
-              !estimatedValue ||
               !serviceCategory,
       reason: !supplierConnection
         ? 'Please answer the supplier connection question first'
@@ -243,15 +214,13 @@ const Section2PreScreening = () => {
         ? 'Please provide justification (minimum 10 characters)'
         : !usageFrequency
         ? 'Please select usage frequency first'
-        : !estimatedValue
-        ? 'Please select estimated annual value first'
         : !serviceCategory
         ? 'Please select service category first'
         : 'Please complete all previous questions'
     },
-    // Q2.8 - Acknowledgement (stays at end)
+    // Q2.7 - Acknowledgement
     // Unlocked when: procurement = "yes" AND approval uploaded, OR procurement = "no" AND questionnaire completed
-    q8_acknowledgement: {
+    q7_acknowledgement: {
       locked: !supplierConnection ||
               connectionDetailsMissing ||
               isBlockedByLetterhead ||
@@ -602,45 +571,16 @@ const Section2PreScreening = () => {
           )}
         </div>
 
-        {/* QUESTION 5: Estimated Annual Value (NEW) */}
-        <div className={getQuestionClass(questionStatus.q5_estimatedValue.locked)}>
-          {questionStatus.q5_estimatedValue.locked && <LockOverlay reason={questionStatus.q5_estimatedValue.reason} />}
-
-          <Controller
-            name="estimatedValue"
-            control={control}
-            render={({ field }) => (
-              <RadioGroup
-                label={<QuestionLabel section="2" question="5">What is the estimated annual value?</QuestionLabel>}
-                name="estimatedValue"
-                options={[
-                  { value: 'under_5000', label: 'Under £5,000' },
-                  { value: '5000_25000', label: '£5,000 - £25,000' },
-                  { value: '25000_50000', label: '£25,000 - £50,000' },
-                  { value: 'over_50000', label: 'Over £50,000' },
-                ]}
-                value={field.value}
-                onChange={(value) => {
-                  field.onChange(value);
-                  handleFieldChange('estimatedValue', value);
-                }}
-                error={errors.estimatedValue?.message}
-                required
-              />
-            )}
-          />
-        </div>
-
-        {/* QUESTION 6: Clinical/Non-clinical */}
-        <div className={getQuestionClass(questionStatus.q6_serviceCategory.locked)}>
-          {questionStatus.q6_serviceCategory.locked && <LockOverlay reason={questionStatus.q6_serviceCategory.reason} />}
+        {/* QUESTION 5: Service Category (Clinical/Non-clinical) */}
+        <div className={getQuestionClass(questionStatus.q5_serviceCategory.locked)}>
+          {questionStatus.q5_serviceCategory.locked && <LockOverlay reason={questionStatus.q5_serviceCategory.reason} />}
 
           <Controller
             name="serviceCategory"
             control={control}
             render={({ field }) => (
               <RadioGroup
-                label={<QuestionLabel section="2" question="6">Is this service Clinical or Non-clinical?</QuestionLabel>}
+                label={<QuestionLabel section="2" question="5">Is this service Clinical or Non-clinical?</QuestionLabel>}
                 name="serviceCategory"
                 options={[
                   { value: 'clinical', label: 'Clinical' },
@@ -659,12 +599,12 @@ const Section2PreScreening = () => {
           />
         </div>
 
-        {/* QUESTION 7: Procurement Engagement (LAST question) */}
-        <div className={getQuestionClass(questionStatus.q7_procurement.locked)}>
-          {questionStatus.q7_procurement.locked && <LockOverlay reason={questionStatus.q7_procurement.reason} />}
+        {/* QUESTION 6: Procurement Engagement */}
+        <div className={getQuestionClass(questionStatus.q6_procurement.locked)}>
+          {questionStatus.q6_procurement.locked && <LockOverlay reason={questionStatus.q6_procurement.reason} />}
 
           {/* Info box explaining the process */}
-          {!questionStatus.q7_procurement.locked && (
+          {!questionStatus.q6_procurement.locked && (
             <div className="info-box" style={{ marginBottom: '16px' }}>
               <span>ℹ️</span>
               <span style={{ color: '#1e40af' }}>
@@ -678,7 +618,7 @@ const Section2PreScreening = () => {
             control={control}
             render={({ field }) => (
               <RadioGroup
-                label={<QuestionLabel section="2" question="7">Have you engaged with the Procurement team?</QuestionLabel>}
+                label={<QuestionLabel section="2" question="6">Have you engaged with the Procurement team?</QuestionLabel>}
                 name="procurementEngaged"
                 options={[
                   { value: 'yes', label: 'Yes - I have procurement approval' },
@@ -694,7 +634,7 @@ const Section2PreScreening = () => {
           />
 
           {/* If Yes - show procurement approval upload */}
-          {procurementEngaged === 'yes' && !questionStatus.q7_procurement.locked && (
+          {procurementEngaged === 'yes' && !questionStatus.q6_procurement.locked && (
             <FileUpload
               label="Upload Procurement Approval Document"
               name="procurementApproval"
@@ -710,7 +650,7 @@ const Section2PreScreening = () => {
           )}
 
           {/* If No - show questionnaire status */}
-          {procurementEngaged === 'no' && !questionStatus.q7_procurement.locked && (
+          {procurementEngaged === 'no' && !questionStatus.q6_procurement.locked && (
             <>
               {isQuestionnaireComplete ? (
                 <div className="success-badge" style={{
@@ -757,16 +697,16 @@ const Section2PreScreening = () => {
           )}
         </div>
 
-        {/* QUESTION 8: Pre-screening Acknowledgement */}
-        <div className={getQuestionClass(questionStatus.q8_acknowledgement.locked)} style={{ marginTop: 'var(--space-32)', paddingTop: 'var(--space-24)', borderTop: '2px solid var(--color-border)' }}>
-          {questionStatus.q8_acknowledgement.locked && <LockOverlay reason={questionStatus.q8_acknowledgement.reason} />}
+        {/* QUESTION 7: Pre-screening Acknowledgement */}
+        <div className={getQuestionClass(questionStatus.q7_acknowledgement.locked)} style={{ marginTop: 'var(--space-32)', paddingTop: 'var(--space-24)', borderTop: '2px solid var(--color-border)' }}>
+          {questionStatus.q7_acknowledgement.locked && <LockOverlay reason={questionStatus.q7_acknowledgement.reason} />}
 
           <Controller
             name="prescreeningAcknowledgement"
             control={control}
             render={({ field }) => (
               <Checkbox
-                label={<QuestionLabel section="2" question="8">I confirm that all information provided is accurate and complete to the best of my knowledge</QuestionLabel>}
+                label={<QuestionLabel section="2" question="7">I confirm that all information provided is accurate and complete to the best of my knowledge</QuestionLabel>}
                 name="prescreeningAcknowledgement"
                 checked={field.value}
                 onChange={(checked) => {
@@ -799,7 +739,6 @@ const Section2PreScreening = () => {
           letterheadAvailable: letterheadAvailable,
           justification: justification || formData.justification,
           usageFrequency: usageFrequency,
-          estimatedValue: estimatedValue,
           serviceCategory: serviceCategory,
           procurementEngaged: procurementEngaged,
         }}
