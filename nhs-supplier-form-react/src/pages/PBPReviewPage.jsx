@@ -588,7 +588,7 @@ const PBPReviewPage = () => {
       )}
 
       {/* Section 1: Requester Information */}
-      <ReviewSection title="Requester Information">
+      <ReviewSection title="Section 1: Requester Information">
         <ReviewField
           label="Name"
           value={`${formData.firstName || ''} ${formData.lastName || ''}`.trim()}
@@ -597,6 +597,46 @@ const PBPReviewPage = () => {
         <ReviewField label="Department" value={formData.department} />
         <ReviewField label="NHS Email" value={formData.nhsEmail} raw />
         <ReviewField label="Phone Number" value={formData.phoneNumber} />
+      </ReviewSection>
+
+      {/* Section 2: Pre-Screening Summary */}
+      <ReviewSection title="Section 2: Pre-Screening Summary">
+        <ReviewField
+          label="Q2.1 - Supplier Connection"
+          value={formatYesNo(submission.section2Summary?.supplierConnection || formData.supplierConnection)}
+        />
+        {(submission.section2Summary?.supplierConnection === 'yes' || formData.supplierConnection === 'yes') && (
+          <ReviewField
+            label="Connection Details"
+            value={submission.section2Summary?.connectionDetails || formData.connectionDetails}
+            isLongText
+          />
+        )}
+        <ReviewField
+          label="Q2.2 - Letterhead with Bank Details"
+          value={formatYesNo(submission.section2Summary?.letterheadAvailable || formData.letterheadAvailable)}
+        />
+        <ReviewField
+          label="Q2.3 - Justification"
+          value={submission.section2Summary?.justification || formData.justification}
+          isLongText
+        />
+        <ReviewField
+          label="Q2.4 - Usage Frequency"
+          value={capitalizeWords(submission.section2Summary?.usageFrequency || formData.usageFrequency)}
+        />
+        <ReviewField
+          label="Q2.5 - Estimated Annual Value"
+          value={submission.section2Summary?.estimatedValue || formData.estimatedValue}
+        />
+        <ReviewField
+          label="Q2.6 - Service Category"
+          value={capitalizeWords(submission.section2Summary?.serviceCategory || submission.questionnaireType)}
+        />
+        <ReviewField
+          label="Q2.7 - Procurement Engaged"
+          value={formatYesNo(submission.section2Summary?.procurementEngaged || formData.procurementEngaged)}
+        />
       </ReviewSection>
 
       {/* Conflict of Interest Warning */}
@@ -622,6 +662,34 @@ const PBPReviewPage = () => {
 
       {/* Questionnaire Responses */}
       <ReviewSection title={`${questionnaireType === 'clinical' ? 'Clinical' : 'Non-Clinical'} Questionnaire Responses`}>
+        {/* Supplier Name - Prominent Display */}
+        {questionnaireData?.supplierName && (
+          <div style={{
+            gridColumn: '1 / -1',
+            padding: 'var(--space-16)',
+            backgroundColor: '#eff6ff',
+            borderRadius: 'var(--radius-base)',
+            border: '2px solid #3b82f6',
+            marginBottom: 'var(--space-16)'
+          }}>
+            <label style={{
+              fontWeight: 'var(--font-weight-semibold)',
+              color: '#1e40af',
+              fontSize: 'var(--font-size-sm)',
+              display: 'block',
+              marginBottom: 'var(--space-4)'
+            }}>
+              Supplier/Company Name
+            </label>
+            <span style={{
+              fontSize: '1.25rem',
+              fontWeight: 'var(--font-weight-bold)',
+              color: '#1e3a8a'
+            }}>
+              {questionnaireData.supplierName}
+            </span>
+          </div>
+        )}
         {questionnaireType === 'clinical' ? (
           <ClinicalQuestionnaireReview data={questionnaireData} />
         ) : (

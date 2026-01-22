@@ -48,7 +48,7 @@ const procurementCategories = [
   { value: 'other', label: 'Other' },
 ];
 
-const QuestionnaireModal = ({ isOpen, onClose, type = 'clinical' }) => {
+const QuestionnaireModal = ({ isOpen, onClose, onComplete, type = 'clinical', section2Data = {} }) => {
   const { formData, updateFormData, updatePrescreeningProgress } = useFormStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
@@ -163,7 +163,7 @@ const QuestionnaireModal = ({ isOpen, onClose, type = 'clinical' }) => {
       console.log('=== QUESTIONNAIRE SUBMIT ===');
       console.log('Questionnaire Uploads:', questionnaireUploads);
 
-      // Create a submission for PBP review
+      // Create a submission for PBP review - includes Section 2 data
       const questionnaireSubmission = {
         submissionId: questionnaireId,
         submissionDate: submissionDate,
@@ -174,6 +174,8 @@ const QuestionnaireModal = ({ isOpen, onClose, type = 'clinical' }) => {
           ...formData,
           [`${type}Questionnaire`]: data,
         },
+        // Include Section 2 data for PBP reference
+        section2Summary: section2Data,
         uploadedFiles: {},
         // Save uploads in multiple formats for compatibility
         questionnaireUploads: questionnaireUploads,
@@ -197,6 +199,7 @@ const QuestionnaireModal = ({ isOpen, onClose, type = 'clinical' }) => {
         questionnaireId,
         type,
         data,
+        section2Summary: section2Data,
         uploads: questionnaireUploads,
         uploadedFiles: questionnaireUploads,
         submittedAt: submissionDate,
@@ -218,8 +221,14 @@ const QuestionnaireModal = ({ isOpen, onClose, type = 'clinical' }) => {
       updatePrescreeningProgress({
         questionnaireSubmitted: true,
         questionnaireId,
+        questionnaireType: type,
         procurementApproved: false, // Will be set to true after PBP approval
       });
+
+      // Also store section2 data with questionnaire info in form store
+      updateFormData('questionnaireCompleted', true);
+      updateFormData('questionnaireId', questionnaireId);
+      updateFormData('section2Summary', section2Data);
 
       setSubmitSuccess(true);
 
@@ -227,7 +236,13 @@ const QuestionnaireModal = ({ isOpen, onClose, type = 'clinical' }) => {
       setTimeout(() => {
         setSubmitSuccess(false);
         reset();
-        onClose();
+        setQuestionnaireUploads({});
+        // Call onComplete to signal successful submission
+        if (onComplete) {
+          onComplete();
+        } else {
+          onClose();
+        }
       }, 2000);
     } catch (error) {
       console.error('Questionnaire submission error:', error);

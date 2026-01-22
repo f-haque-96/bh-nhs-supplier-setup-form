@@ -27,6 +27,9 @@ const Section2PreScreening = () => {
   } = useFormStore();
   const { handleNext, handlePrev } = useFormNavigation();
   const [isQuestionnaireModalOpen, setIsQuestionnaireModalOpen] = useState(false);
+  const [questionnaireCompleted, setQuestionnaireCompleted] = useState(
+    formData.questionnaireCompleted || prescreeningProgress.questionnaireSubmitted || false
+  );
 
   const {
     control,
@@ -119,8 +122,8 @@ const Section2PreScreening = () => {
   const justificationText = formData.justification?.trim() || '';
   const isJustificationValid = justificationText.length >= 10;
 
-  // Check if blocked by procurement - if "No" is selected, block all subsequent questions
-  const isBlockedByProcurement = procurementEngaged === 'no';
+  // Check if questionnaire has been completed (for procurement "no" path)
+  const isQuestionnaireComplete = questionnaireCompleted || prescreeningProgress.questionnaireSubmitted;
 
   const questionStatus = {
     // Q2.1 - Supplier Connection (always unlocked, first question)
@@ -247,18 +250,24 @@ const Section2PreScreening = () => {
         : 'Please complete all previous questions'
     },
     // Q2.8 - Acknowledgement (stays at end)
+    // Unlocked when: procurement = "yes" AND approval uploaded, OR procurement = "no" AND questionnaire completed
     q8_acknowledgement: {
-      locked: !supplierConnection || connectionDetailsMissing || isBlockedByLetterhead || isBlockedByProcurement || !procurementEngaged || (procurementEngaged === 'yes' && !uploadedFiles.procurementApproval),
+      locked: !supplierConnection ||
+              connectionDetailsMissing ||
+              isBlockedByLetterhead ||
+              !procurementEngaged ||
+              (procurementEngaged === 'yes' && !uploadedFiles.procurementApproval) ||
+              (procurementEngaged === 'no' && !isQuestionnaireComplete),
       reason: !supplierConnection
         ? 'Please answer the supplier connection question first'
         : connectionDetailsMissing
         ? 'Please describe your connection to this supplier first'
         : isBlockedByLetterhead
         ? 'You must select "Yes" and upload a letterhead to proceed'
-        : isBlockedByProcurement
-        ? 'You must engage with Procurement before proceeding. Please select "Yes" and upload the approval document.'
         : procurementEngaged === 'yes' && !uploadedFiles.procurementApproval
         ? 'Please upload the procurement approval document'
+        : procurementEngaged === 'no' && !isQuestionnaireComplete
+        ? 'Please complete the questionnaire for PBP review'
         : 'Please complete all previous questions'
     }
   };
@@ -298,9 +307,9 @@ const Section2PreScreening = () => {
       return;
     }
 
-    // Block submission if procurement engagement is 'no'
-    if (data.procurementEngaged === 'no') {
-      alert('You must engage with the Procurement team before proceeding. Please select "Yes" and upload the procurement approval document.');
+    // Validate based on procurement engagement answer
+    if (data.procurementEngaged === 'no' && !isQuestionnaireComplete) {
+      alert('Please complete the questionnaire for PBP review before proceeding.');
       return;
     }
 
@@ -333,11 +342,34 @@ const Section2PreScreening = () => {
 
   // Handle questionnaire modal
   const handleOpenQuestionnaire = () => {
+    if (!serviceCategory) {
+      alert('Please select Clinical or Non-clinical service first (Q2.6)');
+      return;
+    }
     setIsQuestionnaireModalOpen(true);
   };
 
-  const handleCloseQuestionnaire = () => {
+  const handleCloseQuestionnaire = (completed = false) => {
     setIsQuestionnaireModalOpen(false);
+    if (completed) {
+      setQuestionnaireCompleted(true);
+      updateFormData('questionnaireCompleted', true);
+    }
+  };
+
+  // Handle procurement engagement change - trigger questionnaire if "no"
+  const handleProcurementEngagedChange = (value, fieldOnChange) => {
+    fieldOnChange(value);
+    handleFieldChange('procurementEngaged', value);
+
+    // If "No" is selected, open the questionnaire modal
+    if (value === 'no') {
+      if (serviceCategory) {
+        setIsQuestionnaireModalOpen(true);
+      } else {
+        alert('Please select Clinical or Non-clinical service first (Q2.6)');
+      }
+    }
   };
 
   return (
@@ -631,6 +663,16 @@ const Section2PreScreening = () => {
         <div className={getQuestionClass(questionStatus.q7_procurement.locked)}>
           {questionStatus.q7_procurement.locked && <LockOverlay reason={questionStatus.q7_procurement.reason} />}
 
+          {/* Info box explaining the process */}
+          {!questionStatus.q7_procurement.locked && (
+            <div className="info-box" style={{ marginBottom: '16px' }}>
+              <span>ℹ️</span>
+              <span style={{ color: '#1e40af' }}>
+                If you have not engaged with Procurement, you will need to complete a {serviceCategory === 'clinical' ? 'Clinical' : 'Non-Clinical'} questionnaire for PBP review.
+              </span>
+            </div>
+          )}
+
           <Controller
             name="procurementEngaged"
             control={control}
@@ -639,14 +681,11 @@ const Section2PreScreening = () => {
                 label={<QuestionLabel section="2" question="7">Have you engaged with the Procurement team?</QuestionLabel>}
                 name="procurementEngaged"
                 options={[
-                  { value: 'yes', label: 'Yes' },
-                  { value: 'no', label: 'No' },
+                  { value: 'yes', label: 'Yes - I have procurement approval' },
+                  { value: 'no', label: 'No - I need to complete the questionnaire' },
                 ]}
                 value={field.value}
-                onChange={(value) => {
-                  field.onChange(value);
-                  handleFieldChange('procurementEngaged', value);
-                }}
+                onChange={(value) => handleProcurementEngagedChange(value, field.onChange)}
                 error={errors.procurementEngaged?.message}
                 required
                 horizontal
@@ -654,13 +693,7 @@ const Section2PreScreening = () => {
             )}
           />
 
-          {procurementEngaged === 'no' && !questionStatus.q7_procurement.locked && (
-            <div className="blocking-warning">
-              <span className="warning-icon">⚠</span>
-              <p>You must engage with the Procurement team before proceeding. Please select "Yes" and upload the approval document.</p>
-            </div>
-          )}
-
+          {/* If Yes - show procurement approval upload */}
           {procurementEngaged === 'yes' && !questionStatus.q7_procurement.locked && (
             <FileUpload
               label="Upload Procurement Approval Document"
@@ -674,6 +707,53 @@ const Section2PreScreening = () => {
               onRemove={() => removeUploadedFile('procurementApproval')}
               required
             />
+          )}
+
+          {/* If No - show questionnaire status */}
+          {procurementEngaged === 'no' && !questionStatus.q7_procurement.locked && (
+            <>
+              {isQuestionnaireComplete ? (
+                <div className="success-badge" style={{
+                  marginTop: '16px',
+                  padding: '12px 16px',
+                  background: '#f0fdf4',
+                  border: '1px solid #22c55e',
+                  borderRadius: '8px',
+                  color: '#166534',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}>
+                  <span style={{ fontSize: '1.2rem' }}>✓</span>
+                  <span style={{ fontWeight: '600' }}>
+                    {serviceCategory === 'clinical' ? 'Clinical' : 'Non-Clinical'} Questionnaire Completed
+                  </span>
+                  <span style={{ marginLeft: 'auto', fontSize: '0.85rem', color: '#15803d' }}>
+                    Submitted for PBP review
+                  </span>
+                </div>
+              ) : (
+                <div style={{ marginTop: '16px' }}>
+                  <Button
+                    variant="primary"
+                    onClick={handleOpenQuestionnaire}
+                    style={{
+                      backgroundColor: '#005EB8',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px'
+                    }}
+                  >
+                    <span>📋</span>
+                    Complete {serviceCategory === 'clinical' ? 'Clinical' : 'Non-Clinical'} Questionnaire
+                  </Button>
+                  <p style={{ marginTop: '8px', fontSize: '0.85rem', color: '#6b7280' }}>
+                    The questionnaire will be reviewed by a Procurement Business Partner (PBP).
+                    You will receive an approval certificate to upload once reviewed.
+                  </p>
+                </div>
+              )}
+            </>
           )}
         </div>
 
@@ -710,8 +790,19 @@ const Section2PreScreening = () => {
       {/* Questionnaire Modal */}
       <QuestionnaireModal
         isOpen={isQuestionnaireModalOpen}
-        onClose={handleCloseQuestionnaire}
+        onClose={() => handleCloseQuestionnaire(false)}
+        onComplete={() => handleCloseQuestionnaire(true)}
         type={serviceCategory || 'clinical'}
+        section2Data={{
+          supplierConnection: supplierConnection,
+          connectionDetails: formData.connectionDetails,
+          letterheadAvailable: letterheadAvailable,
+          justification: justification || formData.justification,
+          usageFrequency: usageFrequency,
+          estimatedValue: estimatedValue,
+          serviceCategory: serviceCategory,
+          procurementEngaged: procurementEngaged,
+        }}
       />
     </section>
   );
