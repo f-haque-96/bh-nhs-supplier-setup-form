@@ -332,15 +332,11 @@ const QuestionnaireModal = ({ isOpen, onClose, onComplete, type = 'clinical', se
         </NoticeBox>
       ) : (
         <form onSubmit={handleSubmit(onSubmit)}>
-          {/* INFO BOX - MOVED TO TOP, BEFORE FIRST QUESTION */}
-          <div className="info-box">
-            <span className="info-icon">ℹ️</span>
-            <span>
-              {isClinical
-                ? 'This questionnaire assesses clinical suppliers who will have direct patient contact or access to patient data.'
-                : 'This questionnaire assesses non-clinical suppliers providing goods or services to the Trust.'}
-            </span>
-          </div>
+          
+          <NoticeBox type="info" style={{ marginBottom: 'var(--space-24)' }}>
+            <strong>Important:</strong> This questionnaire will be reviewed by a Procurement Business
+            Partner. Please provide accurate and detailed information.
+          </NoticeBox>
 
           {/* Supplier Name - First Question */}
           <div className="form-group" style={{ marginBottom: '24px' }}>
@@ -375,11 +371,6 @@ const QuestionnaireModal = ({ isOpen, onClose, onComplete, type = 'clinical', se
               )}
             />
           </div>
-
-          <NoticeBox type="info" style={{ marginBottom: 'var(--space-24)' }}>
-            <strong>Important:</strong> This questionnaire will be reviewed by a Procurement Business
-            Partner. Please provide accurate and detailed information.
-          </NoticeBox>
 
           {/* Clinical Questionnaire Questions */}
           {isClinical && (
