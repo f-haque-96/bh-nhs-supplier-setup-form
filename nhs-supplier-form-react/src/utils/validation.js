@@ -58,26 +58,23 @@ export const section1Schema = z.object({
 // ===== Section 2: Pre-screening =====
 
 export const section2Schema = z.object({
-  procurementEngaged: z.enum(['yes', 'no'], {
+  supplierConnection: z.enum(['yes', 'no'], {
     required_error: 'Please select an option',
   }),
   letterheadAvailable: z.enum(['yes', 'no'], {
-    required_error: 'Please select an option',
-  }),
-  soleTraderStatus: z.enum(['yes', 'no'], {
-    required_error: 'Please select an option',
-  }),
-  serviceCategory: z.enum(['clinical', 'non-clinical'], {
     required_error: 'Please select an option',
   }),
   justification: z
     .string()
     .min(10, 'Please provide more detail (minimum 10 characters)')
     .max(350, 'Maximum 350 characters'),
-  usageFrequency: z.enum(['one-off', 'occasional', 'frequent'], {
+  usageFrequency: z.enum(['one-off', 'occasional', 'regular'], {
     required_error: 'Please select an option',
   }),
-  supplierConnection: z.enum(['yes', 'no'], {
+  serviceCategory: z.enum(['clinical', 'non-clinical'], {
+    required_error: 'Please select an option',
+  }),
+  procurementEngaged: z.enum(['yes', 'no'], {
     required_error: 'Please select an option',
   }),
   prescreeningAcknowledgement: z.literal(true, {
