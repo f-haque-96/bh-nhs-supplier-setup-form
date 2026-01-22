@@ -71,6 +71,9 @@ export const section2Schema = z.object({
   usageFrequency: z.enum(['one-off', 'occasional', 'regular'], {
     required_error: 'Please select an option',
   }),
+  soleTraderStatus: z.enum(['yes', 'no'], {
+    required_error: 'Please select an option',
+  }),
   serviceCategory: z.enum(['clinical', 'non-clinical'], {
     required_error: 'Please select an option',
   }),

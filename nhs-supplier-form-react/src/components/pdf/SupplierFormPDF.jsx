@@ -539,10 +539,12 @@ const SupplierFormPDF = ({ formData, uploadedFiles, submissionId, submissionDate
         <TextBlock label="2.3 Justification" content={normalizedData.section2?.justification || normalizedData.justification} />
         {/* Q2.4 Usage Frequency */}
         <Field label="2.4 Usage Frequency" value={formatUsageFrequency(normalizedData.section2?.usageFrequency || normalizedData.usageFrequency)} raw />
-        {/* Q2.5 Service Category */}
-        <Field label="2.5 Service Category" value={formatServiceCategory(normalizedData.section2?.serviceCategory || normalizedData.serviceCategory)} raw />
-        {/* Q2.6 Procurement Engaged */}
-        <Field label="2.6 Procurement Engaged" value={normalizedData.section2?.procurementEngaged || normalizedData.procurementEngaged} />
+        {/* Q2.5 Sole Trader Status */}
+        <Field label="2.5 Sole Trader Status" value={normalizedData.section2?.soleTraderStatus || normalizedData.soleTraderStatus} />
+        {/* Q2.6 Service Category */}
+        <Field label="2.6 Service Category" value={formatServiceCategory(normalizedData.section2?.serviceCategory || normalizedData.serviceCategory)} raw />
+        {/* Q2.7 Procurement Engaged */}
+        <Field label="2.7 Procurement Engaged" value={normalizedData.section2?.procurementEngaged || normalizedData.procurementEngaged} />
         <Field label="Section 2 Acknowledgement" value={(normalizedData.section2?.prescreeningAcknowledgement || normalizedData.prescreeningAcknowledgement) ? 'Confirmed' : 'Not confirmed'} raw />
 
         {/* SECTION 3: Supplier Classification */}

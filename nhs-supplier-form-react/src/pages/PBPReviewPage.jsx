@@ -626,11 +626,15 @@ const PBPReviewPage = () => {
           value={capitalizeWords(submission.section2Summary?.usageFrequency || formData.usageFrequency)}
         />
         <ReviewField
-          label="Q2.5 - Service Category"
+          label="Q2.5 - Sole Trader Status"
+          value={formatYesNo(submission.section2Summary?.soleTraderStatus || formData.soleTraderStatus)}
+        />
+        <ReviewField
+          label="Q2.6 - Service Category"
           value={capitalizeWords(submission.section2Summary?.serviceCategory || submission.questionnaireType)}
         />
         <ReviewField
-          label="Q2.6 - Procurement Engaged"
+          label="Q2.7 - Procurement Engaged"
           value={formatYesNo(submission.section2Summary?.procurementEngaged || formData.procurementEngaged)}
         />
       </ReviewSection>
