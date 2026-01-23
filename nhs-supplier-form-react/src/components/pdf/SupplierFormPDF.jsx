@@ -480,17 +480,12 @@ const SupplierFormPDF = ({ formData, uploadedFiles, submissionId, submissionDate
                 Reference: {submission?.alembaReference || submission?.displayReference || submissionId}
               </Text>
             )}
-            <Text style={styles.coverInfo}>
-              Generated: {generateDate}
-            </Text>
             {companyName && companyName !== 'Unknown Company' && (
               <Text style={styles.coverInfo}>
                 Supplier: {companyName}
-              </Text>
-            )}
-            {isAPControlPDF && submission?.apReview?.supplierNumber && (
-              <Text style={styles.coverInfo}>
-                Supplier Number: {submission.apReview.supplierNumber}
+                {(submission?.supplierNumber || submission?.apReview?.supplierNumber) &&
+                  ` - ${submission?.supplierNumber || submission?.apReview?.supplierNumber}`
+                }
               </Text>
             )}
             {(firstName || lastName) && (
@@ -533,14 +528,14 @@ const SupplierFormPDF = ({ formData, uploadedFiles, submissionId, submissionDate
             <Text style={{ fontSize: 10, color: '#92400e', lineHeight: 1.4 }}>{normalizedData.section2?.connectionDetails || normalizedData.connectionDetails}</Text>
           </View>
         )}
-        {/* Q2.2 Letterhead */}
-        <Field label="2.2 Letterhead Available" value={normalizedData.section2?.letterheadAvailable || normalizedData.letterheadAvailable} />
-        {/* Q2.3 Justification */}
-        <TextBlock label="2.3 Justification" content={normalizedData.section2?.justification || normalizedData.justification} />
-        {/* Q2.4 Usage Frequency */}
-        <Field label="2.4 Usage Frequency" value={formatUsageFrequency(normalizedData.section2?.usageFrequency || normalizedData.usageFrequency)} raw />
-        {/* Q2.5 Sole Trader Status */}
-        <Field label="2.5 Sole Trader Status" value={normalizedData.section2?.soleTraderStatus || normalizedData.soleTraderStatus} />
+        {/* Q2.2 Sole Trader Status (moved from Q2.5) */}
+        <Field label="2.2 Sole Trader Status" value={normalizedData.section2?.soleTraderStatus || normalizedData.soleTraderStatus} />
+        {/* Q2.3 Letterhead (was Q2.2) */}
+        <Field label="2.3 Letterhead Available" value={normalizedData.section2?.letterheadAvailable || normalizedData.letterheadAvailable} />
+        {/* Q2.4 Justification (was Q2.3) */}
+        <TextBlock label="2.4 Justification" content={normalizedData.section2?.justification || normalizedData.justification} />
+        {/* Q2.5 Usage Frequency (was Q2.4) */}
+        <Field label="2.5 Usage Frequency" value={formatUsageFrequency(normalizedData.section2?.usageFrequency || normalizedData.usageFrequency)} raw />
         {/* Q2.6 Service Category */}
         <Field label="2.6 Service Category" value={formatServiceCategory(normalizedData.section2?.serviceCategory || normalizedData.serviceCategory)} raw />
         {/* Q2.7 Procurement Engaged */}
@@ -829,6 +824,16 @@ const SupplierFormPDF = ({ formData, uploadedFiles, submissionId, submissionDate
                 </View>
                 {submission.opwReview.rationale && (
                   <Text style={styles.authComments}>Rationale: {submission.opwReview.rationale}</Text>
+                )}
+                {/* Outside IR35 Process Details */}
+                {submission.opwReview.ir35Status === 'outside' && submission.opwReview.outsideIR35Process && (
+                  <View style={{ marginTop: 6, padding: 8, backgroundColor: '#fef3c7', borderRadius: 4 }}>
+                    <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#92400e', marginBottom: 4 }}>Outside IR35 - Email Process:</Text>
+                    <Text style={{ fontSize: 8, color: '#78350f' }}>To: {submission.opwReview.outsideIR35Process.supplierEmail || 'Supplier'}</Text>
+                    <Text style={{ fontSize: 8, color: '#78350f' }}>CC: {submission.opwReview.outsideIR35Process.requesterEmail || 'Requester'}</Text>
+                    <Text style={{ fontSize: 8, color: '#78350f' }}>CC: {submission.opwReview.outsideIR35Process.contractDrafterCC || 'peter.persaud@nhs.net'}</Text>
+                    <Text style={{ fontSize: 8, color: '#78350f', marginTop: 4 }}>Status: {submission.opwReview.outsideIR35Process.status?.replace(/_/g, ' ') || 'Awaiting Agreement'}</Text>
+                  </View>
                 )}
                 <View style={styles.signatureRow}>
                   <Text>Signature: {submission.opwReview.signature || '_______________'}</Text>

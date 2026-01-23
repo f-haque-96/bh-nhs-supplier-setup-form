@@ -19,6 +19,7 @@ import ProcurementReviewPage from './pages/ProcurementReviewPage';
 import OPWReviewPage from './pages/OPWReviewPage';
 import APControlReviewPage from './pages/APControlReviewPage';
 import ContractDrafterPage from './pages/ContractDrafterPage';
+import RequesterResponsePage from './pages/RequesterResponsePage';
 import HelpPage from './pages/HelpPage';
 import useFormStore from './stores/formStore';
 import { getQueryParam } from './utils/helpers';
@@ -95,6 +96,7 @@ function App() {
       <Route path="/opw-review/:submissionId" element={<OPWReviewPage />} />
       <Route path="/contract-drafter/:submissionId" element={<ContractDrafterPage />} />
       <Route path="/ap-review/:submissionId" element={<APControlReviewPage />} />
+      <Route path="/respond/:submissionId" element={<RequesterResponsePage />} />
       <Route path="/help/faq" element={<HelpPage />} />
     </Routes>
   );

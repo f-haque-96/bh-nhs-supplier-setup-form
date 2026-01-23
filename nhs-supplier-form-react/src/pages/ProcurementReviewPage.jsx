@@ -274,7 +274,7 @@ const ProcurementReviewPage = () => {
           }}>
             <p style={{ margin: '0 0 var(--space-8) 0' }}><strong>Rejected by:</strong> {submission.pbpReview?.signature || 'PBP Reviewer'}</p>
             <p style={{ margin: '0 0 var(--space-8) 0' }}><strong>Date:</strong> {submission.pbpReview?.date ? formatDate(submission.pbpReview.date) : 'Not recorded'}</p>
-            <p style={{ margin: 0 }}><strong>Reason:</strong> {submission.pbpReview?.comments || 'No reason provided'}</p>
+            <p style={{ margin: 0 }}><strong>Reason:</strong> {submission.pbpReview?.finalComments || submission.approvalComments || submission.pbpReview?.comments || 'No reason provided'}</p>
           </div>
           <p style={{ marginTop: 'var(--space-16)', marginBottom: 0, fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)' }}>
             The requester has been notified of this rejection and must address the issues before resubmitting.
@@ -339,6 +339,55 @@ const ProcurementReviewPage = () => {
           </p>
           <p style={{ marginTop: 'var(--space-8)', marginBottom: 0 }}>{procurementReview.comments}</p>
         </NoticeBox>
+      )}
+
+      {/* Previous Authorisations Section */}
+      {submission?.pbpReview && (
+        <div style={{
+          background: '#f0fdf4',
+          border: '1px solid #22c55e',
+          borderRadius: '12px',
+          padding: '20px',
+          marginBottom: '24px'
+        }}>
+          <h3 style={{ color: '#166534', borderBottom: '2px solid #22c55e', paddingBottom: '12px', margin: '0 0 16px 0' }}>
+            Previous Authorisations
+          </h3>
+
+          {/* PBP Approval */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            padding: '12px',
+            background: 'white',
+            borderRadius: '8px',
+            marginBottom: '12px'
+          }}>
+            <span style={{
+              background: '#22c55e',
+              color: 'white',
+              padding: '4px 8px',
+              borderRadius: '4px',
+              fontSize: '0.8rem',
+              fontWeight: '600'
+            }}>
+              ✓ PBP APPROVED
+            </span>
+            <div>
+              <p style={{ margin: 0, fontWeight: '500' }}>
+                Approved by: {submission.pbpReview.signature || submission.pbpReview.signatureName || 'PBP Reviewer'}
+              </p>
+              <p style={{ margin: 0, color: '#6b7280', fontSize: '0.9rem' }}>
+                {submission.pbpReview.date
+                  ? new Date(submission.pbpReview.date).toLocaleDateString('en-GB', {
+                      day: 'numeric', month: 'long', year: 'numeric'
+                    })
+                  : 'Date not recorded'}
+              </p>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Section 1: Requester Information */}

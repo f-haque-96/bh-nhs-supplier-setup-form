@@ -365,7 +365,12 @@ const Section7ReviewSubmit = () => {
     }
 
     // Open the appropriate review page with the SAME submission ID
-    window.open(`/${type}-review/${currentSubmissionId}`, '_blank');
+    // Special handling for requester response page (different URL pattern)
+    if (type === 'respond') {
+      window.open(`/respond/${currentSubmissionId}`, '_blank');
+    } else {
+      window.open(`/${type}-review/${currentSubmissionId}`, '_blank');
+    }
   };
 
   // Reset Test Submission
@@ -441,17 +446,17 @@ const Section7ReviewSubmit = () => {
             <p style={{ margin: 'var(--space-8) 0 0 0', color: '#92400e' }}>{formData.connectionDetails}</p>
           </div>
         )}
-        {/* Q2.2 Letterhead */}
-        <ReviewItem label="2.2 Letterhead Available" value={formData.letterheadAvailable} />
-        {/* Q2.3 Justification */}
+        {/* Q2.2 Sole Trader Status (moved from Q2.5) */}
+        <ReviewItem label="2.2 Sole Trader Status" value={formData.soleTraderStatus} />
+        {/* Q2.3 Letterhead (was Q2.2) */}
+        <ReviewItem label="2.3 Letterhead Available" value={formData.letterheadAvailable} />
+        {/* Q2.4 Justification (was Q2.3) */}
         <div style={{ marginTop: 'var(--space-12)', padding: 'var(--space-12)', backgroundColor: 'var(--color-background)', borderRadius: 'var(--radius-base)' }}>
-          <strong>2.3 Justification:</strong>
+          <strong>2.4 Justification:</strong>
           <p style={{ margin: 'var(--space-8) 0 0 0' }}>{formData.justification}</p>
         </div>
-        {/* Q2.4 Usage Frequency */}
-        <ReviewItem label="2.4 Usage Frequency" value={formatUsageFrequency(formData.usageFrequency)} raw />
-        {/* Q2.5 Sole Trader Status */}
-        <ReviewItem label="2.5 Sole Trader Status" value={formData.soleTraderStatus} />
+        {/* Q2.5 Usage Frequency (was Q2.4) */}
+        <ReviewItem label="2.5 Usage Frequency" value={formatUsageFrequency(formData.usageFrequency)} raw />
         {/* Q2.6 Service Category */}
         <ReviewItem label="2.6 Service Category" value={formatServiceCategory(formData.serviceCategory)} raw />
         {/* Q2.7 Procurement Engaged */}
@@ -586,7 +591,13 @@ const Section7ReviewSubmit = () => {
           <Button variant="outline" onClick={() => handlePreviewAuthorisation('ap')} style={{ color: 'var(--nhs-blue)' }}>
             4. AP Control
           </Button>
+          <Button variant="outline" onClick={() => handlePreviewAuthorisation('respond')} style={{ color: '#ca8a04', borderColor: '#ca8a04', backgroundColor: '#fefce8' }}>
+            5. Requester
+          </Button>
         </div>
+        <p style={{ fontSize: 'var(--font-size-xs)', color: '#6b7280', marginTop: 'var(--space-8)', marginBottom: 0 }}>
+          Use "5. Requester" to view the requester's perspective when PBP requests more information
+        </p>
       </div>
 
       {/* Final Acknowledgement */}

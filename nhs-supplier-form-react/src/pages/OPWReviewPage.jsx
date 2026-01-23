@@ -195,19 +195,42 @@ const OPWReviewPage = () => {
       // Load fresh from localStorage to get any updates
       const currentSubmission = JSON.parse(localStorage.getItem(`submission_${submissionId}`)) || submission;
 
+      // Build OPW review data
+      const opwReviewData = {
+        ir35Status: ir35Determination,
+        rationale,
+        decision: 'approved', // OPW panel approved to proceed
+        signature: signatureName,
+        date: signatureDate,
+        reviewedBy: 'OPW Panel Member', // In real app, this would come from auth
+        reviewedAt: new Date().toISOString(),
+      };
+
+      // If OUTSIDE IR35 - add the special process data
+      if (ir35Determination === 'outside') {
+        opwReviewData.outsideIR35Process = {
+          emailSentToSupplier: true,
+          emailSentDate: new Date().toISOString(),
+          supplierEmail: currentSubmission?.formData?.contactEmail || currentSubmission?.formData?.section4?.contactEmail,
+          supplierName: currentSubmission?.formData?.contactName || currentSubmission?.formData?.section4?.contactName,
+          requesterEmail: currentSubmission?.formData?.nhsEmail || currentSubmission?.formData?.section1?.nhsEmail,
+          requesterName: `${currentSubmission?.formData?.firstName || currentSubmission?.formData?.section1?.firstName || ''} ${currentSubmission?.formData?.lastName || currentSubmission?.formData?.section1?.lastName || ''}`.trim(),
+          contractDrafterCC: 'peter.persaud@nhs.net',
+          status: 'Awaiting_Consultancy_Agreement',
+        };
+      }
+
       // Update submission with OPW review
       const updatedSubmission = {
         ...currentSubmission, // Use fresh data from localStorage
-        // Add OPW review
-        opwReview: {
-          ir35Status: ir35Determination,
-          rationale,
-          decision: 'approved', // OPW panel approved to proceed
-          signature: signatureName,
-          date: signatureDate,
-          reviewedBy: 'OPW Panel Member', // In real app, this would come from auth
-          reviewedAt: new Date().toISOString(),
-        },
+        opwReview: opwReviewData,
+        // Different status based on IR35 determination
+        status: ir35Determination === 'outside'
+          ? 'OPW_Outside_IR35_Awaiting_Agreement'
+          : currentSubmission.status,
+        currentStage: ir35Determination === 'outside'
+          ? 'Consultancy_Agreement'
+          : currentSubmission.currentStage,
       };
 
       console.log('Saving OPW Review Data:', updatedSubmission.opwReview);
@@ -227,12 +250,20 @@ const OPWReviewPage = () => {
       const index = submissions.findIndex(s => s.submissionId === submissionId);
       if (index !== -1) {
         submissions[index].ir35Status = ir35Determination;
+        submissions[index].status = updatedSubmission.status;
         localStorage.setItem('all_submissions', JSON.stringify(submissions));
       }
 
       setSubmission(updatedSubmission);
 
-      alert(`IR35 determination recorded: ${ir35Determination === 'inside' ? 'Inside IR35' : 'Outside IR35'}`);
+      // Show different message based on determination
+      if (ir35Determination === 'outside') {
+        const supplierEmail = currentSubmission?.formData?.contactEmail || currentSubmission?.formData?.section4?.contactEmail || 'supplier@email.com';
+        const requesterEmail = currentSubmission?.formData?.nhsEmail || currentSubmission?.formData?.section1?.nhsEmail || 'requester@nhs.net';
+        alert(`Outside IR35 Determination Submitted.\n\nIn production, an email will be sent to:\n- ${supplierEmail} (Supplier)\n- CC: ${requesterEmail} (Requester)\n- CC: peter.persaud@nhs.net (Contract Drafter)\n\nWith the Sole Trader/Consultancy Agreement form attached.\n\nThe negotiation will happen offline via email. Once signed, the Contract Drafter will upload the agreement.`);
+      } else {
+        alert('Inside IR35 Determination Submitted. Contract Drafter has been notified.');
+      }
     } catch (error) {
       console.error('Error updating submission:', error);
       alert('Failed to update submission. Please try again.');
@@ -356,7 +387,7 @@ const OPWReviewPage = () => {
           }}>
             <p style={{ margin: '0 0 var(--space-8) 0' }}><strong>Rejected by:</strong> {rejectionData?.signature || rejectionData?.reviewedBy || `${rejectedBy} Reviewer`}</p>
             <p style={{ margin: '0 0 var(--space-8) 0' }}><strong>Date:</strong> {rejectionData?.date ? formatDate(rejectionData.date) : 'Not recorded'}</p>
-            <p style={{ margin: 0 }}><strong>Reason:</strong> {rejectionData?.comments || 'No reason provided'}</p>
+            <p style={{ margin: 0 }}><strong>Reason:</strong> {rejectionData?.finalComments || rejectionData?.comments || submission.approvalComments || 'No reason provided'}</p>
           </div>
           <p style={{ marginTop: 'var(--space-16)', marginBottom: 0, fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)' }}>
             The requester has been notified of this rejection and must address the issues before resubmitting.
@@ -670,8 +701,8 @@ const OPWReviewPage = () => {
                   {submission.pbpReview.decision?.toUpperCase()}
                 </span>
               </p>
-              {submission.pbpReview.comments && (
-                <p style={{ margin: '8px 0' }}><strong>Comments:</strong> {submission.pbpReview.comments}</p>
+              {(submission.pbpReview.finalComments || submission.pbpReview.comments) && (
+                <p style={{ margin: '8px 0' }}><strong>Comments:</strong> {submission.pbpReview.finalComments || submission.pbpReview.comments}</p>
               )}
               <div className="signature-info" style={{
                 display: 'flex',
@@ -785,6 +816,31 @@ const OPWReviewPage = () => {
               required
             />
           </div>
+
+          {/* Outside IR35 Warning Box */}
+          {ir35Determination === 'outside' && (
+            <div style={{
+              background: '#fef3c7',
+              border: '1px solid #f59e0b',
+              padding: '16px',
+              borderRadius: '8px',
+              marginBottom: '16px'
+            }}>
+              <h4 style={{ color: '#92400e', margin: '0 0 8px 0' }}>⚠️ Outside IR35 Process</h4>
+              <p style={{ margin: '0', color: '#78350f' }}>
+                Upon submission, an email will be sent to the supplier with the Sole Trader/Consultancy Agreement form.
+              </p>
+              <ul style={{ margin: '8px 0 0 0', paddingLeft: '20px', color: '#78350f' }}>
+                <li><strong>To:</strong> {submission?.formData?.contactEmail || submission?.formData?.section4?.contactEmail || 'Supplier Email'} ({submission?.formData?.contactName || submission?.formData?.section4?.contactName || 'Supplier'})</li>
+                <li><strong>CC:</strong> {submission?.formData?.nhsEmail || submission?.formData?.section1?.nhsEmail || 'Requester'} (Requester)</li>
+                <li><strong>CC:</strong> peter.persaud@nhs.net (Contract Drafter)</li>
+              </ul>
+              <p style={{ margin: '8px 0 0 0', color: '#78350f', fontSize: '0.9rem' }}>
+                The contract negotiation will happen offline via email. Once the agreement is signed,
+                the Contract Drafter will upload it to proceed to AP Control.
+              </p>
+            </div>
+          )}
 
           <Textarea
             label="Rationale for Determination (Required)"

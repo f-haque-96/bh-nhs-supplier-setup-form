@@ -11,7 +11,7 @@ import { formatDate, formatCurrency } from '../utils/helpers';
 import { formatYesNo, formatFieldValue, capitalizeWords, formatSupplierType, formatServiceCategory, formatUsageFrequency, formatServiceTypes } from '../utils/formatters';
 import SupplierFormPDF from '../components/pdf/SupplierFormPDF';
 
-const ReviewItem = ({ label, value, highlight, raw = false }) => {
+const ReviewItem = ({ label, value, highlight, raw = false, badge }) => {
   if (!value && value !== 0) return null;
 
   // Format the value unless raw is true (for pre-formatted values)
@@ -29,10 +29,68 @@ const ReviewItem = ({ label, value, highlight, raw = false }) => {
         padding: highlight ? '2px 8px' : '0',
         paddingLeft: highlight ? '8px' : '16px',
         borderRadius: highlight ? 'var(--radius-sm)' : '0',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '8px',
       }}>
         {displayValue}
+        {badge}
       </div>
     </div>
+  );
+};
+
+// CRN Status Badge Component
+const CRNStatusBadge = ({ crn, verificationData }) => {
+  if (!crn) return null;
+
+  const isVerified = verificationData?.verified;
+  const companyStatus = verificationData?.company_status?.toLowerCase();
+  const isActive = companyStatus === 'active';
+
+  const badgeStyle = {
+    display: 'inline-block',
+    padding: '2px 8px',
+    borderRadius: '4px',
+    fontSize: '0.75rem',
+    fontWeight: '600',
+  };
+
+  if (isVerified && isActive) {
+    return (
+      <span style={{
+        ...badgeStyle,
+        backgroundColor: '#d1fae5',
+        color: '#065f46',
+        border: '1px solid #10b981',
+      }}>
+        ✓ Verified - Active
+      </span>
+    );
+  }
+
+  if (isVerified && !isActive) {
+    return (
+      <span style={{
+        ...badgeStyle,
+        backgroundColor: '#fef3c7',
+        color: '#92400e',
+        border: '1px solid #f59e0b',
+      }}>
+        ⚠ {companyStatus ? companyStatus.charAt(0).toUpperCase() + companyStatus.slice(1) : 'Inactive'}
+      </span>
+    );
+  }
+
+  return (
+    <span style={{
+      ...badgeStyle,
+      backgroundColor: '#fee2e2',
+      color: '#991b1b',
+      border: '1px solid #ef4444',
+    }}>
+      ⚠ Not Verified
+    </span>
   );
 };
 
@@ -101,6 +159,29 @@ const APControlReviewPage = () => {
       || supplierName
       || 'Unknown Company';
 
+    // Get existing AP review from localStorage/state, or build from current form state
+    const existingApReview = currentSubmission?.apReview || submission?.apReview;
+    const apReviewForPDF = existingApReview ? {
+      ...existingApReview,
+      // Override with current state values if they exist
+      supplierName: supplierName || existingApReview.supplierName || companyNameFallback,
+      supplierNumber: supplierNumber || existingApReview.supplierNumber || '',
+      signature: signatureName || existingApReview.signature || existingApReview.signatureName || '',
+      date: signatureDate || existingApReview.date || new Date().toISOString().split('T')[0],
+    } : {
+      supplierName: supplierName || companyNameFallback,
+      supplierNumber: supplierNumber || '',
+      decision: 'approved',
+      signature: signatureName || '',
+      date: signatureDate || new Date().toISOString().split('T')[0],
+      bankDetailsVerified,
+      companyDetailsVerified,
+      vatVerified,
+      insuranceVerified,
+      notes,
+      submittedAt: new Date().toISOString()
+    };
+
     const fullSubmission = {
       ...currentSubmission,
       formData: {
@@ -122,20 +203,10 @@ const APControlReviewPage = () => {
       procurementReview: currentSubmission?.procurementReview || null,
       opwReview: currentSubmission?.opwReview || null,
       contractDrafter: currentSubmission?.contractDrafter || null,
-      // Include current AP review
-      apReview: {
-        supplierName: supplierName || companyNameFallback,
-        supplierNumber: supplierNumber || '',
-        decision: 'approved',
-        signature: signatureName || '',
-        date: signatureDate || new Date().toISOString().split('T')[0],
-        bankDetailsVerified,
-        companyDetailsVerified,
-        vatVerified,
-        insuranceVerified,
-        notes,
-        submittedAt: new Date().toISOString()
-      },
+      // Include AP review with proper signature
+      apReview: apReviewForPDF,
+      // Include supplier number at root level for PDF cover page
+      supplierNumber: supplierNumber || existingApReview?.supplierNumber || '',
       // Uploads
       uploadedFiles: currentSubmission?.uploadedFiles || currentSubmission?.uploads || {},
     };
@@ -415,7 +486,7 @@ const APControlReviewPage = () => {
           }}>
             <p style={{ margin: '0 0 var(--space-8) 0' }}><strong>Rejected by:</strong> {rejectionData?.signature || rejectionData?.reviewedBy || `${rejectedBy} Reviewer`}</p>
             <p style={{ margin: '0 0 var(--space-8) 0' }}><strong>Date:</strong> {rejectionData?.date ? formatDate(rejectionData.date) : 'Not recorded'}</p>
-            <p style={{ margin: 0 }}><strong>Reason:</strong> {rejectionData?.comments || 'No reason provided'}</p>
+            <p style={{ margin: 0 }}><strong>Reason:</strong> {rejectionData?.finalComments || rejectionData?.comments || submission.approvalComments || 'No reason provided'}</p>
           </div>
           <p style={{ marginTop: 'var(--space-16)', marginBottom: 0, fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)' }}>
             The requester has been notified of this rejection and must address the issues before resubmitting.
@@ -474,17 +545,19 @@ const APControlReviewPage = () => {
               </div>
             </div>
           )}
-          {/* Download PDF button - always available */}
-          <PDFDownloadLink
-            document={<SupplierFormPDF submission={getFullSubmissionForPDF()} />}
-            fileName={`NHS-Supplier-Form-${submission?.formData?.companyName?.replace(/\s+/g, '_') || 'Supplier'}-${new Date().toISOString().split('T')[0]}.pdf`}
-          >
-            {({ loading }) => (
-              <Button variant="outline" disabled={loading}>
-                {loading ? 'Generating...' : '📄 Download PDF'}
-              </Button>
-            )}
-          </PDFDownloadLink>
+          {/* Download PDF button - only show if AP review not yet complete */}
+          {!apReview && (
+            <PDFDownloadLink
+              document={<SupplierFormPDF submission={getFullSubmissionForPDF()} />}
+              fileName={`NHS-Supplier-Form-${submission?.formData?.companyName?.replace(/\s+/g, '_') || 'Supplier'}-${new Date().toISOString().split('T')[0]}.pdf`}
+            >
+              {({ loading }) => (
+                <Button variant="outline" disabled={loading}>
+                  {loading ? 'Generating...' : '📄 Download PDF'}
+                </Button>
+              )}
+            </PDFDownloadLink>
+          )}
         </div>
       </div>
 
@@ -565,7 +638,14 @@ const APControlReviewPage = () => {
         <ReviewItem label="Company Name" value={formData.companyName?.toUpperCase()} highlight raw />
         {formData.tradingName && <ReviewItem label="Trading Name" value={formData.tradingName?.toUpperCase()} raw />}
         <ReviewItem label="Supplier Type" value={formatSupplierType(formData.supplierType)} raw />
-        {formData.crn && <ReviewItem label="CRN" value={formData.crn} highlight />}
+        {formData.crn && (
+          <ReviewItem
+            label="CRN"
+            value={formData.crn}
+            highlight
+            badge={<CRNStatusBadge crn={formData.crn} verificationData={formData.crnVerification} />}
+          />
+        )}
         {formData.charityNumber && <ReviewItem label="Charity Number" value={formData.charityNumber} />}
         <ReviewItem label="Registered Address" value={formData.registeredAddress?.toUpperCase()} />
         <ReviewItem label="City" value={formData.city?.toUpperCase()} />
@@ -714,9 +794,9 @@ const APControlReviewPage = () => {
                     {submission.pbpReview.decision?.toUpperCase()}
                   </span>
                 </p>
-                {submission.pbpReview.comments && (
+                {(submission.pbpReview.finalComments || submission.pbpReview.comments) && (
                   <p style={{ marginBottom: 'var(--space-8)' }}>
-                    <strong>Comments:</strong> {submission.pbpReview.comments}
+                    <strong>Comments:</strong> {submission.pbpReview.finalComments || submission.pbpReview.comments}
                   </p>
                 )}
                 <div style={{

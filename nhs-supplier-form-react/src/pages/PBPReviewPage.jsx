@@ -2,15 +2,174 @@
  * PBP (Procurement Business Partner) Review Page
  * Reviews ONLY Section 1 (Requester Info) and Questionnaire answers
  * PBP's role is to review supplier suitability, NOT to set up the supplier
+ *
+ * Supports multi-round information exchange between PBP and Requester
  */
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { PDFDownloadLink } from '@react-pdf/renderer';
-import { Button, NoticeBox, ApprovalStamp, Textarea } from '../components/common';
+import { Button, NoticeBox, ApprovalStamp, Textarea, FileUpload } from '../components/common';
 import { formatDate, formatCurrency } from '../utils/helpers';
 import { formatYesNo, formatFieldValue, capitalizeWords } from '../utils/formatters';
 import PBPApprovalPDF from '../components/pdf/PBPApprovalPDF';
+
+// ===== Exchange Thread Component =====
+// Displays the conversation history between PBP and Requester
+const ExchangeThread = ({ exchanges, onPreviewDocument }) => {
+  if (!exchanges || exchanges.length === 0) return null;
+
+  return (
+    <div style={{
+      marginBottom: 'var(--space-24)',
+      border: '2px solid var(--color-border)',
+      borderRadius: 'var(--radius-base)',
+      overflow: 'hidden',
+    }}>
+      <div style={{
+        padding: 'var(--space-16)',
+        backgroundColor: 'var(--nhs-blue)',
+        color: 'white',
+      }}>
+        <h3 style={{ margin: 0, fontSize: 'var(--font-size-base)' }}>
+          💬 Information Exchange ({exchanges.length} {exchanges.length === 1 ? 'message' : 'messages'})
+        </h3>
+      </div>
+
+      <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
+        {exchanges.map((exchange, index) => {
+          const isPBP = exchange.from === 'pbp';
+          const isDecision = exchange.type === 'decision';
+
+          return (
+            <div
+              key={exchange.id || index}
+              style={{
+                padding: 'var(--space-16)',
+                borderBottom: index < exchanges.length - 1 ? '1px solid var(--color-border)' : 'none',
+                backgroundColor: isDecision
+                  ? (exchange.decision === 'approved' ? '#f0fdf4' : '#fef2f2')
+                  : (isPBP ? '#f0f7ff' : '#fefce8'),
+              }}
+            >
+              {/* Header */}
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: 'var(--space-8)',
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{
+                    padding: '2px 8px',
+                    borderRadius: '4px',
+                    fontSize: '0.75rem',
+                    fontWeight: '600',
+                    backgroundColor: isPBP ? '#005EB8' : '#ca8a04',
+                    color: 'white',
+                  }}>
+                    {isPBP ? 'PBP' : 'REQUESTER'}
+                  </span>
+                  <span style={{ fontWeight: '600' }}>{exchange.fromName}</span>
+                  {isDecision && (
+                    <span style={{
+                      padding: '2px 8px',
+                      borderRadius: '4px',
+                      fontSize: '0.75rem',
+                      fontWeight: '600',
+                      backgroundColor: exchange.decision === 'approved' ? '#22c55e' : '#ef4444',
+                      color: 'white',
+                    }}>
+                      {exchange.decision === 'approved' ? '✓ APPROVED' : '✗ REJECTED'}
+                    </span>
+                  )}
+                </div>
+                <span style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}>
+                  {formatDate(exchange.timestamp)}
+                </span>
+              </div>
+
+              {/* Message */}
+              <div style={{
+                padding: 'var(--space-12)',
+                backgroundColor: 'white',
+                borderRadius: 'var(--radius-sm)',
+                border: '1px solid var(--color-border)',
+              }}>
+                <p style={{ margin: 0, whiteSpace: 'pre-wrap' }}>{exchange.message}</p>
+              </div>
+
+              {/* Attachments */}
+              {exchange.attachments && Object.keys(exchange.attachments).length > 0 && (
+                <div style={{ marginTop: 'var(--space-8)' }}>
+                  <span style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}>
+                    📎 Attachments:
+                  </span>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '4px' }}>
+                    {Object.entries(exchange.attachments).map(([key, file]) => (
+                      <button
+                        key={key}
+                        onClick={() => onPreviewDocument && onPreviewDocument(file)}
+                        style={{
+                          padding: '4px 12px',
+                          backgroundColor: '#eff6ff',
+                          border: '1px solid #005EB8',
+                          borderRadius: '4px',
+                          fontSize: '0.85rem',
+                          color: '#005EB8',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                        }}
+                      >
+                        📄 {file.name || key}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
+// ===== Current Status Badge =====
+const StatusBadge = ({ status, isAwaitingRequester }) => {
+  const getStatusConfig = () => {
+    switch (status) {
+      case 'approved':
+        return { bg: '#22c55e', text: '✓ Approved', color: 'white' };
+      case 'rejected':
+        return { bg: '#ef4444', text: '✗ Rejected', color: 'white' };
+      case 'info_required':
+        return isAwaitingRequester
+          ? { bg: '#f59e0b', text: '⏳ Awaiting Requester Response', color: 'white' }
+          : { bg: '#3b82f6', text: '📋 Requester Responded - Review Needed', color: 'white' };
+      default:
+        return { bg: '#6b7280', text: '⏳ Pending Review', color: 'white' };
+    }
+  };
+
+  const config = getStatusConfig();
+
+  return (
+    <span style={{
+      display: 'inline-block',
+      padding: '8px 16px',
+      backgroundColor: config.bg,
+      color: config.color,
+      borderRadius: '6px',
+      fontWeight: '600',
+      fontSize: '0.9rem',
+    }}>
+      {config.text}
+    </span>
+  );
+};
 
 const ReviewField = ({ label, value, isLongText = false, raw = false }) => {
   if (!value && value !== 0) return null;
@@ -193,6 +352,55 @@ const PBPReviewPage = () => {
     procurementApproval: null
   });
 
+  // Exchange thread state
+  const [exchangeAttachments, setExchangeAttachments] = useState({});
+
+  // Check if we're awaiting requester response (last exchange was from PBP)
+  const exchanges = submission?.pbpReview?.exchanges || [];
+  const lastExchange = exchanges.length > 0 ? exchanges[exchanges.length - 1] : null;
+  const isAwaitingRequester = lastExchange?.from === 'pbp' && lastExchange?.type !== 'decision';
+  const hasRequesterResponded = lastExchange?.from === 'requester';
+
+  // Handle file upload for exchange
+  const handleExchangeFileUpload = async (file) => {
+    if (!file) return;
+
+    // Check file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      alert(`File "${file.name}" is too large. Maximum size is 5MB.`);
+      return;
+    }
+
+    try {
+      const base64 = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+      });
+
+      setExchangeAttachments(prev => ({
+        ...prev,
+        [file.name]: {
+          name: file.name,
+          size: file.size,
+          type: file.type,
+          base64: base64,
+          uploadedAt: new Date().toISOString()
+        }
+      }));
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      alert('Failed to upload file. Please try again.');
+    }
+  };
+
+  // Remove exchange attachment
+  const removeExchangeAttachment = (fileName) => {
+    const { [fileName]: removed, ...rest } = exchangeAttachments;
+    setExchangeAttachments(rest);
+  };
+
   useEffect(() => {
     console.log('=== PBP PAGE: LOADING SUBMISSION ===');
     // Load submission from localStorage
@@ -373,20 +581,54 @@ const PBPReviewPage = () => {
     setIsSubmitting(true);
 
     try {
-      // Update submission with approval status
+      const timestamp = new Date().toISOString();
+      const existingExchanges = submission?.pbpReview?.exchanges || [];
+
+      // Create new exchange entry
+      const newExchange = {
+        id: `EXC-${Date.now()}`,
+        type: action === 'info_required' ? 'info_request' : 'decision',
+        from: 'pbp',
+        fromName: reviewerName,
+        fromEmail: 'pbp@nhs.net', // In production, get from auth
+        message: comments,
+        attachments: Object.keys(exchangeAttachments).length > 0 ? exchangeAttachments : null,
+        timestamp: timestamp,
+        decision: action === 'approve' ? 'approved' : action === 'reject' ? 'rejected' : null,
+      };
+
+      // Build updated exchanges array
+      const updatedExchanges = [...existingExchanges, newExchange];
+
+      // Determine final status
+      const isFinalDecision = action === 'approve' || action === 'reject';
+      const newStatus = isFinalDecision
+        ? (action === 'approve' ? 'approved' : 'rejected')
+        : 'info_required';
+
+      // Update submission with exchange thread
       const updatedSubmission = {
         ...submission,
         pbpReview: {
-          decision: action === 'approve' ? 'approved' : action === 'info_required' ? 'info_required' : 'rejected',
-          comments,
-          signature: reviewerName,
-          date: signatureDate,
-          submittedAt: new Date().toISOString()
+          ...submission?.pbpReview,
+          decision: newStatus,
+          exchanges: updatedExchanges,
+          currentStatus: isFinalDecision ? 'complete' : 'awaiting_requester',
+          // Final signature only on approve/reject
+          ...(isFinalDecision && {
+            signature: reviewerName,
+            date: signatureDate,
+            finalDecision: action,
+            finalComments: comments,
+            completedAt: timestamp,
+          }),
         },
-        status: action === 'approve' ? 'approved' : action === 'info_required' ? 'info_required' : 'rejected',
-        approvalDate: new Date().toISOString(),
-        approver: reviewerName,
-        approvalComments: comments,
+        status: newStatus,
+        ...(isFinalDecision && {
+          approvalDate: timestamp,
+          approver: reviewerName,
+          approvalComments: comments,
+        }),
       };
 
       // Save back to localStorage
@@ -402,18 +644,17 @@ const PBPReviewPage = () => {
 
         const auditEntry = {
           submissionId: submissionId,
-          timestamp: new Date().toISOString(),
+          timestamp: timestamp,
           action: 'PBP_REJECTED',
           user: reviewerName,
           details: `Submission rejected by PBP. Supplier: ${supplierName} | Requester: ${requesterName} (${requesterEmail})`,
-          flag: 'REQUESTER_FLAGGED', // Special flag for rejected requesters
+          flag: 'REQUESTER_FLAGGED',
           requesterEmail: requesterEmail,
           requesterName: requesterName,
           supplierName: supplierName,
           rejectionReason: comments
         };
 
-        // Store audit trail (for production, this would go to SharePoint)
         const auditTrail = JSON.parse(localStorage.getItem('auditTrail') || '[]');
         auditTrail.push(auditEntry);
         localStorage.setItem('auditTrail', JSON.stringify(auditTrail));
@@ -425,16 +666,24 @@ const PBPReviewPage = () => {
       const submissions = JSON.parse(localStorage.getItem('all_submissions') || '[]');
       const index = submissions.findIndex(s => s.submissionId === submissionId);
       if (index !== -1) {
-        submissions[index].status = updatedSubmission.status;
+        submissions[index].status = newStatus;
+        submissions[index].currentStatus = isFinalDecision ? 'complete' : 'awaiting_requester';
         localStorage.setItem('all_submissions', JSON.stringify(submissions));
       }
 
       setSubmission(updatedSubmission);
       setApprovalAction(null);
       setComments('');
+      setExchangeAttachments({});
 
-      const actionText = action === 'approve' ? 'approved' : action === 'info_required' ? 'marked for more information' : 'rejected';
-      alert(`Questionnaire ${actionText} successfully!`);
+      // Show appropriate message
+      if (action === 'info_required') {
+        const requesterEmail = submission?.formData?.section1?.nhsEmail || submission?.formData?.nhsEmail || submission?.submittedBy || 'Unknown';
+        alert(`Information request sent successfully!\n\nThe requester (${requesterEmail}) will be notified and can respond at:\n\n${window.location.origin}/respond/${submissionId}\n\n(In production, an email will be sent automatically)`);
+      } else {
+        const actionText = action === 'approve' ? 'approved' : 'rejected';
+        alert(`Questionnaire ${actionText} successfully!`);
+      }
     } catch (error) {
       console.error('Error updating submission:', error);
       alert('Failed to update submission. Please try again.');
@@ -469,7 +718,13 @@ const PBPReviewPage = () => {
   }
 
   const formData = submission.formData || {};
-  const questionnaireType = submission.questionnaireType || 'clinical';
+  // Get questionnaire type from multiple sources to ensure correct value
+  const questionnaireType = submission.questionnaireType ||
+                           submission.section2Summary?.serviceCategory ||
+                           formData.serviceCategory ||
+                           formData.section2?.serviceCategory ||
+                           localStorage.getItem('questionnaireType') ||
+                           'clinical';
   const questionnaireData = formData[`${questionnaireType}Questionnaire`];
 
   return (
@@ -517,8 +772,54 @@ const PBPReviewPage = () => {
                   </div>
       </div>
 
-      {/* Status Notice */}
-      {submission.approvalComments && (
+      {/* Current Status Banner */}
+      {submission.status && (
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          padding: 'var(--space-16)',
+          backgroundColor: 'var(--color-background)',
+          borderRadius: 'var(--radius-base)',
+          marginBottom: 'var(--space-24)',
+          border: '1px solid var(--color-border)',
+        }}>
+          <div>
+            <span style={{ fontWeight: '600', marginRight: '12px' }}>Current Status:</span>
+            <StatusBadge status={submission.status} isAwaitingRequester={isAwaitingRequester} />
+          </div>
+          {submission.status === 'info_required' && !isAwaitingRequester && hasRequesterResponded && (
+            <span style={{
+              padding: '4px 12px',
+              backgroundColor: '#dbeafe',
+              color: '#1e40af',
+              borderRadius: '4px',
+              fontSize: '0.85rem',
+              fontWeight: '500',
+            }}>
+              New response from requester - please review
+            </span>
+          )}
+        </div>
+      )}
+
+      {/* Exchange Thread - Only show if there are actual back-and-forth exchanges (not just a direct approval/rejection) */}
+      {exchanges.length > 0 && !(exchanges.length === 1 && exchanges[0].type === 'decision') && (
+        <ExchangeThread exchanges={exchanges} onPreviewDocument={handlePreviewDocument} />
+      )}
+
+      {/* Rejection Reason Notice - Show when rejected directly without exchange thread */}
+      {submission.status === 'rejected' && (exchanges.length === 0 || (exchanges.length === 1 && exchanges[0].type === 'decision')) && (
+        <NoticeBox type="error" style={{ marginBottom: 'var(--space-24)' }}>
+          <h4 style={{ margin: '0 0 var(--space-12) 0', color: '#991b1b' }}>Rejection Reason</h4>
+          <p style={{ margin: 0, whiteSpace: 'pre-wrap' }}>
+            {submission.pbpReview?.finalComments || submission.approvalComments || exchanges[0]?.message || 'No reason provided'}
+          </p>
+        </NoticeBox>
+      )}
+
+      {/* Legacy Status Notice - only show if no exchanges exist and not rejected (rejection has its own notice above) */}
+      {submission.approvalComments && exchanges.length === 0 && submission.status !== 'rejected' && (
         <NoticeBox type={submission.status === 'approved' ? 'success' : submission.status === 'info_required' ? 'warning' : 'error'} style={{ marginBottom: 'var(--space-24)' }}>
           <strong>Reviewer Comments:</strong>
           <p style={{ marginTop: 'var(--space-8)', marginBottom: 0 }}>{submission.approvalComments}</p>
@@ -544,8 +845,8 @@ const PBPReviewPage = () => {
             document={
               <PBPApprovalPDF
                 submission={submission}
-                questionnaireType={submission.questionnaireType}
-                questionnaireData={submission.formData?.[`${submission.questionnaireType}Questionnaire`]}
+                questionnaireType={questionnaireType}
+                questionnaireData={submission.formData?.[`${questionnaireType}Questionnaire`] || questionnaireData}
                 pbpReview={{
                   decision: submission.pbpReview?.decision || submission.status,
                   signature: submission.pbpReview?.signature || submission.approver,
@@ -813,18 +1114,27 @@ const PBPReviewPage = () => {
         </div>
       </ReviewSection>
 
-      {/* Approval Actions */}
-      {submission.status === 'pending_review' && (
+      {/* Approval Actions - Show when pending OR when info_required and requester has responded */}
+      {(submission.status === 'pending_review' || (submission.status === 'info_required' && hasRequesterResponded)) && (
         <div style={{
           marginTop: 'var(--space-32)',
           padding: 'var(--space-24)',
-          backgroundColor: 'var(--color-surface)',
+          backgroundColor: hasRequesterResponded ? '#dbeafe' : 'var(--color-surface)',
           borderRadius: 'var(--radius-base)',
-          border: '2px solid var(--color-border)',
+          border: hasRequesterResponded ? '2px solid #3b82f6' : '2px solid var(--color-border)',
         }}>
           <h3 style={{ margin: '0 0 var(--space-16) 0', color: 'var(--nhs-blue)' }}>
-            Review Decision
+            {hasRequesterResponded ? 'Review Requester Response' : 'Review Decision'}
           </h3>
+
+          {hasRequesterResponded && (
+            <NoticeBox type="info" style={{ marginBottom: 'var(--space-16)' }}>
+              <strong>The requester has responded to your information request.</strong>
+              <p style={{ margin: '8px 0 0 0' }}>
+                Please review their response in the exchange thread above, then make a decision or request further information.
+              </p>
+            </NoticeBox>
+          )}
 
           {!approvalAction ? (
             <div style={{ display: 'flex', gap: 'var(--space-12)', flexWrap: 'wrap' }}>
@@ -879,6 +1189,54 @@ const PBPReviewPage = () => {
                 required={approvalAction !== 'approve'}
                 style={{ marginTop: 'var(--space-16)' }}
               />
+
+              {/* File attachment for exchange */}
+              {approvalAction === 'info_required' && (
+                <div style={{ marginTop: 'var(--space-16)' }}>
+                  <label style={{ display: 'block', marginBottom: 'var(--space-8)', fontWeight: 'var(--font-weight-medium)' }}>
+                    Attach Documents (Optional)
+                  </label>
+                  <input
+                    type="file"
+                    accept=".pdf,.png,.jpg,.jpeg,.doc,.docx"
+                    onChange={(e) => e.target.files?.[0] && handleExchangeFileUpload(e.target.files[0])}
+                    style={{ marginBottom: 'var(--space-8)' }}
+                  />
+                  {Object.keys(exchangeAttachments).length > 0 && (
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                      {Object.entries(exchangeAttachments).map(([name, file]) => (
+                        <span
+                          key={name}
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            padding: '4px 8px',
+                            backgroundColor: '#eff6ff',
+                            borderRadius: '4px',
+                            fontSize: '0.85rem',
+                          }}
+                        >
+                          📎 {file.name}
+                          <button
+                            type="button"
+                            onClick={() => removeExchangeAttachment(name)}
+                            style={{
+                              background: 'none',
+                              border: 'none',
+                              color: '#dc2626',
+                              cursor: 'pointer',
+                              padding: '0 4px',
+                            }}
+                          >
+                            ×
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Signature Section */}
               <div style={{ marginTop: 'var(--space-24)', padding: 'var(--space-16)', backgroundColor: 'var(--color-background)', borderRadius: 'var(--radius-base)', border: '1px solid var(--color-border)' }}>

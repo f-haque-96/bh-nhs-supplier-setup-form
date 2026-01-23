@@ -109,8 +109,8 @@ const Section2PreScreening = () => {
   }, [prescreeningProgress.questionnaireId, prescreeningProgress.procurementApproved, updatePrescreeningProgress]);
 
   // Determine which questions should be active/locked (strict one-by-one)
-  // ORDER: Q2.1 Supplier Connection, Q2.2 Letterhead, Q2.3 Justification, Q2.4 Usage Frequency,
-  // Q2.5 Sole Trader Status, Q2.6 Service Category, Q2.7 Procurement, Q2.8 Acknowledgement
+  // ORDER: Q2.1 Supplier Connection, Q2.2 Sole Trader, Q2.3 Letterhead, Q2.4 Justification,
+  // Q2.5 Usage Frequency, Q2.6 Service Category, Q2.7 Procurement, Q2.8 Acknowledgement
 
   const isBlockedByLetterhead = letterheadAvailable === 'no';
 
@@ -131,30 +131,58 @@ const Section2PreScreening = () => {
       locked: false,
       reason: ''
     },
-    // Q2.2 - Letterhead with Bank Details
-    q2_letterhead: {
+    // Q2.2 - Sole Trader Status (unlocks after Q2.1)
+    q2_soleTrader: {
       locked: !supplierConnection || connectionDetailsMissing,
       reason: connectionDetailsMissing
         ? 'Please describe your connection to this supplier first'
         : 'Please answer the supplier connection question first'
     },
-    // Q2.3 - Justification (moved from Q6)
-    q3_justification: {
-      locked: !supplierConnection || connectionDetailsMissing || isBlockedByLetterhead || !letterheadAvailable || (letterheadAvailable === 'yes' && !uploadedFiles.letterhead),
+    // Q2.3 - Letterhead with Bank Details (unlocks after Q2.2)
+    q3_letterhead: {
+      locked: !supplierConnection ||
+              connectionDetailsMissing ||
+              !soleTraderStatus ||
+              (soleTraderStatus === 'yes' && !uploadedFiles.cestForm),
       reason: !supplierConnection
         ? 'Please answer the supplier connection question first'
         : connectionDetailsMissing
         ? 'Please describe your connection to this supplier first'
+        : !soleTraderStatus
+        ? 'Please answer the sole trader question first'
+        : soleTraderStatus === 'yes' && !uploadedFiles.cestForm
+        ? 'Please upload the CEST form'
+        : 'Please complete all previous questions'
+    },
+    // Q2.4 - Justification
+    q4_justification: {
+      locked: !supplierConnection ||
+              connectionDetailsMissing ||
+              !soleTraderStatus ||
+              (soleTraderStatus === 'yes' && !uploadedFiles.cestForm) ||
+              isBlockedByLetterhead ||
+              !letterheadAvailable ||
+              (letterheadAvailable === 'yes' && !uploadedFiles.letterhead),
+      reason: !supplierConnection
+        ? 'Please answer the supplier connection question first'
+        : connectionDetailsMissing
+        ? 'Please describe your connection to this supplier first'
+        : !soleTraderStatus
+        ? 'Please answer the sole trader question first'
+        : soleTraderStatus === 'yes' && !uploadedFiles.cestForm
+        ? 'Please upload the CEST form'
         : isBlockedByLetterhead
         ? 'You must select "Yes" and upload a letterhead to proceed'
         : letterheadAvailable === 'yes' && !uploadedFiles.letterhead
         ? 'Please upload the letterhead document'
         : 'Answer the letterhead question first'
     },
-    // Q2.4 - Usage Frequency
-    q4_usageFrequency: {
+    // Q2.5 - Usage Frequency
+    q5_usageFrequency: {
       locked: !supplierConnection ||
               connectionDetailsMissing ||
+              !soleTraderStatus ||
+              (soleTraderStatus === 'yes' && !uploadedFiles.cestForm) ||
               isBlockedByLetterhead ||
               !letterheadAvailable ||
               (letterheadAvailable === 'yes' && !uploadedFiles.letterhead) ||
@@ -163,6 +191,10 @@ const Section2PreScreening = () => {
         ? 'Please answer the supplier connection question first'
         : connectionDetailsMissing
         ? 'Please describe your connection to this supplier first'
+        : !soleTraderStatus
+        ? 'Please answer the sole trader question first'
+        : soleTraderStatus === 'yes' && !uploadedFiles.cestForm
+        ? 'Please upload the CEST form'
         : isBlockedByLetterhead
         ? 'You must select "Yes" and upload a letterhead to proceed'
         : letterheadAvailable === 'yes' && !uploadedFiles.letterhead
@@ -171,10 +203,12 @@ const Section2PreScreening = () => {
         ? 'Please provide justification (minimum 10 characters)'
         : 'Answer the letterhead question first'
     },
-    // Q2.5 - Sole Trader Status (with CEST form upload if yes)
-    q5_soleTrader: {
+    // Q2.6 - Service Category (Clinical/Non-clinical)
+    q6_serviceCategory: {
       locked: !supplierConnection ||
               connectionDetailsMissing ||
+              !soleTraderStatus ||
+              (soleTraderStatus === 'yes' && !uploadedFiles.cestForm) ||
               isBlockedByLetterhead ||
               !letterheadAvailable ||
               (letterheadAvailable === 'yes' && !uploadedFiles.letterhead) ||
@@ -184,61 +218,40 @@ const Section2PreScreening = () => {
         ? 'Please answer the supplier connection question first'
         : connectionDetailsMissing
         ? 'Please describe your connection to this supplier first'
-        : isBlockedByLetterhead
-        ? 'You must select "Yes" and upload a letterhead to proceed'
-        : letterheadAvailable === 'yes' && !uploadedFiles.letterhead
-        ? 'Please upload the letterhead document'
-        : !isJustificationValid
-        ? 'Please provide justification (minimum 10 characters)'
-        : !usageFrequency
-        ? 'Please select usage frequency first'
-        : 'Please complete all previous questions'
-    },
-    // Q2.6 - Service Category (Clinical/Non-clinical)
-    q6_serviceCategory: {
-      locked: !supplierConnection ||
-              connectionDetailsMissing ||
-              isBlockedByLetterhead ||
-              !letterheadAvailable ||
-              (letterheadAvailable === 'yes' && !uploadedFiles.letterhead) ||
-              !isJustificationValid ||
-              !usageFrequency ||
-              !soleTraderStatus ||
-              (soleTraderStatus === 'yes' && !uploadedFiles.cestForm),
-      reason: !supplierConnection
-        ? 'Please answer the supplier connection question first'
-        : connectionDetailsMissing
-        ? 'Please describe your connection to this supplier first'
-        : isBlockedByLetterhead
-        ? 'You must select "Yes" and upload a letterhead to proceed'
-        : letterheadAvailable === 'yes' && !uploadedFiles.letterhead
-        ? 'Please upload the letterhead document'
-        : !isJustificationValid
-        ? 'Please provide justification (minimum 10 characters)'
-        : !usageFrequency
-        ? 'Please select usage frequency first'
         : !soleTraderStatus
         ? 'Please answer the sole trader question first'
         : soleTraderStatus === 'yes' && !uploadedFiles.cestForm
         ? 'Please upload the CEST form'
+        : isBlockedByLetterhead
+        ? 'You must select "Yes" and upload a letterhead to proceed'
+        : letterheadAvailable === 'yes' && !uploadedFiles.letterhead
+        ? 'Please upload the letterhead document'
+        : !isJustificationValid
+        ? 'Please provide justification (minimum 10 characters)'
+        : !usageFrequency
+        ? 'Please select usage frequency first'
         : 'Please complete all previous questions'
     },
     // Q2.7 - Procurement Engagement
     q7_procurement: {
       locked: !supplierConnection ||
               connectionDetailsMissing ||
+              !soleTraderStatus ||
+              (soleTraderStatus === 'yes' && !uploadedFiles.cestForm) ||
               isBlockedByLetterhead ||
               !letterheadAvailable ||
               (letterheadAvailable === 'yes' && !uploadedFiles.letterhead) ||
               !isJustificationValid ||
               !usageFrequency ||
-              !soleTraderStatus ||
-              (soleTraderStatus === 'yes' && !uploadedFiles.cestForm) ||
               !serviceCategory,
       reason: !supplierConnection
         ? 'Please answer the supplier connection question first'
         : connectionDetailsMissing
         ? 'Please describe your connection to this supplier first'
+        : !soleTraderStatus
+        ? 'Please answer the sole trader question first'
+        : soleTraderStatus === 'yes' && !uploadedFiles.cestForm
+        ? 'Please upload the CEST form'
         : isBlockedByLetterhead
         ? 'You must select "Yes" and upload a letterhead to proceed'
         : letterheadAvailable === 'yes' && !uploadedFiles.letterhead
@@ -247,33 +260,36 @@ const Section2PreScreening = () => {
         ? 'Please provide justification (minimum 10 characters)'
         : !usageFrequency
         ? 'Please select usage frequency first'
-        : !soleTraderStatus
-        ? 'Please answer the sole trader question first'
-        : soleTraderStatus === 'yes' && !uploadedFiles.cestForm
-        ? 'Please upload the CEST form'
         : !serviceCategory
         ? 'Please select service category first'
         : 'Please complete all previous questions'
     },
     // Q2.8 - Acknowledgement
-    // Unlocked when: procurement = "yes" AND approval uploaded, OR procurement = "no" AND questionnaire completed
+    // ONLY unlocks when: procurement = "yes" AND approval document uploaded
+    // If "no" is selected, user must complete questionnaire, wait for PBP approval, then come back and select "yes" with certificate
     q8_acknowledgement: {
       locked: !supplierConnection ||
               connectionDetailsMissing ||
+              !soleTraderStatus ||
+              (soleTraderStatus === 'yes' && !uploadedFiles.cestForm) ||
               isBlockedByLetterhead ||
               !procurementEngaged ||
-              (procurementEngaged === 'yes' && !uploadedFiles.procurementApproval) ||
-              (procurementEngaged === 'no' && !isQuestionnaireComplete),
+              procurementEngaged === 'no' ||
+              (procurementEngaged === 'yes' && !uploadedFiles.procurementApproval),
       reason: !supplierConnection
         ? 'Please answer the supplier connection question first'
         : connectionDetailsMissing
         ? 'Please describe your connection to this supplier first'
+        : !soleTraderStatus
+        ? 'Please answer the sole trader question first'
+        : soleTraderStatus === 'yes' && !uploadedFiles.cestForm
+        ? 'Please upload the CEST form'
         : isBlockedByLetterhead
         ? 'You must select "Yes" and upload a letterhead to proceed'
+        : procurementEngaged === 'no'
+        ? 'Please complete the questionnaire and wait for PBP approval. Once approved, select "Yes" and upload your approval certificate.'
         : procurementEngaged === 'yes' && !uploadedFiles.procurementApproval
         ? 'Please upload the procurement approval document'
-        : procurementEngaged === 'no' && !isQuestionnaireComplete
-        ? 'Please complete the questionnaire for PBP review'
         : 'Please complete all previous questions'
     }
   };
@@ -477,16 +493,80 @@ const Section2PreScreening = () => {
           </div>
         </div>
 
-        {/* QUESTION 2: Letterhead with Bank Details */}
-        <div className={getQuestionClass(questionStatus.q2_letterhead.locked)}>
-          {questionStatus.q2_letterhead.locked && <LockOverlay reason={questionStatus.q2_letterhead.reason} />}
+        {/* QUESTION 2: Sole Trader Status (MOVED FROM Q2.5 TO Q2.2) */}
+        <div className={getQuestionClass(questionStatus.q2_soleTrader.locked)}>
+          {questionStatus.q2_soleTrader.locked && <LockOverlay reason={questionStatus.q2_soleTrader.reason} />}
+
+          <Controller
+            name="soleTraderStatus"
+            control={control}
+            render={({ field }) => (
+              <RadioGroup
+                label={<QuestionLabel section="2" question="2">Is the supplier a Sole Trader or an individual providing personal services?</QuestionLabel>}
+                name="soleTraderStatus"
+                options={[
+                  { value: 'no', label: 'No' },
+                  { value: 'yes', label: 'Yes' },
+                ]}
+                value={field.value}
+                onChange={(value) => {
+                  field.onChange(value);
+                  handleFieldChange('soleTraderStatus', value);
+                }}
+                error={errors.soleTraderStatus?.message}
+                required
+                horizontal
+              />
+            )}
+          />
+
+          {/* CEST Form Upload - Required if Sole Trader */}
+          {soleTraderStatus === 'yes' && !questionStatus.q2_soleTrader.locked && (
+            <>
+              <NoticeBox type="warning" style={{ marginTop: '16px', marginBottom: '16px' }}>
+                <strong>IR35 / Off-Payroll Working Rules Apply</strong>
+                <p style={{ margin: '8px 0 0 0' }}>
+                  For engagements with sole traders or individuals providing personal services, you must complete a
+                  CEST (Check Employment Status for Tax) determination. This will be reviewed by the Off-Payroll Worker (OPW) team.
+                </p>
+                <p style={{ margin: '8px 0 0 0' }}>
+                  <a
+                    href="https://www.gov.uk/guidance/check-employment-status-for-tax"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ color: '#005EB8', fontWeight: '500' }}
+                  >
+                    Click here to complete a CEST assessment ↗
+                  </a>
+                </p>
+              </NoticeBox>
+
+              <FileUpload
+                label="Upload CEST Form"
+                name="cestForm"
+                acceptedTypes={['application/pdf']}
+                acceptedExtensions={['.pdf']}
+                maxSize={FILE_UPLOAD_CONFIG.maxSize}
+                errorMessage="Only PDF files are accepted"
+                currentFile={uploadedFiles.cestForm}
+                onUpload={(file) => setUploadedFile('cestForm', file)}
+                onRemove={() => removeUploadedFile('cestForm')}
+                required
+              />
+            </>
+          )}
+        </div>
+
+        {/* QUESTION 3: Letterhead with Bank Details (WAS Q2.2) */}
+        <div className={getQuestionClass(questionStatus.q3_letterhead.locked)}>
+          {questionStatus.q3_letterhead.locked && <LockOverlay reason={questionStatus.q3_letterhead.reason} />}
 
           <Controller
             name="letterheadAvailable"
             control={control}
             render={({ field }) => (
               <RadioGroup
-                label={<QuestionLabel section="2" question="2">Do you have a letterhead with bank details from the supplier?</QuestionLabel>}
+                label={<QuestionLabel section="2" question="3">Do you have a letterhead with bank details from the supplier?</QuestionLabel>}
                 name="letterheadAvailable"
                 options={[
                   { value: 'yes', label: 'Yes' },
@@ -508,14 +588,14 @@ const Section2PreScreening = () => {
             )}
           />
 
-          {letterheadAvailable === 'no' && !questionStatus.q2_letterhead.locked && (
+          {letterheadAvailable === 'no' && !questionStatus.q3_letterhead.locked && (
             <div className="blocking-warning">
               <span className="warning-icon">⚠</span>
               <p>You must upload bank details on supplier letterhead to proceed. Please select "Yes" and upload the document.</p>
             </div>
           )}
 
-          {letterheadAvailable === 'yes' && !questionStatus.q2_letterhead.locked && (
+          {letterheadAvailable === 'yes' && !questionStatus.q3_letterhead.locked && (
             <FileUpload
               label="Upload Letterhead Document"
               name="letterhead"
@@ -531,16 +611,16 @@ const Section2PreScreening = () => {
           )}
         </div>
 
-        {/* QUESTION 3: Justification (moved from Q6) */}
-        <div className={getQuestionClass(questionStatus.q3_justification.locked)}>
-          {questionStatus.q3_justification.locked && <LockOverlay reason={questionStatus.q3_justification.reason} />}
+        {/* QUESTION 4: Justification (WAS Q2.3) */}
+        <div className={getQuestionClass(questionStatus.q4_justification.locked)}>
+          {questionStatus.q4_justification.locked && <LockOverlay reason={questionStatus.q4_justification.reason} />}
 
           <Controller
             name="justification"
             control={control}
             render={({ field }) => (
               <Textarea
-                label={<QuestionLabel section="2" question="3">Why do you need this supplier?</QuestionLabel>}
+                label={<QuestionLabel section="2" question="4">Why do you need this supplier?</QuestionLabel>}
                 name="justification"
                 value={field.value}
                 onChange={(e) => {
@@ -560,16 +640,16 @@ const Section2PreScreening = () => {
           />
         </div>
 
-        {/* QUESTION 4: Usage Frequency (moved from Q7) */}
-        <div className={getQuestionClass(questionStatus.q4_usageFrequency.locked)}>
-          {questionStatus.q4_usageFrequency.locked && <LockOverlay reason={questionStatus.q4_usageFrequency.reason} />}
+        {/* QUESTION 5: Usage Frequency (WAS Q2.4) */}
+        <div className={getQuestionClass(questionStatus.q5_usageFrequency.locked)}>
+          {questionStatus.q5_usageFrequency.locked && <LockOverlay reason={questionStatus.q5_usageFrequency.reason} />}
 
           <Controller
             name="usageFrequency"
             control={control}
             render={({ field }) => (
               <RadioGroup
-                label={<QuestionLabel section="2" question="4">How often will you use this supplier?</QuestionLabel>}
+                label={<QuestionLabel section="2" question="5">How often will you use this supplier?</QuestionLabel>}
                 name="usageFrequency"
                 options={[
                   {
@@ -600,76 +680,11 @@ const Section2PreScreening = () => {
             )}
           />
 
-          {usageFrequency === 'one-off' && !questionStatus.q4_usageFrequency.locked && (
+          {usageFrequency === 'one-off' && !questionStatus.q5_usageFrequency.locked && (
             <NoticeBox type="info">
               For one-off purchases, you may be able to use a purchase card instead of setting up a new supplier.
               Please check with your Procurement team.
             </NoticeBox>
-          )}
-        </div>
-
-        {/* QUESTION 5: Sole Trader Status */}
-        <div className={getQuestionClass(questionStatus.q5_soleTrader.locked)}>
-          {questionStatus.q5_soleTrader.locked && <LockOverlay reason={questionStatus.q5_soleTrader.reason} />}
-
-          <Controller
-            name="soleTraderStatus"
-            control={control}
-            render={({ field }) => (
-              <RadioGroup
-                label={<QuestionLabel section="2" question="5">Is the supplier a Sole Trader or an individual providing personal services?</QuestionLabel>}
-                name="soleTraderStatus"
-                options={[
-                  { value: 'no', label: 'No' },
-                  { value: 'yes', label: 'Yes' },
-                ]}
-                value={field.value}
-                onChange={(value) => {
-                  field.onChange(value);
-                  handleFieldChange('soleTraderStatus', value);
-                }}
-                error={errors.soleTraderStatus?.message}
-                required
-                horizontal
-              />
-            )}
-          />
-
-          {/* CEST Form Upload - Required if Sole Trader */}
-          {soleTraderStatus === 'yes' && !questionStatus.q5_soleTrader.locked && (
-            <>
-              <NoticeBox type="warning" style={{ marginTop: '16px', marginBottom: '16px' }}>
-                <strong>IR35 / Off-Payroll Working Rules Apply</strong>
-                <p style={{ margin: '8px 0 0 0' }}>
-                  For engagements with sole traders or individuals providing personal services, you must complete a
-                  CEST (Check Employment Status for Tax) determination. This will be reviewed by the Off-Payroll Worker (OPW) team.
-                </p>
-              </NoticeBox>
-
-              <FileUpload
-                label="Upload CEST Form"
-                name="cestForm"
-                acceptedTypes={['application/pdf']}
-                acceptedExtensions={['.pdf']}
-                maxSize={FILE_UPLOAD_CONFIG.maxSize}
-                errorMessage="Only PDF files are accepted"
-                currentFile={uploadedFiles.cestForm}
-                onUpload={(file) => setUploadedFile('cestForm', file)}
-                onRemove={() => removeUploadedFile('cestForm')}
-                required
-              />
-
-              <div style={{ marginTop: '8px', fontSize: '0.85rem', color: '#6b7280' }}>
-                <a
-                  href="https://www.gov.uk/guidance/check-employment-status-for-tax"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{ color: '#005EB8' }}
-                >
-                  Complete CEST assessment on GOV.UK ↗
-                </a>
-              </div>
-            </>
           )}
         </div>
 
@@ -705,15 +720,6 @@ const Section2PreScreening = () => {
         <div className={getQuestionClass(questionStatus.q7_procurement.locked)}>
           {questionStatus.q7_procurement.locked && <LockOverlay reason={questionStatus.q7_procurement.reason} />}
 
-          {/* Info box explaining the process */}
-          {!questionStatus.q7_procurement.locked && (
-            <div className="info-box" style={{ marginBottom: '16px' }}>
-              <span>ℹ️</span>
-              <span style={{ color: '#1e40af' }}>
-                If you have not engaged with Procurement, you will need to complete a {serviceCategory === 'clinical' ? 'Clinical' : 'Non-Clinical'} questionnaire for PBP review.
-              </span>
-            </div>
-          )}
 
           <Controller
             name="procurementEngaged"
@@ -755,24 +761,35 @@ const Section2PreScreening = () => {
           {procurementEngaged === 'no' && !questionStatus.q7_procurement.locked && (
             <>
               {isQuestionnaireComplete ? (
-                <div className="success-badge" style={{
-                  marginTop: '16px',
-                  padding: '12px 16px',
-                  background: '#f0fdf4',
-                  border: '1px solid #22c55e',
-                  borderRadius: '8px',
-                  color: '#166534',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px'
-                }}>
-                  <span style={{ fontSize: '1.2rem' }}>✓</span>
-                  <span style={{ fontWeight: '600' }}>
-                    {serviceCategory === 'clinical' ? 'Clinical' : 'Non-Clinical'} Questionnaire Completed
-                  </span>
-                  <span style={{ marginLeft: 'auto', fontSize: '0.85rem', color: '#15803d' }}>
-                    Submitted for PBP review
-                  </span>
+                <div style={{ marginTop: '16px' }}>
+                  <div className="success-badge" style={{
+                    padding: '12px 16px',
+                    background: '#f0fdf4',
+                    border: '1px solid #22c55e',
+                    borderRadius: '8px',
+                    color: '#166534',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }}>
+                    <span style={{ fontSize: '1.2rem' }}>✓</span>
+                    <span style={{ fontWeight: '600' }}>
+                      {serviceCategory === 'clinical' ? 'Clinical' : 'Non-Clinical'} Questionnaire Completed
+                    </span>
+                    <span style={{ marginLeft: 'auto', fontSize: '0.85rem', color: '#15803d' }}>
+                      Submitted for PBP review
+                    </span>
+                  </div>
+                  <NoticeBox type="warning" style={{ marginTop: '12px' }}>
+                    <strong>Awaiting PBP Approval</strong>
+                    <p style={{ margin: '8px 0 0 0' }}>
+                      Your questionnaire has been submitted to a Procurement Business Partner (PBP) for assessment.
+                      Once approved, you will receive an approval certificate via email.
+                    </p>
+                    <p style={{ margin: '8px 0 0 0', fontWeight: '500' }}>
+                      To proceed: Return to this form, select "Yes - I have procurement approval" above, and upload your approval certificate.
+                    </p>
+                  </NoticeBox>
                 </div>
               ) : (
                 <div style={{ marginTop: '16px' }}>
@@ -799,7 +816,7 @@ const Section2PreScreening = () => {
           )}
         </div>
 
-        {/* QUESTION 7: Pre-screening Acknowledgement */}
+        {/* QUESTION 8: Pre-screening Acknowledgement */}
         <div className={getQuestionClass(questionStatus.q8_acknowledgement.locked)} style={{ marginTop: 'var(--space-32)', paddingTop: 'var(--space-24)', borderTop: '2px solid var(--color-border)' }}>
           {questionStatus.q8_acknowledgement.locked && <LockOverlay reason={questionStatus.q8_acknowledgement.reason} />}
 
