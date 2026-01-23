@@ -330,10 +330,10 @@ const PBPApprovalPDF = ({ submission, questionnaireType, questionnaireData, pbpR
         </View>
 
         {/* PBP Comments - if any */}
-        {pbpReview?.approvalComments && (
+        {(pbpReview?.approvalComments || pbpReview?.comments) && (
           <View style={styles.commentsSection}>
             <Text style={styles.commentsLabel}>PBP Comments:</Text>
-            <Text style={styles.commentsText}>{pbpReview.approvalComments}</Text>
+            <Text style={styles.commentsText}>{pbpReview.approvalComments || pbpReview.comments}</Text>
           </View>
         )}
 
