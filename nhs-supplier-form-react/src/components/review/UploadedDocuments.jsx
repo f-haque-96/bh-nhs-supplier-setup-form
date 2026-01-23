@@ -180,40 +180,30 @@ const UploadedDocuments = () => {
           return (
             <div
               key={upload.fieldName}
+              className="required-document-item"
               style={{
                 padding: '12px 16px',
                 borderRadius: '6px',
                 marginBottom: '8px',
                 background: isUploaded ? '#f0fdf4' : '#fef2f2',
                 border: `1px solid ${isUploaded ? '#22c55e' : '#dc2626'}`,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: '12px',
               }}
             >
-              <div style={{ flex: 1 }}>
+              <div className="document-info-section">
                 <div style={{ fontWeight: '600', color: 'var(--color-text)' }}>
                   {upload.label}
                 </div>
                 {file?.name && (
-                  <div
-                    style={{
-                      fontSize: '0.85rem',
-                      color: '#6b7280',
-                      marginTop: '4px',
-                    }}
-                  >
+                  <div className="document-filename">
                     {file.name}
                   </div>
                 )}
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div className="document-status-section">
                 <span
+                  className="document-status-badge"
                   style={{
-                    fontWeight: '600',
-                    fontSize: '0.9rem',
                     color: isUploaded ? '#22c55e' : '#dc2626',
                   }}
                 >
@@ -221,7 +211,7 @@ const UploadedDocuments = () => {
                 </span>
 
                 {isUploaded && (
-                  <div style={{ display: 'flex', gap: '8px' }}>
+                  <div className="document-action-buttons">
                     {file.file && (
                       <Button variant="outline" size="sm" onClick={() => handlePreview(file)}>
                         Preview

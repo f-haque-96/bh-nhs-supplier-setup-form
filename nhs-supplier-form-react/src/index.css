@@ -2676,3 +2676,383 @@ span.required::after,
   color: #1e40af;
 }
 
+/* ===== Required Document Item Styles ===== */
+.required-document-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.document-info-section {
+  flex: 1;
+  min-width: 0;
+}
+
+.document-filename {
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin-top: 4px;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.document-status-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.document-status-badge {
+  font-weight: 600;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.document-action-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+/* ===== Review Item Styles (Section 7) ===== */
+.review-item-row {
+  display: flex;
+  margin-bottom: var(--space-8);
+  flex-wrap: wrap;
+}
+
+.review-item-label {
+  font-weight: var(--font-weight-medium);
+  min-width: 200px;
+  color: var(--color-text-secondary);
+}
+
+.review-item-value {
+  color: var(--color-text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-left: 16px;
+  flex: 1;
+  word-break: break-word;
+}
+
+/* ===== MOBILE RESPONSIVENESS FIXES ===== */
+@media (max-width: 768px) {
+  /* FIX: Review item layout - stack on mobile */
+  .review-item-row {
+    flex-direction: column !important;
+    gap: 4px !important;
+  }
+
+  .review-item-label {
+    min-width: 0 !important;
+    width: 100% !important;
+  }
+
+  .review-item-value {
+    padding-left: 0 !important;
+    flex-wrap: wrap !important;
+  }
+
+  /* FIX: Required Documents section - stack on mobile */
+  .required-document-item {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
+    padding: 16px !important;
+  }
+
+  .document-info-section {
+    width: 100% !important;
+  }
+
+  .document-status-section {
+    width: 100% !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    justify-content: space-between !important;
+  }
+
+  .document-action-buttons {
+    flex-wrap: wrap !important;
+    width: 100% !important;
+    margin-top: 8px !important;
+  }
+
+  .document-action-buttons button {
+    flex: 1 !important;
+    min-width: 80px !important;
+  }
+
+  /* FIX: Other Required Documents section - buttons cut off */
+  .uploaded-file,
+  .uploaded-document,
+  .upload-item {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
+    padding: 16px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .uploaded-file .file-info,
+  .uploaded-document .file-info {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .uploaded-file .file-name,
+  .uploaded-document .file-name,
+  .document-title {
+    word-break: break-word !important;
+    overflow-wrap: break-word !important;
+    white-space: normal !important;
+    max-width: 100% !important;
+  }
+
+  .uploaded-file button,
+  .uploaded-document button,
+  .upload-item button,
+  .file-actions,
+  .document-actions {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+    width: 100% !important;
+    margin-top: 8px !important;
+  }
+
+  .uploaded-file button,
+  .uploaded-document button {
+    flex: 1 1 auto !important;
+    min-width: 80px !important;
+    padding: 10px 16px !important;
+    font-size: 14px !important;
+    white-space: nowrap !important;
+  }
+
+  /* FIX: Review items - badges cut off */
+  .review-item,
+  .review-field,
+  [style*="display: flex"][style*="marginBottom"] {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 4px !important;
+    width: 100% !important;
+  }
+
+  /* Section 7 ReviewItem component inline styles override */
+  div[style*="minWidth: '200px'"],
+  div[style*="min-width: 200px"] {
+    min-width: 0 !important;
+    width: 100% !important;
+  }
+
+  div[style*="paddingLeft: '16px'"],
+  div[style*="padding-left: 16px"] {
+    padding-left: 0 !important;
+  }
+
+  /* CRN Badge and verification badges */
+  .crn-badge,
+  .verification-badge,
+  .status-badge,
+  [class*="badge"] {
+    display: inline-flex !important;
+    font-size: 11px !important;
+    padding: 4px 8px !important;
+    white-space: nowrap !important;
+    margin-left: 0 !important;
+    margin-top: 4px !important;
+  }
+
+  /* FIX: Tooltips - reposition for mobile */
+  .tooltip-content,
+  .radio-tooltip {
+    position: fixed !important;
+    bottom: auto !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    max-width: calc(100vw - 32px) !important;
+    width: auto !important;
+    min-width: 200px !important;
+    white-space: normal !important;
+    text-align: center !important;
+    z-index: 10000 !important;
+  }
+
+  .tooltip-content::after,
+  .radio-tooltip::after {
+    display: none !important;
+  }
+
+  /* Add overlay for tooltips on mobile */
+  .tooltip:hover::before,
+  .radio-option-with-tooltip:hover::before {
+    content: '' !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    background: rgba(0, 0, 0, 0.3) !important;
+    z-index: 9999 !important;
+  }
+
+  /* FIX: Section headers with Edit button */
+  .section-card-header,
+  .review-section-header,
+  div[style*="display: 'flex'"][style*="justifyContent: 'space-between'"] {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
+  }
+
+  .section-card-header h3,
+  .review-section-header h3 {
+    margin-bottom: 8px !important;
+  }
+
+  .section-card-header button,
+  .review-section-header button,
+  .edit-btn {
+    align-self: flex-start !important;
+  }
+
+  /* FIX: Form container overflow */
+  .form-container,
+  .section-content,
+  .question-block {
+    overflow-x: hidden !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* FIX: Inline flex items that overflow */
+  div[style*="display: flex"],
+  div[style*="display:flex"] {
+    flex-wrap: wrap !important;
+  }
+
+  /* FIX: Email and long text fields */
+  .field-value,
+  .review-value,
+  span[style*="color: 'var(--color-text)'"] {
+    word-break: break-all !important;
+    overflow-wrap: anywhere !important;
+  }
+
+  /* FIX: Section 7 review cards */
+  .section-card,
+  .review-card {
+    padding: 16px !important;
+    margin-bottom: 16px !important;
+  }
+
+  /* FIX: Locked overlay text */
+  .locked-overlay-content {
+    flex-direction: column !important;
+    text-align: center !important;
+    padding: 16px !important;
+    max-width: calc(100% - 32px) !important;
+  }
+
+  .locked-overlay-content svg {
+    margin-bottom: 8px !important;
+  }
+
+  .lock-reason {
+    font-size: 13px !important;
+    line-height: 1.4 !important;
+  }
+
+  /* FIX: Notice boxes text overflow */
+  .notice-box,
+  .notice-box--info,
+  .notice-box--warning,
+  .notice-box--error,
+  .notice-box--success {
+    flex-direction: column !important;
+    padding: 16px !important;
+  }
+
+  .notice-box p,
+  .notice-box span,
+  .notice-box a {
+    word-break: break-word !important;
+    overflow-wrap: break-word !important;
+  }
+
+  /* FIX: Authorisation test buttons */
+  div[style*="display: 'flex'"][style*="flexWrap: 'wrap'"] button,
+  .test-auth-buttons button {
+    flex: 1 1 100% !important;
+    min-width: 0 !important;
+  }
+
+  /* FIX: PDF download buttons */
+  .pdf-download-link,
+  a[style*="textDecoration: 'none'"] {
+    width: 100% !important;
+    display: block !important;
+  }
+
+  .pdf-download-link button,
+  a[style*="textDecoration: 'none'"] button {
+    width: 100% !important;
+  }
+
+  /* FIX: Approval stamp positioning */
+  .approval-stamp {
+    transform: scale(0.8) !important;
+    transform-origin: top right !important;
+  }
+
+  /* FIX: Tables and grids */
+  table {
+    display: block !important;
+    overflow-x: auto !important;
+    white-space: nowrap !important;
+  }
+
+  /* FIX: File type badge */
+  .file-type,
+  .file-icon {
+    min-width: 36px !important;
+    height: 36px !important;
+    font-size: 0.65rem !important;
+  }
+}
+
+/* Extra small devices */
+@media (max-width: 380px) {
+  .uploaded-file button,
+  .uploaded-document button {
+    flex: 1 1 100% !important;
+  }
+
+  .header-title {
+    font-size: 0.9rem !important;
+  }
+
+  .version-badge {
+    display: none !important;
+  }
+
+  .step-label {
+    font-size: 0.55rem !important;
+    max-width: 50px !important;
+  }
+
+  .section-title {
+    font-size: 1rem !important;
+  }
+}
+

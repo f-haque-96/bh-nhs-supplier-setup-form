@@ -24,11 +24,11 @@ const ReviewItem = ({ label, value, badge, raw = false }) => {
   const displayValue = raw ? value : formatFieldValue(value);
 
   return (
-    <div style={{ display: 'flex', marginBottom: 'var(--space-8)' }}>
-      <div style={{ fontWeight: 'var(--font-weight-medium)', minWidth: '200px', color: 'var(--color-text-secondary)' }}>
+    <div className="review-item-row">
+      <div className="review-item-label">
         {label}:
       </div>
-      <div style={{ color: 'var(--color-text)', display: 'flex', alignItems: 'center', gap: '8px', paddingLeft: '16px' }}>
+      <div className="review-item-value">
         {displayValue}
         {badge}
       </div>
