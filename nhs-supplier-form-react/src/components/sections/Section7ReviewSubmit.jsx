@@ -10,7 +10,7 @@ import { pdf } from '@react-pdf/renderer';
 import { Checkbox, Button, NoticeBox, QuestionLabel } from '../common';
 import { FormNavigation } from '../layout';
 import { section7Schema } from '../../utils/validation';
-import { formatDate, formatCurrency } from '../../utils/helpers';
+import { formatCurrency } from '../../utils/helpers';
 import { formatFieldValue, formatSupplierType, formatServiceCategory, formatUsageFrequency, formatServiceTypes, formatOrganisationType } from '../../utils/formatters';
 import useFormStore from '../../stores/formStore';
 import useFormNavigation from '../../hooks/useFormNavigation';
@@ -149,7 +149,7 @@ const Section7ReviewSubmit = () => {
 
   const canSubmit = canSubmitForm() && finalAcknowledgement && canSubmitWithUploads;
 
-  const onSubmit = async (data) => {
+  const onSubmit = async () => {
     // Double-check validation before submitting
     const missing = getMissingFields('all');
 
@@ -438,11 +438,10 @@ const Section7ReviewSubmit = () => {
           <div style={{
             marginTop: 'var(--space-12)',
             padding: 'var(--space-12)',
-            backgroundColor: '#fef3c7',
+            backgroundColor: '#fbf8ec',
             borderRadius: 'var(--radius-base)',
-            border: '2px solid #f59e0b'
           }}>
-            <strong style={{ color: '#b45309' }}>⚠️ Conflict of Interest - Connection Details:</strong>
+            <strong style={{ color: '#b45309' }}> Connection Details:</strong>
             <p style={{ margin: 'var(--space-8) 0 0 0', color: '#92400e' }}>{formData.connectionDetails}</p>
           </div>
         )}

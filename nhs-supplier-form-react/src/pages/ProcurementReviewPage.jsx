@@ -412,11 +412,10 @@ const ProcurementReviewPage = () => {
           <div style={{
             marginTop: 'var(--space-12)',
             padding: 'var(--space-12)',
-            backgroundColor: '#fef3c7',
+            backgroundColor: '#fbf8ec',
             borderRadius: 'var(--radius-base)',
-            border: '2px solid #f59e0b'
           }}>
-            <strong style={{ color: '#b45309' }}>⚠️ Conflict of Interest - Connection Details:</strong>
+            <strong style={{ color: '#b45309' }}> Connection Details:</strong>
             <p style={{ margin: 'var(--space-8) 0 0 0', color: '#92400e' }}>{formData.connectionDetails}</p>
           </div>
         )}
