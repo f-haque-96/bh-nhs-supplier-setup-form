@@ -2871,38 +2871,39 @@ span.required::after,
     margin-top: 4px !important;
   }
 
-  /* FIX: Tooltips - reposition for mobile */
+  /* FIX: Tooltips - better positioning for mobile */
   .tooltip-content,
   .radio-tooltip {
-    position: fixed !important;
-    bottom: auto !important;
-    top: 50% !important;
-    left: 50% !important;
-    transform: translate(-50%, -50%) !important;
-    max-width: calc(100vw - 32px) !important;
-    width: auto !important;
-    min-width: 200px !important;
+    position: absolute !important;
+    bottom: calc(100% + 8px) !important;
+    top: auto !important;
+    left: 0 !important;
+    right: auto !important;
+    transform: none !important;
+    max-width: calc(100vw - 48px) !important;
+    width: max-content !important;
+    min-width: 150px !important;
     white-space: normal !important;
-    text-align: center !important;
-    z-index: 10000 !important;
+    text-align: left !important;
+    z-index: 1000 !important;
+    font-size: 13px !important;
+    padding: 10px 12px !important;
   }
 
   .tooltip-content::after,
   .radio-tooltip::after {
-    display: none !important;
+    left: 20px !important;
+    transform: none !important;
   }
 
-  /* Add overlay for tooltips on mobile */
-  .tooltip:hover::before,
-  .radio-option-with-tooltip:hover::before {
-    content: '' !important;
-    position: fixed !important;
-    top: 0 !important;
+  /* Ensure tooltips don't overflow screen edges */
+  .radio-option-with-tooltip {
+    position: relative !important;
+  }
+
+  .radio-option-with-tooltip .radio-tooltip {
     left: 0 !important;
-    right: 0 !important;
-    bottom: 0 !important;
-    background: rgba(0, 0, 0, 0.3) !important;
-    z-index: 9999 !important;
+    right: auto !important;
   }
 
   /* FIX: Section headers with Edit button */
