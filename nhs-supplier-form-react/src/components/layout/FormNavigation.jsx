@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { Button } from '../common';
+import { Button, CheckIcon } from '../common';
 import useFormStore from '../../stores/formStore';
 
 const FormNavigation = ({ onNext, onPrev, showNext = true, showPrev = true, nextDisabled = false }) => {
@@ -37,9 +37,9 @@ const FormNavigation = ({ onNext, onPrev, showNext = true, showPrev = true, next
           </>
         )}
         {saveStatus === 'saved' && lastSaved && (
-          <>
-            ✓ Saved at {formatSaveTime(lastSaved)}
-          </>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+            <CheckIcon size={14} color="#22c55e" /> Saved at {formatSaveTime(lastSaved)}
+          </span>
         )}
       </div>
 

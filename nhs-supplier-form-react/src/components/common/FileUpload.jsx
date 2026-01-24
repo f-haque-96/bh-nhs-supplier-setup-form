@@ -6,6 +6,7 @@
 import React, { useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import clsx from 'clsx';
+import { XIcon } from './Icons';
 
 const FileUpload = ({
   label,
@@ -182,7 +183,7 @@ const FileUpload = ({
               onClick={onRemove}
               aria-label="Remove file"
             >
-              ✕
+              <XIcon size={14} color="currentColor" />
             </button>
           )}
         </div>

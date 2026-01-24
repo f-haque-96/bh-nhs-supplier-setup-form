@@ -17,3 +17,5 @@ export { default as ApprovalStamp } from './ApprovalStamp';
 export { default as QuestionLabel } from './QuestionLabel';
 export { default as SignatureSection } from './SignatureSection';
 export { default as HelpButton } from './HelpButton';
+export * from './Icons';
+export { default as Icons } from './Icons';

@@ -4,6 +4,7 @@
  */
 
 import { useState } from 'react';
+import { XIcon, HelpCircleIcon, TicketIcon, InfoIcon, ExternalLinkIcon } from './Icons';
 import './HelpButton.css';
 
 const HelpButton = () => {
@@ -13,13 +14,13 @@ const HelpButton = () => {
     {
       label: 'Procurement Helpdesk',
       url: 'https://servicedeskbartshealth.alembacloud.com/production/Portal.aspx?Form=Dashboard&DATABASE=Production&JAVA_FLAG=1&PORTAL=procurement&HTML_TYPE=LITE',
-      icon: '🎫',
+      IconComponent: TicketIcon,
       external: true,
     },
     {
       label: 'FAQ & Guidance',
       url: '/help/faq',
-      icon: '❓',
+      IconComponent: InfoIcon,
       external: false,
       newTab: true,
     },
@@ -32,7 +33,7 @@ const HelpButton = () => {
         onClick={() => setIsOpen(!isOpen)}
         aria-label="Get help"
       >
-        {isOpen ? '✕' : '?'}
+        {isOpen ? <XIcon size={18} color="white" /> : <HelpCircleIcon size={20} color="white" />}
       </button>
 
       {isOpen && (
@@ -46,9 +47,9 @@ const HelpButton = () => {
               rel="noopener noreferrer"
               className="help-link"
             >
-              <span className="help-icon">{link.icon}</span>
+              <span className="help-icon"><link.IconComponent size={16} color="#005EB8" /></span>
               <span>{link.label}</span>
-              {link.external && <span className="external-icon">↗</span>}
+              {link.external && <span className="external-icon"><ExternalLinkIcon size={12} color="#6b7280" /></span>}
             </a>
           ))}
         </div>

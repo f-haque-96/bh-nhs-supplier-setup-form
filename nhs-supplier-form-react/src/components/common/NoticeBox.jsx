@@ -5,6 +5,7 @@
 
 import React from 'react';
 import clsx from 'clsx';
+import { InfoIcon, WarningIcon, CircleXIcon, CircleCheckIcon } from './Icons';
 
 const NoticeBox = ({
   type = 'info', // 'info' | 'warning' | 'error' | 'success'
@@ -12,12 +13,19 @@ const NoticeBox = ({
   className,
   ...props
 }) => {
-  const icons = {
-    info: 'ℹ️',
-    warning: '⚠️',
-    error: '❌',
-    success: '✅',
+  const iconColors = {
+    info: '#3b82f6',
+    warning: '#f59e0b',
+    error: '#ef4444',
+    success: '#22c55e',
   };
+
+  const IconComponent = {
+    info: InfoIcon,
+    warning: WarningIcon,
+    error: CircleXIcon,
+    success: CircleCheckIcon,
+  }[type];
 
   return (
     <div
@@ -26,7 +34,9 @@ const NoticeBox = ({
       aria-live="polite"
       {...props}
     >
-      <span style={{ marginRight: '8px' }}>{icons[type]}</span>
+      <span style={{ marginRight: '8px', display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+        <IconComponent size={20} color={iconColors[type]} />
+      </span>
       <div style={{ flex: 1 }}>{children}</div>
     </div>
   );

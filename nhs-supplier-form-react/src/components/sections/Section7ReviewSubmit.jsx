@@ -7,7 +7,7 @@ import React, { useState, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { pdf } from '@react-pdf/renderer';
-import { Checkbox, Button, NoticeBox, QuestionLabel } from '../common';
+import { Checkbox, Button, NoticeBox, QuestionLabel, CheckIcon, WarningIcon } from '../common';
 import { FormNavigation } from '../layout';
 import { section7Schema } from '../../utils/validation';
 import { formatCurrency } from '../../utils/helpers';
@@ -44,36 +44,76 @@ const CRNStatusBadge = ({ crn, verificationData }) => {
   const isActive = companyStatus === 'active';
 
   if (isVerified && isActive) {
-    return <span className="crn-badge crn-badge--verified">✓ Verified</span>;
+    return <span className="crn-badge crn-badge--verified" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><CheckIcon size={12} color="#22c55e" /> Verified</span>;
   }
 
   if (isVerified && !isActive) {
-    return <span className="crn-badge crn-badge--warning">⚠ {companyStatus}</span>;
+    return <span className="crn-badge crn-badge--warning" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><WarningIcon size={12} color="#f59e0b" /> {companyStatus}</span>;
   }
 
   return <span className="crn-badge crn-badge--unverified">Verification needed</span>;
 };
 
 const ReviewCard = ({ title, children, sectionNumber }) => {
-  const { goToSection, getMissingFields } = useFormStore();
+  const { goToSection, getMissingFields, formData } = useFormStore();
   const missingFields = getMissingFields(sectionNumber);
   const isIncomplete = missingFields.length > 0;
 
+  // Check for sole trader warning on Section 2
+  const isSoleTrader = formData.supplierType === 'sole_trader' || formData.supplierType === 'individual';
+  const needsSoleTraderAttention = sectionNumber === 2 && isSoleTrader && formData.soleTraderStatus !== 'yes';
+
+  // Determine border color and background
+  const getBorderColor = () => {
+    if (isIncomplete) return '#DA291C';
+    if (needsSoleTraderAttention) return '#f59e0b';
+    return 'var(--color-border)';
+  };
+
+  const getBackgroundColor = () => {
+    if (needsSoleTraderAttention && !isIncomplete) return '#fffbeb';
+    return 'var(--color-surface)';
+  };
+
+  const getHeaderColor = () => {
+    if (isIncomplete) return '#DA291C';
+    if (needsSoleTraderAttention) return '#b45309';
+    return 'var(--nhs-blue)';
+  };
+
   return (
     <div
-      className={isIncomplete ? 'section-card section-card--incomplete' : 'section-card'}
+      className={isIncomplete ? 'section-card section-card--incomplete' : needsSoleTraderAttention ? 'section-card section-card--warning' : 'section-card'}
       style={{
         padding: 'var(--space-24)',
         borderRadius: 'var(--radius-base)',
-        border: `2px solid ${isIncomplete ? '#DA291C' : 'var(--color-border)'}`,
+        border: `2px solid ${getBorderColor()}`,
         marginBottom: 'var(--space-16)',
-        backgroundColor: 'var(--color-surface)',
+        backgroundColor: getBackgroundColor(),
+        position: 'relative',
       }}
     >
+      {/* Attention badge for sole trader warning */}
+      {needsSoleTraderAttention && !isIncomplete && (
+        <div style={{
+          position: 'absolute',
+          top: '-10px',
+          left: '16px',
+          background: '#f59e0b',
+          color: 'white',
+          fontSize: '0.75rem',
+          fontWeight: 600,
+          padding: '2px 8px',
+          borderRadius: '4px',
+        }}>
+          Attention Required
+        </div>
+      )}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-16)' }}>
-        <h4 className={isIncomplete ? 'section-card-header' : ''} style={{ margin: 0, color: isIncomplete ? '#DA291C' : 'var(--nhs-blue)' }}>
+        <h4 className={isIncomplete ? 'section-card-header' : ''} style={{ margin: 0, color: getHeaderColor() }}>
           Section {sectionNumber}: {title}
-          {isIncomplete && <span style={{ marginLeft: '8px', fontSize: '0.9rem', fontWeight: 400 }}>⚠ Incomplete</span>}
+          {isIncomplete && <span style={{ marginLeft: '8px', fontSize: '0.9rem', fontWeight: 400, display: 'inline-flex', alignItems: 'center', gap: '4px' }}><WarningIcon size={14} color="#DA291C" /> Incomplete</span>}
+          {needsSoleTraderAttention && !isIncomplete && <span style={{ marginLeft: '8px', fontSize: '0.9rem', fontWeight: 400, display: 'inline-flex', alignItems: 'center', gap: '4px' }}><WarningIcon size={14} color="#f59e0b" /> Review Q2.2</span>}
         </h4>
         <Button
           variant="outline"
@@ -92,6 +132,20 @@ const ReviewCard = ({ title, children, sectionNumber }) => {
               <li key={index} className="missing-field">{field}</li>
             ))}
           </ul>
+        </div>
+      )}
+      {needsSoleTraderAttention && !isIncomplete && (
+        <div style={{
+          marginTop: 'var(--space-16)',
+          padding: 'var(--space-12)',
+          background: '#fef3c7',
+          borderRadius: 'var(--radius-base)',
+          border: '1px solid #f59e0b',
+        }}>
+          <p style={{ margin: 0, color: '#92400e', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <WarningIcon size={16} color="#f59e0b" />
+            <span><strong>Sole Trader selected in Section 3.</strong> Please confirm Q2.2 "Is the supplier a Sole Trader?" is answered as "Yes" and upload the required CEST form.</span>
+          </p>
         </div>
       )}
     </div>
@@ -611,8 +665,8 @@ const Section7ReviewSubmit = () => {
               padding: '16px',
               marginBottom: '24px'
             }}>
-              <h4 style={{ color: '#dc2626', margin: '0 0 12px 0' }}>
-                ⚠️ Missing Required Uploads
+              <h4 style={{ color: '#dc2626', margin: '0 0 12px 0', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <WarningIcon size={18} color="#dc2626" /> Missing Required Uploads
               </h4>
               <p style={{ margin: '0 0 12px 0' }}>
                 The following documents must be uploaded before you can submit:
@@ -642,8 +696,8 @@ const Section7ReviewSubmit = () => {
               padding: '16px',
               marginBottom: '24px'
             }}>
-              <h4 style={{ color: '#92400e', margin: '0 0 12px 0' }}>
-                ⚠️ Please Complete All Required Fields
+              <h4 style={{ color: '#92400e', margin: '0 0 12px 0', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <WarningIcon size={18} color="#f59e0b" /> Please Complete All Required Fields
               </h4>
               <ul style={{ margin: 0, paddingLeft: '20px' }}>
                 {missingFields.map((field, index) => (

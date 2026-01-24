@@ -6,7 +6,7 @@
 import React, { useEffect, useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { RadioGroup, Textarea, Checkbox, FileUpload, NoticeBox, Button, QuestionLabel } from '../common';
+import { RadioGroup, Textarea, Checkbox, FileUpload, NoticeBox, Button, QuestionLabel, WarningIcon, CheckIcon, ClipboardIcon, ExternalLinkIcon } from '../common';
 import { FormNavigation } from '../layout';
 import { section2Schema } from '../../utils/validation';
 import { FILE_UPLOAD_CONFIG } from '../../utils/constants';
@@ -428,8 +428,8 @@ const Section2PreScreening = () => {
                 <li>Family members who work for or own the supplier</li>
                 <li>Any financial benefit from the supplier relationship</li>
               </ul>
-              <p style={{ color: '#dc2626', fontWeight: '600', margin: '0' }}>
-                ⚠️ Failure to declare a conflict of interest may result in disciplinary action.
+              <p style={{ color: '#dc2626', fontWeight: '600', margin: '0', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <WarningIcon size={16} color="#dc2626" /> Failure to declare a conflict of interest may result in disciplinary action.
               </p>
             </div>
 
@@ -494,7 +494,11 @@ const Section2PreScreening = () => {
         </div>
 
         {/* QUESTION 2: Sole Trader Status (MOVED FROM Q2.5 TO Q2.2) */}
-        <div className={getQuestionClass(questionStatus.q2_soleTrader.locked)}>
+        {/* Highlight this question when sole trader is selected in Section 3 but not confirmed here */}
+        <div className={`${getQuestionClass(questionStatus.q2_soleTrader.locked)} ${
+          (formData.supplierType === 'sole_trader' || formData.supplierType === 'individual') &&
+          soleTraderStatus !== 'yes' ? 'question-highlight-warning' : ''
+        }`}>
           {questionStatus.q2_soleTrader.locked && <LockOverlay reason={questionStatus.q2_soleTrader.reason} />}
 
           <Controller
@@ -536,7 +540,7 @@ const Section2PreScreening = () => {
                     rel="noopener noreferrer"
                     style={{ color: '#005EB8', fontWeight: '500' }}
                   >
-                    Click here to complete a CEST assessment ↗
+                    Click here to complete a CEST assessment <ExternalLinkIcon size={12} color="#005EB8" style={{ marginLeft: '4px' }} />
                   </a>
                 </p>
               </NoticeBox>
@@ -590,7 +594,7 @@ const Section2PreScreening = () => {
 
           {letterheadAvailable === 'no' && !questionStatus.q3_letterhead.locked && (
             <div className="blocking-warning">
-              <span className="warning-icon">⚠</span>
+              <span className="warning-icon"><WarningIcon size={18} color="#dc2626" /></span>
               <p>You must upload bank details on supplier letterhead to proceed. Please select "Yes" and upload the document.</p>
             </div>
           )}
@@ -772,7 +776,7 @@ const Section2PreScreening = () => {
                     alignItems: 'center',
                     gap: '8px'
                   }}>
-                    <span style={{ fontSize: '1.2rem' }}>✓</span>
+                    <CheckIcon size={20} color="#22c55e" />
                     <span style={{ fontWeight: '600' }}>
                       {serviceCategory === 'clinical' ? 'Clinical' : 'Non-Clinical'} Questionnaire Completed
                     </span>
@@ -803,7 +807,7 @@ const Section2PreScreening = () => {
                       gap: '8px'
                     }}
                   >
-                    <span>📋</span>
+                    <ClipboardIcon size={16} color="white" />
                     Complete {serviceCategory === 'clinical' ? 'Clinical' : 'Non-Clinical'} Questionnaire
                   </Button>
                   <p style={{ marginTop: '8px', fontSize: '0.85rem', color: '#6b7280' }}>

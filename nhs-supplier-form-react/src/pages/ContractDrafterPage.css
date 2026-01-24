@@ -199,7 +199,7 @@
   margin: 0;
   padding: var(--space-12);
   background: #fef3c7;
-  border-left: 3px solid #f59e0b;
+  border: 1px solid #f59e0b;
   border-radius: var(--radius-sm);
 }
 

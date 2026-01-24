@@ -6,7 +6,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { PDFDownloadLink } from '@react-pdf/renderer';
-import { Button, NoticeBox, ApprovalStamp, Textarea, RadioGroup, SignatureSection, FileUpload, Input } from '../components/common';
+import { Button, NoticeBox, ApprovalStamp, Textarea, RadioGroup, SignatureSection, FileUpload, Input, CheckIcon, XIcon, WarningIcon, DocumentIcon, UploadIcon, CircleXIcon } from '../components/common';
 import { formatDate } from '../utils/helpers';
 import { formatYesNo, formatFieldValue, capitalizeWords, formatServiceCategory, formatUsageFrequency, formatServiceTypes } from '../utils/formatters';
 import SupplierFormPDF from '../components/pdf/SupplierFormPDF';
@@ -377,7 +377,10 @@ const OPWReviewPage = () => {
     return (
       <div style={{ padding: 'var(--space-32)', maxWidth: '800px', margin: '0 auto' }}>
         <NoticeBox type="error">
-          <h3 style={{ marginTop: 0 }}>⛔ Submission Rejected by {rejectedBy}</h3>
+          <h3 style={{ marginTop: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <CircleXIcon size={24} color="#dc2626" />
+            Submission Rejected by {rejectedBy}
+          </h3>
           <p>This submission was rejected at the {rejectedBy} Review stage and cannot proceed to OPW Panel Review.</p>
           <div style={{
             marginTop: 'var(--space-16)',
@@ -454,7 +457,7 @@ const OPWReviewPage = () => {
           >
             {({ loading }) => (
               <Button variant="outline" disabled={loading}>
-                {loading ? 'Generating...' : '📄 Download PDF'}
+                {loading ? 'Generating...' : <><DocumentIcon size={16} style={{ marginRight: '4px' }} /> Download PDF</>}
               </Button>
             )}
           </PDFDownloadLink>
@@ -543,7 +546,7 @@ const OPWReviewPage = () => {
           border: '2px solid #f59e0b',
         }}>
           <h4 style={{ margin: '0 0 var(--space-8) 0', color: '#b45309', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            ⚠️ Conflict of Interest Declared
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}><WarningIcon size={18} color="#b45309" /> Conflict of Interest Declared</span>
           </h4>
           <p style={{ margin: '0 0 var(--space-8) 0', color: '#92400e', fontWeight: 'var(--font-weight-medium)' }}>
             The requester has declared a connection to this supplier:
@@ -563,7 +566,7 @@ const OPWReviewPage = () => {
             <div style={{ marginTop: 'var(--space-16)', padding: 'var(--space-12)', backgroundColor: '#FFF', borderRadius: 'var(--radius-base)', border: '1px solid var(--color-border)' }}>
               <strong>Required Documents:</strong>
               <ul style={{ marginTop: 'var(--space-8)', marginBottom: 0, paddingLeft: '20px' }}>
-                <li>CEST Form: {submission.uploadedFiles?.cestForm ? '✓ Uploaded' : '✗ Missing'}</li>
+                <li>CEST Form: {submission.uploadedFiles?.cestForm ? <><CheckIcon size={14} style={{ marginRight: '4px', verticalAlign: 'middle' }} /> Uploaded</> : <><XIcon size={14} style={{ marginRight: '4px', verticalAlign: 'middle' }} /> Missing</>}</li>
               </ul>
             </div>
           </>
@@ -622,7 +625,7 @@ const OPWReviewPage = () => {
                 border: isOPWRelated ? '1px solid var(--color-warning)' : '1px solid var(--color-border)',
                 marginBottom: 'var(--space-8)',
               }}>
-                <span style={{ fontSize: '24px' }}>{isOPWRelated ? '⚠️' : ''}</span>
+                {isOPWRelated ? <WarningIcon size={24} color="#f59e0b" /> : null}
                 {!isOPWRelated && (
                   <span style={{
                     display: 'inline-flex',
@@ -694,10 +697,11 @@ const OPWReviewPage = () => {
                   fontSize: '0.75rem',
                   fontWeight: 600,
                   textTransform: 'uppercase',
-                  background: submission.pbpReview.decision === 'approved' ? '#22c55e' : '#ef4444',
+                  background: submission.pbpReview.decision === 'approved' ? '#22c55e' :
+                             submission.pbpReview.decision === 'info_required' ? '#f59e0b' : '#ef4444',
                   color: 'white'
                 }}>
-                  {submission.pbpReview.decision?.toUpperCase()}
+                  {submission.pbpReview.decision === 'info_required' ? 'INFO REQUIRED' : submission.pbpReview.decision?.toUpperCase()}
                 </span>
               </p>
               {(submission.pbpReview.finalComments || submission.pbpReview.comments) && (
@@ -747,7 +751,8 @@ const OPWReviewPage = () => {
                   fontSize: '0.75rem',
                   fontWeight: 600,
                   textTransform: 'uppercase',
-                  background: submission.procurementReview.decision === 'approved' ? '#22c55e' : '#ef4444',
+                  background: submission.procurementReview.decision === 'approved' ? '#22c55e' :
+                             submission.procurementReview.decision === 'info_required' ? '#f59e0b' : '#ef4444',
                   color: 'white'
                 }}>
                   {submission.procurementReview.decision?.toUpperCase()}
@@ -825,7 +830,7 @@ const OPWReviewPage = () => {
               borderRadius: '8px',
               marginBottom: '16px'
             }}>
-              <h4 style={{ color: '#92400e', margin: '0 0 8px 0' }}>⚠️ Outside IR35 Process</h4>
+              <h4 style={{ color: '#92400e', margin: '0 0 8px 0', display: 'flex', alignItems: 'center', gap: '8px' }}><WarningIcon size={18} color="#92400e" /> Outside IR35 Process</h4>
               <p style={{ margin: '0', color: '#78350f' }}>
                 Upon submission, an email will be sent to the supplier with the Sole Trader/Consultancy Agreement form.
               </p>
@@ -918,7 +923,7 @@ const OPWReviewPage = () => {
                     borderRadius: 'var(--radius-base)',
                     fontSize: 'var(--font-size-sm)',
                   }}>
-                    ✓ File selected: {contractFile.name}
+                    <CheckIcon size={14} style={{ marginRight: '4px' }} /> File selected: {contractFile.name}
                   </div>
                 )}
               </div>
@@ -945,7 +950,7 @@ const OPWReviewPage = () => {
           ) : (
             <div>
               <NoticeBox type="success" style={{ marginBottom: 'var(--space-16)' }}>
-                <strong>✓ Contract Uploaded Successfully</strong>
+                <strong><CheckIcon size={14} style={{ marginRight: '4px' }} /> Contract Uploaded Successfully</strong>
                 <p style={{ marginTop: 'var(--space-8)', marginBottom: 0 }}>
                   Uploaded by: <strong>{submission.contractDrafter.uploadedBy}</strong>
                 </p>

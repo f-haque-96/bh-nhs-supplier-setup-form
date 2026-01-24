@@ -327,14 +327,8 @@ const QuestionnaireModal = ({ isOpen, onClose, onComplete, type = 'clinical', se
             Procurement Business Partner (PBP) for assessment.
           </p>
           <p style={{ fontWeight: '600', color: '#166534' }}>
-            What happens next:
+            Please wait for their assessment.
           </p>
-          <ol style={{ margin: '8px 0', paddingLeft: '20px' }}>
-            <li>The PBP will review your questionnaire</li>
-            <li>Once approved, you will receive an approval certificate via email</li>
-            <li>Return to this form and select "Yes - I have procurement approval"</li>
-            <li>Upload the approval certificate to proceed</li>
-          </ol>
           <p style={{ marginBottom: 0, fontStyle: 'italic', color: '#6b7280' }}>
             This window will close automatically...
           </p>

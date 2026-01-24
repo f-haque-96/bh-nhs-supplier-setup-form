@@ -4,7 +4,7 @@
  */
 
 import React, { useState } from 'react';
-import { Button } from '../common';
+import { Button, CheckIcon, XIcon, WarningIcon } from '../common';
 import useFormStore from '../../stores/formStore';
 
 // File metadata mapping - which section/question each file belongs to
@@ -205,9 +205,16 @@ const UploadedDocuments = () => {
                   className="document-status-badge"
                   style={{
                     color: isUploaded ? '#22c55e' : '#dc2626',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
                   }}
                 >
-                  {isUploaded ? '✓ Uploaded' : '✗ Required'}
+                  {isUploaded ? (
+                    <><CheckIcon size={14} color="#22c55e" /> Uploaded</>
+                  ) : (
+                    <><XIcon size={14} color="#dc2626" /> Required</>
+                  )}
                 </span>
 
                 {isUploaded && (
@@ -242,7 +249,7 @@ const UploadedDocuments = () => {
             color: '#dc2626',
           }}
         >
-          <strong>⚠ Warning:</strong> You cannot submit the form until all required documents are uploaded.
+          <strong style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><WarningIcon size={14} color="#dc2626" /> Warning:</strong> You cannot submit the form until all required documents are uploaded.
         </div>
       )}
     </div>

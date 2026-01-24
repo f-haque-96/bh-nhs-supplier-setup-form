@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { Button, Input } from '../components/common';
+import { Button, Input, CheckIcon } from '../components/common';
 import { formatDate } from '../utils/helpers';
 import './ContractDrafterPage.css';
 
@@ -129,7 +129,7 @@ const ContractDrafterPage = () => {
     return (
       <div className="contract-drafter-page">
         <div className="success-message">
-          <div className="success-icon">✓</div>
+          <div className="success-icon"><CheckIcon size={32} color="white" /></div>
           <h2>Contract Submitted</h2>
           <p>The contract has been uploaded and sent to AP Control for final approval.</p>
           <div className="submission-details">

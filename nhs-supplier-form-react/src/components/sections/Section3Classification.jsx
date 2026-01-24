@@ -6,7 +6,7 @@
 import React, { useState, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Input, RadioGroup, Select, FileUpload, NoticeBox, Button, Tooltip, QuestionLabel } from '../common';
+import { Input, RadioGroup, Select, FileUpload, NoticeBox, Button, Tooltip, QuestionLabel, CheckIcon, InfoIcon, WarningIcon, LockIcon, ExternalLinkIcon } from '../common';
 import { SupplierIcon } from '../common/SupplierTypeIcons';
 import { FormNavigation } from '../layout';
 import {
@@ -217,7 +217,7 @@ const Section3Classification = () => {
               onClick={() => window.open('https://find-and-update.company-information.service.gov.uk/', '_blank')}
               type="button"
             >
-              Check Companies House ↗
+              Check Companies House <ExternalLinkIcon size={12} color="currentColor" style={{ marginLeft: '4px' }} />
             </Button>
           </Tooltip>
         </div>
@@ -344,7 +344,7 @@ const Section3Classification = () => {
 
               {isValid && companyData && (
                 <NoticeBox type="success" style={{ marginTop: 'var(--space-8)' }}>
-                  <strong>✓ Verified:</strong> {companyData.name}
+                  <strong style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><CheckIcon size={14} color="#22c55e" /> Verified:</strong> {companyData.name}
                   <br />
                   <small>Status: {companyData.status}</small>
                 </NoticeBox>
@@ -352,7 +352,7 @@ const Section3Classification = () => {
 
               {isCorsBlocked && watchCRN && watchCRN.length >= 7 && (
                 <NoticeBox type="info" style={{ marginTop: 'var(--space-8)' }}>
-                  <strong>ℹ️ Verification Unavailable:</strong> Unable to verify CRN due to browser restrictions.
+                  <strong style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><InfoIcon size={14} color="#3b82f6" /> Verification Unavailable:</strong> Unable to verify CRN due to browser restrictions.
                   <br />
                   <small>You can proceed by entering company details manually in the next section. The CRN will still be recorded.</small>
                 </NoticeBox>
@@ -360,7 +360,7 @@ const Section3Classification = () => {
 
               {isNotFound && watchCRN && watchCRN.length >= 7 && (
                 <NoticeBox type="warning" style={{ marginTop: 'var(--space-8)' }}>
-                  <strong>⚠️ Company Not Found:</strong> {crnError || 'CRN not found on Companies House.'}
+                  <strong style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><WarningIcon size={14} color="#f59e0b" /> Company Not Found:</strong> {crnError || 'CRN not found on Companies House.'}
                   <br />
                   <small>Please check the number or enter company details manually in the next section.</small>
                 </NoticeBox>
@@ -420,7 +420,7 @@ const Section3Classification = () => {
         {companiesHouseValue === 'no' && (selectedSupplierType === 'sole_trader' || selectedSupplierType === 'individual') && (
           <div className="id-upload-section">
             <div className="consent-notice">
-              <div className="notice-icon">🔒</div>
+              <div className="notice-icon"><LockIcon size={24} color="#005EB8" /></div>
               <div className="notice-content">
                 <h4>Identification Upload Required</h4>
                 <p>As a sole trader, you are required to provide a copy of your passport or driving licence for verification purposes.</p>

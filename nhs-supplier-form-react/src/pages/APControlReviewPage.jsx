@@ -6,7 +6,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { PDFDownloadLink } from '@react-pdf/renderer';
-import { Button, NoticeBox, Checkbox, Textarea, SignatureSection, Input } from '../components/common';
+import { Button, NoticeBox, Checkbox, Textarea, SignatureSection, Input, CheckIcon, XIcon, WarningIcon, ClockIcon, DocumentIcon, DownloadIcon, LockIcon, ShieldIcon, CircleXIcon } from '../components/common';
 import { formatDate, formatCurrency } from '../utils/helpers';
 import { formatYesNo, formatFieldValue, capitalizeWords, formatSupplierType, formatServiceCategory, formatUsageFrequency, formatServiceTypes } from '../utils/formatters';
 import SupplierFormPDF from '../components/pdf/SupplierFormPDF';
@@ -64,7 +64,7 @@ const CRNStatusBadge = ({ crn, verificationData }) => {
         color: '#065f46',
         border: '1px solid #10b981',
       }}>
-        ✓ Verified - Active
+        <CheckIcon size={14} style={{ marginRight: '4px' }} /> Verified - Active
       </span>
     );
   }
@@ -77,7 +77,7 @@ const CRNStatusBadge = ({ crn, verificationData }) => {
         color: '#92400e',
         border: '1px solid #f59e0b',
       }}>
-        ⚠ {companyStatus ? companyStatus.charAt(0).toUpperCase() + companyStatus.slice(1) : 'Inactive'}
+        <WarningIcon size={14} style={{ marginRight: '4px' }} /> {companyStatus ? companyStatus.charAt(0).toUpperCase() + companyStatus.slice(1) : 'Inactive'}
       </span>
     );
   }
@@ -89,7 +89,7 @@ const CRNStatusBadge = ({ crn, verificationData }) => {
       color: '#991b1b',
       border: '1px solid #ef4444',
     }}>
-      ⚠ Not Verified
+      <WarningIcon size={14} style={{ marginRight: '4px' }} /> Not Verified
     </span>
   );
 };
@@ -476,7 +476,10 @@ const APControlReviewPage = () => {
     return (
       <div style={{ padding: 'var(--space-32)', maxWidth: '800px', margin: '0 auto' }}>
         <NoticeBox type="error">
-          <h3 style={{ marginTop: 0 }}>⛔ Submission Rejected by {rejectedBy}</h3>
+          <h3 style={{ marginTop: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <CircleXIcon size={24} color="#dc2626" />
+            Submission Rejected by {rejectedBy}
+          </h3>
           <p>This submission was rejected at the {rejectedBy} Review stage and cannot proceed to AP Control Verification.</p>
           <div style={{
             marginTop: 'var(--space-16)',
@@ -541,7 +544,7 @@ const APControlReviewPage = () => {
                 AP Status
               </div>
               <div style={{ fontSize: '1.25rem', fontWeight: 700, color: '#065f46' }}>
-                ✓ VERIFIED
+                <CheckIcon size={14} style={{ marginRight: '4px' }} /> VERIFIED
               </div>
             </div>
           )}
@@ -553,7 +556,7 @@ const APControlReviewPage = () => {
             >
               {({ loading }) => (
                 <Button variant="outline" disabled={loading}>
-                  {loading ? 'Generating...' : '📄 Download PDF'}
+                  {loading ? 'Generating...' : <><DocumentIcon size={16} style={{ marginRight: '4px' }} /> Download PDF</>}
                 </Button>
               )}
             </PDFDownloadLink>
@@ -601,9 +604,9 @@ const APControlReviewPage = () => {
               {({ loading, error }) => (
                 <button className="btn-download-complete" disabled={loading}>
                   {loading ? (
-                    <>⏳ Generating PDF...</>
+                    <><ClockIcon size={16} style={{ marginRight: '4px' }} /> Generating PDF...</>
                   ) : (
-                    <>📥 Download Complete PDF with All Authorisations</>
+                    <><DownloadIcon size={16} style={{ marginRight: '4px' }} /> Download Complete PDF with All Authorisations</>
                   )}
                 </button>
               )}
@@ -622,7 +625,7 @@ const APControlReviewPage = () => {
           border: '2px solid #f59e0b',
         }}>
           <h4 style={{ margin: '0 0 var(--space-8) 0', color: '#b45309', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            ⚠️ Conflict of Interest Declared
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}><WarningIcon size={18} color="#b45309" /> Conflict of Interest Declared</span>
           </h4>
           <p style={{ margin: '0 0 var(--space-8) 0', color: '#92400e', fontWeight: 'var(--font-weight-medium)' }}>
             The requester has declared a connection to this supplier:
@@ -687,7 +690,7 @@ const APControlReviewPage = () => {
             gap: 'var(--space-12)',
           }}>
             <div style={{ flex: 1 }}>
-              <strong>✓ Letterhead with Bank Details:</strong> {submission.uploadedFiles.letterhead.name}
+              <strong><CheckIcon size={14} style={{ marginRight: '4px' }} /> Letterhead with Bank Details:</strong> {submission.uploadedFiles.letterhead.name}
             </div>
             <Button
               variant="outline"
@@ -891,7 +894,7 @@ const APControlReviewPage = () => {
             </div>
           )}
 
-          {/* OPW Review - if OPW/IR35 classification */}
+          {/* OPW Review & Contract Agreement - Combined in one box */}
           {submission.procurementReview?.supplierClassification === 'opw_ir35' && submission.opwReview && (
             <div style={{
               padding: 'var(--space-16)',
@@ -899,6 +902,7 @@ const APControlReviewPage = () => {
               borderRadius: 'var(--radius-base)',
               border: '1px solid var(--color-border)',
             }}>
+              {/* OPW Panel / IR35 Section */}
               <h4 style={{ margin: '0 0 var(--space-12) 0', color: 'var(--nhs-blue)', fontSize: 'var(--font-size-base)' }}>
                 OPW Panel / IR35
               </h4>
@@ -945,84 +949,61 @@ const APControlReviewPage = () => {
                      submission.opwReview.approvalDate)}
                   </span>
                 </div>
-                {submission.opwReview.contractUploaded && (
-                  <div style={{
-                    marginTop: 'var(--space-12)',
-                    padding: 'var(--space-12)',
-                    backgroundColor: '#e7f3ff',
-                    borderRadius: 'var(--radius-base)',
-                    border: '1px solid var(--nhs-blue)',
-                  }}>
-                    <p style={{ margin: '0 0 var(--space-8) 0', fontSize: 'var(--font-size-sm)', fontWeight: 'var(--font-weight-semibold)' }}>
-                      <strong>Contract uploaded by:</strong> {submission.opwReview.contractUploadedBy}
-                    </p>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handlePreviewDocument(submission.opwReview.contract)}
-                      style={{ fontSize: 'var(--font-size-sm)' }}
-                    >
-                      Preview Contract
-                    </Button>
-                  </div>
-                )}
               </div>
-            </div>
-          )}
 
-          {/* Contract Drafter - if contract uploaded */}
-          {submission.contractDrafter && (
-            <div style={{
-              padding: 'var(--space-16)',
-              backgroundColor: 'white',
-              borderRadius: 'var(--radius-base)',
-              marginBottom: 'var(--space-16)',
-              border: '1px solid var(--color-border)',
-            }}>
-              <h4 style={{ margin: '0 0 var(--space-12) 0', color: 'var(--nhs-blue)', fontSize: 'var(--font-size-base)' }}>
-                Contract Agreement
-              </h4>
-              <div style={{ fontSize: 'var(--font-size-sm)' }}>
-                <p style={{ marginBottom: 'var(--space-8)' }}>
-                  <strong>Status:</strong>{' '}
-                  <span style={{
-                    display: 'inline-block',
-                    padding: '4px 12px',
-                    borderRadius: 'var(--radius-sm)',
-                    backgroundColor: '#22c55e',
-                    color: 'white',
-                    fontWeight: 'var(--font-weight-semibold)',
-                    fontSize: 'var(--font-size-xs)',
-                  }}>
-                    UPLOADED
-                  </span>
-                </p>
-                <p style={{ marginBottom: 'var(--space-8)' }}>
-                  <strong>Uploaded by:</strong> {submission.contractDrafter.uploadedBy || 'Not recorded'}
-                </p>
+              {/* Contract Agreement Section - within the same box */}
+              {submission.contractDrafter && (
                 <div style={{
-                  marginTop: 'var(--space-12)',
-                  paddingTop: 'var(--space-12)',
-                  borderTop: '1px solid var(--color-border)',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  fontSize: 'var(--font-size-xs)',
-                  color: 'var(--color-text-secondary)',
+                  marginTop: 'var(--space-16)',
+                  paddingTop: 'var(--space-16)',
+                  borderTop: '1px dashed var(--color-border)',
                 }}>
-                  <span>
-                    <strong>Signed by:</strong>{' '}
-                    {submission.contractDrafter.signature ||
-                     submission.contractDrafter.uploadedBy ||
-                     'Not recorded'}
-                  </span>
-                  <span>
-                    <strong>Date:</strong>{' '}
-                    {formatDate(submission.contractDrafter.date ||
-                     submission.contractDrafter.uploadDate ||
-                     submission.contractDrafter.submittedAt)}
-                  </span>
+                  <h4 style={{ margin: '0 0 var(--space-12) 0', color: 'var(--nhs-blue)', fontSize: 'var(--font-size-base)' }}>
+                    Contract Agreement
+                  </h4>
+                  <div style={{ fontSize: 'var(--font-size-sm)' }}>
+                    <p style={{ marginBottom: 'var(--space-8)' }}>
+                      <strong>Status:</strong>{' '}
+                      <span style={{
+                        display: 'inline-block',
+                        padding: '4px 12px',
+                        borderRadius: 'var(--radius-sm)',
+                        backgroundColor: '#22c55e',
+                        color: 'white',
+                        fontWeight: 'var(--font-weight-semibold)',
+                        fontSize: 'var(--font-size-xs)',
+                      }}>
+                        UPLOADED
+                      </span>
+                    </p>
+                    <p style={{ marginBottom: 'var(--space-8)' }}>
+                      <strong>Uploaded by:</strong> {submission.contractDrafter.uploadedBy || 'Not recorded'}
+                    </p>
+                    <div style={{
+                      marginTop: 'var(--space-12)',
+                      paddingTop: 'var(--space-12)',
+                      borderTop: '1px solid var(--color-border)',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      fontSize: 'var(--font-size-xs)',
+                      color: 'var(--color-text-secondary)',
+                    }}>
+                      <span>
+                        <strong>Signed by:</strong>{' '}
+                        {submission.contractDrafter.signature ||
+                         submission.contractDrafter.uploadedBy ||
+                         'Not recorded'}
+                      </span>
+                      <span>
+                        <strong>Date:</strong>{' '}
+                        {formatDate(submission.contractDrafter.date ||
+                         submission.contractDrafter.uploadDate ||
+                         submission.contractDrafter.submittedAt)}
+                      </span>
+                    </div>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           )}
         </div>
@@ -1204,7 +1185,7 @@ const APControlReviewPage = () => {
             submission?.uploadedFiles?.identityDocument ||
             submission?.formData?.section3?.idType) && (
             <div className="document-card document-sensitive">
-              <div className="document-icon">🔒</div>
+              <div className="document-icon"><LockIcon size={24} color="#6b7280" /></div>
               <div className="document-info">
                 <h4>Identity Document</h4>
                 <p className="file-name">
@@ -1214,11 +1195,11 @@ const APControlReviewPage = () => {
                     : 'Passport'}
                 </p>
                 <p className="upload-date sensitive-note">
-                  ⚠️ Sensitive document - View restricted
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}><WarningIcon size={14} /> Sensitive document - View restricted</span>
                 </p>
               </div>
               <div className="document-actions">
-                <span className="verified-badge">✓ Verified</span>
+                <span className="verified-badge"><CheckIcon size={14} style={{ marginRight: '4px' }} /> Verified</span>
               </div>
             </div>
           )}

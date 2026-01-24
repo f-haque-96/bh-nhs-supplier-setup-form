@@ -6,6 +6,7 @@
 import React, { useEffect, useState } from 'react';
 import clsx from 'clsx';
 import useFormStore from '../../stores/formStore';
+import { CheckIcon } from '../common';
 
 const steps = [
   { number: 1, label: 'Requester Info' },
@@ -50,6 +51,14 @@ const ProgressIndicator = () => {
 
     // If section has been visited
     const visited = visitedSections.includes(section);
+
+    // Special case: Section 2 should show warning when sole trader is selected in Section 3
+    // This alerts the user that Q2.2 (Sole Trader Status) needs attention
+    const isSoleTrader = formData.supplierType === 'sole_trader' || formData.supplierType === 'individual';
+    if (section === 2 && isSoleTrader && formData.soleTraderStatus !== 'yes') {
+      // Show warning if sole trader selected but Q2.2 not answered as "yes"
+      return 'warning';
+    }
 
     // Debug logging
     console.log(`Section ${section}:`, {
@@ -109,7 +118,7 @@ const ProgressIndicator = () => {
               }}
             >
               <div className={clsx('step-circle', status)}>
-                {status === 'complete' ? '✓' : step.number}
+                {status === 'complete' ? <CheckIcon size={16} color="white" /> : step.number}
               </div>
               <span className="step-label">{step.label}</span>
             </div>

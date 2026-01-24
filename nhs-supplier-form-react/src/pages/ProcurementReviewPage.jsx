@@ -6,7 +6,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { PDFDownloadLink } from '@react-pdf/renderer';
-import { Button, NoticeBox, ApprovalStamp, Textarea, SignatureSection } from '../components/common';
+import { Button, NoticeBox, ApprovalStamp, Textarea, SignatureSection, CheckIcon, XIcon, CircleXIcon, InfoIcon, WarningIcon, ClockIcon } from '../components/common';
 import { formatDate, formatCurrency } from '../utils/helpers';
 import { formatYesNo, formatFieldValue, capitalizeWords, formatSupplierType, formatServiceCategory, formatUsageFrequency, formatServiceTypes } from '../utils/formatters';
 import SupplierFormPDF from '../components/pdf/SupplierFormPDF';
@@ -264,7 +264,10 @@ const ProcurementReviewPage = () => {
     return (
       <div style={{ padding: 'var(--space-32)', maxWidth: '800px', margin: '0 auto' }}>
         <NoticeBox type="error">
-          <h3 style={{ marginTop: 0 }}>⛔ Submission Rejected by PBP</h3>
+          <h3 style={{ marginTop: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <CircleXIcon size={24} color="#dc2626" />
+            Submission Rejected by PBP
+          </h3>
           <p>This submission was rejected at the PBP Review stage and cannot proceed to Procurement Review.</p>
           <div style={{
             marginTop: 'var(--space-16)',
@@ -344,20 +347,29 @@ const ProcurementReviewPage = () => {
       {/* Previous Authorisations Section */}
       {submission?.pbpReview && (
         <div style={{
-          background: '#f0fdf4',
-          border: '1px solid #22c55e',
+          background: submission.pbpReview.decision === 'approved' ? '#f0fdf4' :
+                     submission.pbpReview.decision === 'info_required' ? '#fffbeb' : '#f0f7ff',
+          border: `1px solid ${submission.pbpReview.decision === 'approved' ? '#22c55e' :
+                              submission.pbpReview.decision === 'info_required' ? '#f59e0b' : '#005EB8'}`,
           borderRadius: '12px',
           padding: '20px',
           marginBottom: '24px'
         }}>
-          <h3 style={{ color: '#166534', borderBottom: '2px solid #22c55e', paddingBottom: '12px', margin: '0 0 16px 0' }}>
+          <h3 style={{
+            color: submission.pbpReview.decision === 'approved' ? '#166534' :
+                   submission.pbpReview.decision === 'info_required' ? '#92400e' : '#005EB8',
+            borderBottom: `2px solid ${submission.pbpReview.decision === 'approved' ? '#22c55e' :
+                                       submission.pbpReview.decision === 'info_required' ? '#f59e0b' : '#005EB8'}`,
+            paddingBottom: '12px',
+            margin: '0 0 16px 0'
+          }}>
             Previous Authorisations
           </h3>
 
-          {/* PBP Approval */}
+          {/* PBP Review Status */}
           <div style={{
             display: 'flex',
-            alignItems: 'center',
+            alignItems: 'flex-start',
             gap: '12px',
             padding: '12px',
             background: 'white',
@@ -365,18 +377,29 @@ const ProcurementReviewPage = () => {
             marginBottom: '12px'
           }}>
             <span style={{
-              background: '#22c55e',
+              background: submission.pbpReview.decision === 'approved' ? '#22c55e' :
+                         submission.pbpReview.decision === 'rejected' ? '#ef4444' :
+                         submission.pbpReview.decision === 'info_required' ? '#f59e0b' : '#6b7280',
               color: 'white',
               padding: '4px 8px',
               borderRadius: '4px',
               fontSize: '0.8rem',
-              fontWeight: '600'
+              fontWeight: '600',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
+              flexShrink: 0
             }}>
-              ✓ PBP APPROVED
+              {submission.pbpReview.decision === 'approved' && <><CheckIcon size={14} color="white" /> PBP APPROVED</>}
+              {submission.pbpReview.decision === 'rejected' && <><XIcon size={14} color="white" /> PBP REJECTED</>}
+              {submission.pbpReview.decision === 'info_required' && <><ClockIcon size={14} color="white" /> INFO REQUIRED</>}
+              {!submission.pbpReview.decision && <><ClockIcon size={14} color="white" /> PENDING</>}
             </span>
             <div>
               <p style={{ margin: 0, fontWeight: '500' }}>
-                Approved by: {submission.pbpReview.signature || submission.pbpReview.signatureName || 'PBP Reviewer'}
+                {submission.pbpReview.decision === 'approved' ? 'Approved' :
+                 submission.pbpReview.decision === 'rejected' ? 'Rejected' :
+                 submission.pbpReview.decision === 'info_required' ? 'Awaiting requester response' : 'Pending'} by: {submission.pbpReview.signature || submission.pbpReview.signatureName || 'PBP Reviewer'}
               </p>
               <p style={{ margin: 0, color: '#6b7280', fontSize: '0.9rem' }}>
                 {submission.pbpReview.date
@@ -385,6 +408,11 @@ const ProcurementReviewPage = () => {
                     })
                   : 'Date not recorded'}
               </p>
+              {(submission.pbpReview.finalComments || submission.pbpReview.comments) && (
+                <p style={{ margin: '8px 0 0 0', fontSize: '0.9rem', color: '#4b5563' }}>
+                  <strong>Comments:</strong> {submission.pbpReview.finalComments || submission.pbpReview.comments}
+                </p>
+              )}
             </div>
           </div>
         </div>
@@ -620,15 +648,16 @@ const ProcurementReviewPage = () => {
               <Button
                 variant="primary"
                 onClick={() => setApprovalAction('approved')}
-                style={{ backgroundColor: 'var(--color-success)' }}
+                style={{ backgroundColor: 'var(--color-success)', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
               >
-                ✓ Approve
+                <CheckIcon size={16} color="white" /> Approve
               </Button>
               <Button
                 variant="danger"
                 onClick={() => setApprovalAction('rejected')}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
               >
-                ✕ Reject
+                <XIcon size={16} color="white" /> Reject
               </Button>
             </div>
           ) : (
@@ -664,8 +693,10 @@ const ProcurementReviewPage = () => {
                     Alemba Call Reference Number
                     <span style={{ color: '#dc2626' }}> *</span>
                   </label>
-                  <div className="info-box" style={{ marginBottom: '12px' }}>
-                    <span className="info-icon">ℹ️</span>
+                  <div className="info-box" style={{ marginBottom: '12px', display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
+                    <span className="info-icon" style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+                      <InfoIcon size={18} color="#3b82f6" />
+                    </span>
                     <span style={{ color: '#1e40af' }}>
                       Enter the Alemba call reference number for this supplier setup request.
                       This will become the primary reference for tracking this supplier.

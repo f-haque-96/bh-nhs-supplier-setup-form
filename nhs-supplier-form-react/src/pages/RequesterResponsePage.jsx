@@ -7,7 +7,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { PDFDownloadLink } from '@react-pdf/renderer';
-import { Button, NoticeBox, Textarea } from '../components/common';
+import { Button, NoticeBox, Textarea, PaperclipIcon } from '../components/common';
 import { formatDate } from '../utils/helpers';
 import PBPApprovalPDF from '../components/pdf/PBPApprovalPDF';
 
@@ -27,7 +27,7 @@ const ExchangeThread = ({ exchanges, onPreviewDocument }) => {
         backgroundColor: 'var(--nhs-blue)',
         color: 'white',
       }}>
-        <h3 style={{ margin: 0, fontSize: 'var(--font-size-base)' }}>
+        <h3 style={{ margin: 0, fontSize: 'var(--font-size-base)', color: 'white' }}>
           Conversation History ({exchanges.length} {exchanges.length === 1 ? 'message' : 'messages'})
         </h3>
       </div>
@@ -98,8 +98,8 @@ const ExchangeThread = ({ exchanges, onPreviewDocument }) => {
               {/* Attachments */}
               {exchange.attachments && Object.keys(exchange.attachments).length > 0 && (
                 <div style={{ marginTop: 'var(--space-8)' }}>
-                  <span style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}>
-                    Attachments:
+                  <span style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                    <PaperclipIcon size={14} color="var(--color-text-secondary)" /> Attachments:
                   </span>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '4px' }}>
                     {Object.entries(exchange.attachments).map(([key, file]) => (

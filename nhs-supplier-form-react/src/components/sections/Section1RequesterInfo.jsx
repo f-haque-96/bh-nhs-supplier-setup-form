@@ -6,7 +6,7 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Input, QuestionLabel } from '../common';
+import { Input, QuestionLabel, InfoIcon } from '../common';
 import { FormNavigation } from '../layout';
 import { section1Schema } from '../../utils/validation';
 import { formatPhoneNumber } from '../../utils/helpers';
@@ -145,7 +145,7 @@ const Section1RequesterInfo = () => {
               placeholder="firstname.lastname@nhs.net"
             />
             <div className="info-box">
-              <span className="info-icon">ℹ️</span>
+              <span className="info-icon"><InfoIcon size={16} color="#3b82f6" /></span>
               <span>This must be your official NHS email address (ending in @nhs.net)</span>
             </div>
           </div>

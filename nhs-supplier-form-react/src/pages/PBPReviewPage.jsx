@@ -9,7 +9,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { PDFDownloadLink } from '@react-pdf/renderer';
-import { Button, NoticeBox, ApprovalStamp, Textarea, FileUpload } from '../components/common';
+import { Button, NoticeBox, ApprovalStamp, Textarea, FileUpload, CheckIcon, XIcon, WarningIcon, ClockIcon, ClipboardIcon, DocumentIcon, DownloadIcon, CircleCheckIcon, CircleXIcon, PaperclipIcon } from '../components/common';
 import { formatDate, formatCurrency } from '../utils/helpers';
 import { formatYesNo, formatFieldValue, capitalizeWords } from '../utils/formatters';
 import PBPApprovalPDF from '../components/pdf/PBPApprovalPDF';
@@ -31,8 +31,8 @@ const ExchangeThread = ({ exchanges, onPreviewDocument }) => {
         backgroundColor: 'var(--nhs-blue)',
         color: 'white',
       }}>
-        <h3 style={{ margin: 0, fontSize: 'var(--font-size-base)' }}>
-          💬 Information Exchange ({exchanges.length} {exchanges.length === 1 ? 'message' : 'messages'})
+        <h3 style={{ margin: 0, fontSize: 'var(--font-size-base)', display: 'flex', alignItems: 'center', gap: '8px', color: 'white' }}>
+          <ClipboardIcon size={18} color="white" /> Information Exchange ({exchanges.length} {exchanges.length === 1 ? 'message' : 'messages'})
         </h3>
       </div>
 
@@ -80,7 +80,7 @@ const ExchangeThread = ({ exchanges, onPreviewDocument }) => {
                       backgroundColor: exchange.decision === 'approved' ? '#22c55e' : '#ef4444',
                       color: 'white',
                     }}>
-                      {exchange.decision === 'approved' ? '✓ APPROVED' : '✗ REJECTED'}
+                      {exchange.decision === 'approved' ? <><CheckIcon size={14} /> APPROVED</> : <><XIcon size={14} /> REJECTED</>}
                     </span>
                   )}
                 </div>
@@ -102,8 +102,8 @@ const ExchangeThread = ({ exchanges, onPreviewDocument }) => {
               {/* Attachments */}
               {exchange.attachments && Object.keys(exchange.attachments).length > 0 && (
                 <div style={{ marginTop: 'var(--space-8)' }}>
-                  <span style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}>
-                    📎 Attachments:
+                  <span style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                    <PaperclipIcon size={14} color="var(--color-text-secondary)" /> Attachments:
                   </span>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '4px' }}>
                     {Object.entries(exchange.attachments).map(([key, file]) => (
@@ -123,7 +123,7 @@ const ExchangeThread = ({ exchanges, onPreviewDocument }) => {
                           gap: '4px',
                         }}
                       >
-                        📄 {file.name || key}
+                        <DocumentIcon size={14} style={{ marginRight: '4px' }} /> {file.name || key}
                       </button>
                     ))}
                   </div>
@@ -142,23 +142,26 @@ const StatusBadge = ({ status, isAwaitingRequester }) => {
   const getStatusConfig = () => {
     switch (status) {
       case 'approved':
-        return { bg: '#22c55e', text: '✓ Approved', color: 'white' };
+        return { bg: '#22c55e', text: 'Approved', color: 'white', Icon: CheckIcon };
       case 'rejected':
-        return { bg: '#ef4444', text: '✗ Rejected', color: 'white' };
+        return { bg: '#ef4444', text: 'Rejected', color: 'white', Icon: XIcon };
       case 'info_required':
         return isAwaitingRequester
-          ? { bg: '#f59e0b', text: '⏳ Awaiting Requester Response', color: 'white' }
-          : { bg: '#3b82f6', text: '📋 Requester Responded - Review Needed', color: 'white' };
+          ? { bg: '#f59e0b', text: 'Awaiting Requester Response', color: 'white', Icon: ClockIcon }
+          : { bg: '#3b82f6', text: 'Requester Responded - Review Needed', color: 'white', Icon: ClipboardIcon };
       default:
-        return { bg: '#6b7280', text: '⏳ Pending Review', color: 'white' };
+        return { bg: '#6b7280', text: 'Pending Review', color: 'white', Icon: ClockIcon };
     }
   };
 
   const config = getStatusConfig();
+  const IconComponent = config.Icon;
 
   return (
     <span style={{
-      display: 'inline-block',
+      display: 'inline-flex',
+      alignItems: 'center',
+      gap: '6px',
       padding: '8px 16px',
       backgroundColor: config.bg,
       color: config.color,
@@ -166,6 +169,7 @@ const StatusBadge = ({ status, isAwaitingRequester }) => {
       fontWeight: '600',
       fontSize: '0.9rem',
     }}>
+      <IconComponent size={16} color="white" />
       {config.text}
     </span>
   );
@@ -836,7 +840,7 @@ const PBPReviewPage = () => {
           marginBottom: 'var(--space-24)',
         }}>
           <h3 style={{ margin: '0 0 var(--space-12) 0', color: '#065f46', fontSize: '1.1rem' }}>
-            ✓ Approval Confirmed
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}><CheckIcon size={18} color="#065f46" /> Approval Confirmed</span>
           </h3>
           <p style={{ margin: '0 0 var(--space-16) 0', color: '#047857' }}>
             Download the approval certificate for the requester:
@@ -867,7 +871,7 @@ const PBPReviewPage = () => {
                   marginBottom: 'var(--space-8)',
                 }}
               >
-                {loading ? '⏳ Generating...' : '⬇ Download Approval Certificate'}
+                {loading ? <><ClockIcon size={16} /> Generating...</> : <><DownloadIcon size={16} /> Download Approval Certificate</>}
               </Button>
             )}
           </PDFDownloadLink>
@@ -950,7 +954,7 @@ const PBPReviewPage = () => {
           border: '2px solid #f59e0b',
         }}>
           <h4 style={{ margin: '0 0 var(--space-8) 0', color: '#b45309', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            ⚠️ Conflict of Interest Declared
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}><WarningIcon size={18} color="#b45309" /> Conflict of Interest Declared</span>
           </h4>
           <p style={{ margin: '0 0 var(--space-8) 0', color: '#92400e', fontWeight: 'var(--font-weight-medium)' }}>
             The requester has declared a connection to this supplier:
@@ -1013,7 +1017,7 @@ const PBPReviewPage = () => {
               border: '1px solid #86efac',
               marginBottom: 'var(--space-8)',
             }}>
-              <span style={{ fontSize: '24px' }}>📋</span>
+              <ClipboardIcon size={24} color="#005EB8" />
               <div style={{ flex: 1 }}>
                 <div style={{ fontWeight: 'var(--font-weight-semibold)', color: '#166534' }}>
                   Letterhead with Bank Details
@@ -1044,7 +1048,7 @@ const PBPReviewPage = () => {
               border: '1px solid #93c5fd',
               marginBottom: 'var(--space-8)',
             }}>
-              <span style={{ fontSize: '24px' }}>✅</span>
+              <CircleCheckIcon size={24} color="#22c55e" />
               <div style={{ flex: 1 }}>
                 <div style={{ fontWeight: 'var(--font-weight-semibold)', color: '#1e40af' }}>
                   Procurement Approval Document
@@ -1143,20 +1147,20 @@ const PBPReviewPage = () => {
                 onClick={() => setApprovalAction('approve')}
                 style={{ backgroundColor: 'var(--color-success)' }}
               >
-                ✓ Approve Questionnaire
+                <CheckIcon size={16} /> Approve Questionnaire
               </Button>
               <Button
                 variant="outline"
                 onClick={() => setApprovalAction('info_required')}
                 style={{ color: '#D4A617', borderColor: '#D4A617', backgroundColor: '#FFF9E6' }}
               >
-                ⚠ Request More Information
+                <WarningIcon size={16} /> Request More Information
               </Button>
               <Button
                 variant="danger"
                 onClick={() => setApprovalAction('reject')}
               >
-                ✗ Reject Questionnaire
+                <XIcon size={16} /> Reject Questionnaire
               </Button>
             </div>
           ) : (
@@ -1217,7 +1221,7 @@ const PBPReviewPage = () => {
                             fontSize: '0.85rem',
                           }}
                         >
-                          📎 {file.name}
+                          <PaperclipIcon size={12} color="#005EB8" /> {file.name}
                           <button
                             type="button"
                             onClick={() => removeExchangeAttachment(name)}

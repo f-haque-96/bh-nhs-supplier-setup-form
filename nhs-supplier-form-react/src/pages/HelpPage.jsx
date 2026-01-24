@@ -4,6 +4,7 @@
  */
 
 import React from 'react';
+import { TicketIcon } from '../components/common';
 import './HelpPage.css';
 
 const HelpPage = () => {
@@ -72,7 +73,7 @@ const HelpPage = () => {
           <h2>Still need help?</h2>
           <div className="contact-cards">
             <a href="https://servicedeskbartshealth.alembacloud.com/production/Portal.aspx?Form=Dashboard&DATABASE=Production&JAVA_FLAG=1&PORTAL=procurement&HTML_TYPE=LITE" className="contact-card" target="_blank" rel="noopener noreferrer">
-              <h3>🎫 Procurement Helpdesk</h3>
+              <h3 style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}><TicketIcon size={20} color="#005EB8" /> Procurement Helpdesk</h3>
               <p>Submit a support ticket</p>
             </a>
           </div>
